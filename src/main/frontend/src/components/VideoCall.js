@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
 function VideoCall() {
+
+    // 컴포넌트 최상위에 추가 (다른 useEffect들과 함께)
+
+
     // 상태 변수들
     const [session, setSession] = useState(null);
     const [publisher, setPublisher] = useState(null);
@@ -15,6 +19,15 @@ function VideoCall() {
     // 구독자 Ref는 배열로 관리하며, 각 요소는 해당 구독자의 비디오 요소 Ref가 됩니다.
     // OpenVidu의 streamManager.addVideoElement는 DOM 요소를 필요로 하므로 Ref 사용이 적합합니다.
     const subscribersRef = useRef([]);
+
+    useEffect(() => {
+        subscribers.forEach((subscriber, index) => {
+            if (subscribersRef.current[index] && !subscribersRef.current[index].hasChildNodes()) {
+                subscriber.addVideoElement(subscribersRef.current[index]);
+                console.log(`구독자 비디오 요소 추가 완료: index ${index}`);
+            }
+        });
+    }, [subscribers]);
 
 
     // --- 유틸리티 함수들 ---
@@ -169,39 +182,32 @@ function VideoCall() {
 
             // 2. 세션 이벤트 핸들러 설정 (Piece 2)
             mySession.on('streamCreated', (event) => {
-                console.log('새로운 스트림 생성됨:', event.stream.streamId, 'from connectionId:', event.stream.connection.connectionId);
+                console.log('새로운 스트림 생성됨:', event.stream.streamId);
                 try {
-                    // 새 스트림 구독
-                    const subscriber = mySession.subscribe(event.stream, undefined); // undefined는 비디오 요소를 직접 추가하겠다는 의미
+                    const subscriber = mySession.subscribe(event.stream, undefined);
                     console.log('구독자 생성됨:', subscriber);
 
-                    // 상태 업데이트 (비동기)
                     setSubscribers(prev => [...prev, subscriber]);
 
-                    // DOM에 비디오 요소 추가 (상태 업데이트 후 DOM이 준비될 때까지 약간의 지연)
-                    // subscribers 상태 업데이트 후 subscribersRef에 해당하는 DOM 요소가 생성될 것을 기대
+                    // useEffect 대신 setTimeout 사용 (첫 번째 파일처럼)
                     setTimeout(() => {
-                        // 업데이트된 subscribers 배열에서 현재 추가된 subscriber의 인덱스를 찾습니다.
-                        // 주의: 이 방법은 subscribers 배열 순서가 유지된다는 가정이 필요하며,
-                        // 여러 스트림이 거의 동시에 생성될 경우 타이밍 문제가 발생할 수 있습니다.
-                        // 더 견고한 방법은 Map이나 객체를 사용하여 subscriber 객체나 streamId를 키로
-                        // DOM 요소를 관리하는 것입니다. 하지만 주어진 코드 구조를 유지하기 위해 배열 인덱스를 사용합니다.
-                        const currentIndex = subscribersRef.current.length; // 구독자 추가 전 Ref의 길이를 사용 (새 요소가 push될 위치)
+                        const currentIndex = subscribersRef.current.length;
                         console.log(`구독자 비디오 요소 추가 시도: Ref index ${currentIndex}`);
 
                         if (subscribersRef.current[currentIndex]) {
                             subscriber.addVideoElement(subscribersRef.current[currentIndex]);
                             console.log(`구독자 비디오 요소 추가 완료: ${event.stream.streamId}`);
                         } else {
-                            console.warn(`구독자 비디오 요소를 찾을 수 없음 (index: ${currentIndex})`, subscribersRef.current);
+                            console.warn(`구독자 비디오 요소를 찾을 수 없음 (index: ${currentIndex})`);
                         }
-                    }, 100); // 100ms 딜레이
+                    }, 300); // 딜레이를 300ms로 늘려봐
 
                 } catch (error) {
                     console.error('구독 실패:', error);
                     alert('다른 참가자의 화면을 불러오는데 실패했습니다.');
                 }
             });
+
 
             mySession.on('streamDestroyed', (event) => {
                 console.log('스트림 제거됨:', event.stream.streamId);
