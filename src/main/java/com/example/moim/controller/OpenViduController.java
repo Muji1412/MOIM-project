@@ -26,26 +26,39 @@ public class OpenViduController {
     }
 
 
-    // 세션 생성 api
     @PostMapping("/api/sessions")
     public ResponseEntity<String> initializeSession(@RequestBody(required = false) Map<String, Object> params) {
         try {
-            SessionProperties properties;
-            if (params == null || params.isEmpty()) {
-                // 빈 객체나 null일 경우 기본 속성 사용
-                properties = new SessionProperties.Builder().build();
-            } else {
-                properties = SessionProperties.fromJson(params).build();
+            SessionProperties.Builder builder = new SessionProperties.Builder();
+
+            // customSessionId 처리 추가
+            if (params != null && params.containsKey("customSessionId")) {
+                String customSessionId = (String) params.get("customSessionId");
+                builder.customSessionId(customSessionId);
+                System.out.println("커스텀 세션 ID로 생성 시도: " + customSessionId);
             }
 
+            SessionProperties properties = builder.build();
             Session session = openvidu.createSession(properties);
+
             return new ResponseEntity<>(session.getSessionId(), HttpStatus.OK);
+
+        } catch (OpenViduHttpException e) {
+            if (e.getStatus() == 409) {
+                // 세션이 이미 존재하는 경우 - 정상 처리
+                String existingSessionId = (String) params.get("customSessionId");
+                System.out.println("세션이 이미 존재함: " + existingSessionId);
+                return new ResponseEntity<>(existingSessionId, HttpStatus.OK);
+            }
+            System.err.println("OpenVidu HTTP 오류: " + e.getMessage());
+            return new ResponseEntity<>("세션 생성 실패: " + e.getMessage(), HttpStatus.valueOf(e.getStatus()));
         } catch (Exception e) {
             System.err.println("세션 생성 오류: " + e.getMessage());
-            e.printStackTrace(); // 더 자세한 에러 로그 출력
+            e.printStackTrace();
             return new ResponseEntity<>("세션 생성 실패", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @PostMapping("/api/sessions/{sessionId}/connections")
     public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId,
