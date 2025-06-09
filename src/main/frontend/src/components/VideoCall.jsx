@@ -1,6 +1,3 @@
-// VideoCall.js
-
-// VideoCall.js
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { OpenVidu } from 'openvidu-browser';
@@ -8,7 +5,7 @@ import { OpenVidu } from 'openvidu-browser';
 // 배포버전 URL입니다. 리눅스 서버에 올릴때는 아래 url값을 써주세요.
 const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
 // 로컬에서 테스트하는 경우에는 아래 값으로 바꿔주세요. 포트값은 유동적으로 바꿔도 됩니다.
-// const APPLICATION_SERVER_URL = 'http://localhost:8089';
+// const APPLICATION_SERVER_URL = 'http://localhost:8081';
 
 
 function VideoCall() {
