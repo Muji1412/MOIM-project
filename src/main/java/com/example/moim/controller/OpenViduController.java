@@ -20,7 +20,7 @@ public class OpenViduController {
 
     private final OpenViduService openViduService;
 
-    // 생성자 주입
+    // 생성자 주입\
     public OpenViduController(OpenViduService openViduService) {
         this.openViduService = openViduService;
     }
@@ -43,7 +43,7 @@ public class OpenViduController {
     }
 
     /**
-     * 지정된 세션 ID로 연결(토큰)을 생성합니다.
+     * 토큰 생성 api
      */
     @PostMapping("/sessions/{sessionId}/connections")
     public ResponseEntity<String> createConnection(@PathVariable("sessionId") String sessionId,
