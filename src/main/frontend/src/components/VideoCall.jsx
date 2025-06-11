@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
+
 // 서버 URL
 const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
+
 
 // --- Helper Component ---
 const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
