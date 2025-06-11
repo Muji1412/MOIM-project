@@ -1,881 +1,272 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
-// 배포버전 URL입니다. 리눅스 서버에 올릴때는 아래 url값을 써주세요.
-//const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
-// 로컬에서 테스트하는 경우에는 아래 값으로 바꿔주세요. 포트값은 유동적으로 바꿔도 됩니다.
-const APPLICATION_SERVER_URL = 'http://localhost:8081';
 
+// 서버 URL
+const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
+
+
+// --- Helper Component ---
+const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
+    const videoRef = useRef();
+
+    useEffect(() => {
+        if (streamManager && videoRef.current) {
+            streamManager.addVideoElement(videoRef.current);
+        }
+    }, [streamManager]);
+
+    const getUserName = () => {
+        try {
+            return JSON.parse(streamManager.stream.connection.data).clientData;
+        } catch (e) {
+            return 'Participant';
+        }
+    };
+
+    return (
+        <div className="video-item-container" onClick={onClick}>
+            <video autoPlay={true} ref={videoRef} muted={isMuted} />
+            <div className="participant-name">{getUserName()}</div>
+        </div>
+    );
+});
 
 function VideoCall() {
+    // --- State Management ---
     const [session, setSession] = useState(null);
     const [publisher, setPublisher] = useState(null);
     const [subscribers, setSubscribers] = useState([]);
-    const [sessionId, setSessionId] = useState('');
     const [isConnected, setIsConnected] = useState(false);
     const [sessionIdInput, setSessionIdInput] = useState('');
+    const [userName, setUserName] = useState(`User_${Math.floor(Math.random() * 100)}`);
     const [isMicEnabled, setIsMicEnabled] = useState(true);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-    const publisherRef = useRef(null);
+    const [mainStreamManager, setMainStreamManager] = useState(null);
 
-    // 토큰 받아오기
-    const getToken = async (currentSessionId) => {
-        try {
-            const response = await fetch(`${APPLICATION_SERVER_URL}/api/sessions/${currentSessionId}/connections`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({})
-            });
-            if (response.ok) {
-                const token = await response.text();
-                console.log('토큰 받음:', token);
-                return token;
-            } else {
-                const errorText = await response.text();
-                console.error('토큰 생성 실패 응답:', errorText);
-                throw new Error(`토큰 생성 실패: ${response.status} ${errorText}`);
-            }
-        } catch (error) {
-            console.error('토큰 생성 오류:', error);
-            throw error;
-        }
-    };
+    // --- Refs ---
+    const OV = useRef(new OpenVidu());
+    const sessionRef = useRef(null); // 세션 객체를 ref에 저장하여 최신 상태를 유지
 
-    // 스트림 생성 이벤트 핸들러 (useCallback으로 고정)
-    const handleStreamCreated = useCallback((event) => {
-        console.log('새로운 스트림 생성됨');
-        if (session) {
-            const subscriber = session.subscribe(event.stream, undefined);
-            setSubscribers(prev => [...prev, subscriber]);
-        } else {
-            console.warn('세션이 아직 준비되지 않아 구독할 수 없습니다.');
-        }
+    // --- Session State Synchronization ---
+    // session 상태가 변경될 때마다 ref에도 최신 값을 반영
+    useEffect(() => {
+        sessionRef.current = session;
     }, [session]);
 
-    // 스트림 제거 이벤트 핸들러 (useCallback으로 고정)
-    const handleStreamDestroyed = useCallback((event) => {
-        console.log('스트림 제거됨');
-        setSubscribers(prev => prev.filter(sub => sub !== event.stream.streamManager));
-    }, []);
 
-    // 마이크 토글 함수
-    const toggleMicrophone = () => {
-        if (publisher) {
-            const newMicState = !isMicEnabled;
-            publisher.publishAudio(newMicState);
-            setIsMicEnabled(newMicState);
-            console.log(`마이크 ${newMicState ? '켜짐' : '꺼짐'}`);
-        }
-    };
-
-    // 비디오 토글 함수
-    const toggleVideo = () => {
-        if (publisher) {
-            const newVideoState = !isVideoEnabled;
-            publisher.publishVideo(newVideoState);
-            setIsVideoEnabled(newVideoState);
-            console.log(`비디오 ${newVideoState ? '켜짐' : '꺼짐'}`);
-        }
-    };
-
-    // Publisher 비디오 요소 연결 (useEffect로 DOM 업데이트 감지)
+    // =========================================================================
+    // !!!!! 여기가 핵심 수정 부분입니다 !!!!!
+    //
+    // 이 useEffect는 의존성 배열이 `[]` 이므로,
+    // 컴포넌트가 "처음 생성될 때"와 "완전히 사라질 때" 단 한 번씩만 실행됩니다.
+    // 상태가 변해도 중간에 재실행되지 않으므로, 연결되자마자 끊기는 문제가 발생하지 않습니다.
+    //
+    // 컴포넌트가 사라질 때(unmount), ref에 저장된 최신 세션의 연결을 끊습니다.
+    // =========================================================================
     useEffect(() => {
-        if (publisher && publisherRef.current) {
-            console.log('Publisher 비디오 요소 연결 중...');
-            publisher.addVideoElement(publisherRef.current);
-            console.log('Publisher 비디오 요소 연결 완료');
-        }
-    }, [publisher]);
+        const handleBeforeUnload = () => {
+            if (sessionRef.current) {
+                sessionRef.current.disconnect();
+            }
+        };
 
-    // 세션 이벤트 리스너 등록 (useEffect로 관리)
-    useEffect(() => {
-        if (session) {
-            session.on('streamCreated', handleStreamCreated);
-            session.on('streamDestroyed', handleStreamDestroyed);
+        window.addEventListener('beforeunload', handleBeforeUnload);
 
-            // 컴포넌트 언마운트 시 또는 session이 변경될 때 리스너 제거
-            return () => {
-                session.off('streamCreated', handleStreamCreated);
-                session.off('streamDestroyed', handleStreamDestroyed);
-            };
-        }
-    }, [session, handleStreamCreated, handleStreamDestroyed]);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (sessionRef.current) {
+                console.log('컴포넌트가 사라지면서 세션 연결을 종료합니다.');
+                sessionRef.current.disconnect();
+            }
+        };
+    }, []); // <-- 의존성 배열을 비워서 최초 1회만 실행되도록 설정
 
-    // 화상통화 시작하기
-    const joinSession = async () => {
+
+    // 세션 참여 로직 (내부 로직은 동일)
+    const joinSession = async (e) => {
+        e.preventDefault();
         try {
-            // 1. 입력받은 세션 ID로 세션 생성 (또는 기본값 사용)
-            const roomName = sessionIdInput || "test-room-123";
+            const roomName = sessionIdInput || "default-room-moim";
+            const mySession = OV.current.initSession();
+
+            mySession.on('streamCreated', (event) => {
+                const subscriber = mySession.subscribe(event.stream, undefined);
+                setSubscribers((prev) => [...prev, subscriber]);
+            });
+            mySession.on('streamDestroyed', (event) => {
+                if (mainStreamManager && mainStreamManager.stream.streamId === event.stream.streamId) {
+                    setMainStreamManager(null);
+                }
+                setSubscribers((prev) => prev.filter((sub) => sub.stream.streamId !== event.stream.streamId));
+            });
+            mySession.on('exception', (exception) => console.warn("OpenVidu 예외: ", exception));
 
             const response = await fetch(`${APPLICATION_SERVER_URL}/api/sessions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    customSessionId: roomName
-                })
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customSessionId: roomName }),
             });
+            if (!response.ok) throw new Error(`세션 생성 실패: ${response.status}`);
+            const sessionId = await response.text();
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('세션 생성 실패 응답:', errorText);
-                throw new Error(`세션 생성 실패: ${response.status} ${errorText}`);
-            }
-
-            const newSessionId = await response.text();
-            setSessionId(newSessionId);
-            console.log('세션 생성됨:', newSessionId);
-
-            // 2. OpenVidu 객체 생성
-            const OV = new OpenVidu();
-            const mySession = OV.initSession();
-
-            // 3. 세션 상태 설정 (이벤트는 useEffect에서 처리)
-            setSession(mySession);
-
-            // 4. 토큰 받아서 세션 연결
-            const token = await getToken(newSessionId);
-            await mySession.connect(token);
-
-            // 5. 내 비디오 퍼블리셔 생성
-            const myPublisher = OV.initPublisher(undefined, {
-                audioSource: undefined,
-                videoSource: undefined,
-                publishAudio: true,
-                publishVideo: true,
-                resolution: '1280x720',
-                frameRate: 30,
-                insertMode: 'APPEND',
-                mirror: false
+            const tokenResponse = await fetch(`${APPLICATION_SERVER_URL}/api/sessions/${sessionId}/connections`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
             });
+            if (!tokenResponse.ok) throw new Error(`토큰 발급 실패: ${tokenResponse.status}`);
+            const token = await tokenResponse.text();
 
-            // 6. 퍼블리셔를 세션에 발행
+            await mySession.connect(token, { clientData: userName });
+
+            const myPublisher = await OV.current.initPublisherAsync(undefined, {
+                audioSource: undefined, videoSource: undefined, publishAudio: isMicEnabled, publishVideo: isVideoEnabled,
+                resolution: '1280x720', frameRate: 30, insertMode: 'APPEND', mirror: true,
+            });
             await mySession.publish(myPublisher);
+
+            setSession(mySession);
             setPublisher(myPublisher);
             setIsConnected(true);
-
-            console.log('화상통화 연결 완료!');
         } catch (error) {
-            console.error('화상통화 연결 실패:', error);
-            // 연결 실패 시 상태 초기화
-            if (session) {
-                session.disconnect();
-            }
-            setSession(null);
-            setPublisher(null);
-            setSubscribers([]);
-            setIsConnected(false);
-            setSessionId('');
-            alert(`화상통화 연결에 실패했습니다: ${error.message}`);
+            console.error('세션 참여 실패:', error);
+            alert(`연결 실패: ${error.message}`);
         }
     };
 
-    // 화상통화 종료하기
+    // UI에서 사용하는 '나가기' 버튼용 함수
     const leaveSession = () => {
         if (session) {
             session.disconnect();
         }
-        // 상태 초기화
-        setSession(null);
-        setPublisher(null);
-        setSubscribers([]);
-        setIsConnected(false);
-        setSessionId('');
-        setSessionIdInput('');
-        setIsMicEnabled(true);
-        setIsVideoEnabled(true);
-        console.log('화상통화 종료됨');
     };
 
-    return React.createElement('div', { style: { padding: '20px' } },
-        React.createElement('h1', null, 'MOIM 화상통화'),
+    // --- UI Control Handlers ---
+    const toggleMicrophone = () => publisher?.publishAudio(!isMicEnabled);
+    const toggleVideo = () => publisher?.publishVideo(!isVideoEnabled);
 
-        !isConnected ?
-            React.createElement('div', null,
-                React.createElement('input', {
-                    type: 'text',
-                    placeholder: '방 이름을 입력하세요 (예: room-123) 또는 비워두세요',
-                    value: sessionIdInput,
-                    onChange: (e) => setSessionIdInput(e.target.value),
-                    style: {
-                        padding: '10px',
-                        marginRight: '10px',
-                        width: '300px',
-                        fontSize: '14px',
-                        border: '1px solid #ccc',
-                        borderRadius: '5px'
-                    }
-                }),
-                React.createElement('button', {
-                    onClick: joinSession,
-                    style: {
-                        padding: '10px 20px',
-                        fontSize: '16px',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer'
-                    }
-                }, '화상통화 시작'),
-                React.createElement('p', {
-                    style: { marginTop: '10px', color: '#666', fontSize: '14px' }
-                }, '같은 방 이름을 입력한 사람들끼리 화상통화가 됩니다.', React.createElement('br'), '비워두면 기본 방(test-room-123)에 입장합니다.')
-            )
-            :
-            React.createElement('div', null,
-                // 컨트롤 버튼들
-                React.createElement('div', { style: { marginBottom: '20px' } },
-                    React.createElement('button', {
-                        onClick: toggleMicrophone,
-                        style: {
-                            padding: '10px 15px',
-                            marginRight: '10px',
-                            backgroundColor: isMicEnabled ? '#28a745' : '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer'
-                        }
-                    }, isMicEnabled ? '🎤 마이크 켜짐' : '🔇 마이크 꺼짐'),
+    useEffect(() => {
+        if(publisher) {
+            publisher.on('streamPropertyChanged', (event) => {
+                if (event.changedProperty === 'audioActive') {
+                    setIsMicEnabled(event.newValue);
+                }
+                if (event.changedProperty === 'videoActive') {
+                    setIsVideoEnabled(event.newValue);
+                }
+            });
+        }
+    }, [publisher]);
 
-                    React.createElement('button', {
-                        onClick: toggleVideo,
-                        style: {
-                            padding: '10px 15px',
-                            marginRight: '10px',
-                            backgroundColor: isVideoEnabled ? '#28a745' : '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer'
-                        }
-                    }, isVideoEnabled ? '📹 비디오 켜짐' : '📵 비디오 꺼짐'),
+    const handleMainVideoStream = (stream) => {
+        if (mainStreamManager?.stream.streamId === stream.stream.streamId) {
+            setMainStreamManager(null);
+        } else {
+            setMainStreamManager(stream);
+        }
+    };
 
-                    React.createElement('button', {
-                        onClick: leaveSession,
-                        style: {
-                            padding: '10px 20px',
-                            fontSize: '16px',
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer'
-                        }
-                    }, '화상통화 종료')
-                ),
 
-                React.createElement('div', { style: { display: 'flex', gap: '20px', flexWrap: 'wrap' } },
-                    // 내 비디오
-                    publisher && React.createElement('div', null,
-                        React.createElement('h3', null, '내 화면'),
-                        React.createElement('video', {
-                            ref: publisherRef,
-                            autoPlay: true,
-                            muted: true,
-                            style: {
-                                width: '320px',
-                                height: '240px',
-                                backgroundColor: '#000',
-                                border: '2px solid #007bff',
-                                objectFit: 'contain'
-                            }
-                        })
-                    ),
+    // --- Render Logic ---
 
-                    // 다른 참가자들 비디오
-                    ...subscribers.map((subscriber, index) =>
-                        React.createElement('div', { key: subscriber.stream.streamId || index },
-                            React.createElement('h3', null, `참가자 ${index + 1}`),
-                            React.createElement('video', {
-                                ref: (el) => {
-                                    if (el && subscriber) {
-                                        console.log(`Subscriber ${index} 비디오 요소 연결 중 (streamId: ${subscriber.stream.streamId})...`);
-                                        subscriber.addVideoElement(el);
-                                        console.log(`Subscriber ${index} 비디오 요소 연결 완료`);
-                                    }
-                                },
-                                autoPlay: true,
-                                style: {
-                                    width: '320px',
-                                    height: '240px',
-                                    backgroundColor: '#000',
-                                    border: '2px solid #28a745',
-                                    objectFit: 'contain'
-                                }
-                            })
-                        )
-                    )
-                ),
+    // 접속 전 UI
+    if (!isConnected) {
+        return (
+            <>
+                <style>{joinFormStyles}</style>
+                <div className="join-container">
+                    <div className="join-form-wrapper">
+                        <h1>MOIM 화상통화</h1>
+                        <form onSubmit={joinSession}>
+                            <input type="text" placeholder="사용자 이름을 입력하세요" value={userName} onChange={(e) => setUserName(e.target.value)} required />
+                            <input type="text" placeholder="방 이름을 입력하거나 비워두세요" value={sessionIdInput} onChange={(e) => setSessionIdInput(e.target.value)} />
+                            <button type="submit">참여하기</button>
+                        </form>
+                        <p>같은 방 이름을 입력한 사람들끼리 화상통화가 됩니다.</p>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
-                React.createElement('p', {
-                    style: { marginTop: '20px', color: '#666' }
-                }, `현재 방: ${sessionId}`)
-            )
+    // 접속 후 UI
+    const allParticipants = [publisher, ...subscribers].filter(Boolean);
+    const effectiveMainStreamManager = mainStreamManager || (allParticipants.length > 0 ? allParticipants[0] : null);
+    const otherParticipants = allParticipants.filter(p => effectiveMainStreamManager && p.stream.streamId !== effectiveMainStreamManager.stream.streamId);
+
+    const getGridLayoutClass = (count) => {
+        if (count === 1) return 'grid-cols-1 grid-rows-1';
+        if (count === 2) return 'grid-cols-2 grid-rows-1';
+        return 'grid-cols-2 grid-rows-2';
+    };
+    const useFocusedLayout = allParticipants.length > 4 || !!mainStreamManager;
+
+    return (
+        <>
+            <style>{videoCallStyles}</style>
+            <div className="video-call-wrapper">
+                <div className="main-content">
+                    {useFocusedLayout ? (
+                        <div className="focused-layout">
+                            <div className="main-video-container">
+                                {effectiveMainStreamManager && (
+                                    <UserVideo streamManager={effectiveMainStreamManager} onClick={() => handleMainVideoStream(effectiveMainStreamManager)} isMuted={publisher === effectiveMainStreamManager}/>
+                                )}
+                            </div>
+                            <div className="thumbnail-strip">
+                                {otherParticipants.map(p => (
+                                    <UserVideo key={p.stream.streamId} streamManager={p} onClick={() => handleMainVideoStream(p)} isMuted={publisher === p}/>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={`grid-layout ${getGridLayoutClass(allParticipants.length)}`}>
+                            {allParticipants.map(p => (
+                                <UserVideo key={p.stream.streamId} streamManager={p} onClick={() => handleMainVideoStream(p)} isMuted={publisher === p}/>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="controls-bar">
+                    <button onClick={toggleMicrophone} className={`control-btn ${isMicEnabled ? 'on' : 'off'}`}>{isMicEnabled ? '🎤' : '🔇'}</button>
+                    <button onClick={toggleVideo} className={`control-btn ${isVideoEnabled ? 'on' : 'off'}`}>{isVideoEnabled ? '📹' : '📵'}</button>
+                    <button onClick={leaveSession} className="control-btn leave">🚪</button>
+                </div>
+            </div>
+        </>
     );
 }
 
+
+// --- CSS Styles (unchanged) ---
+const joinFormStyles = `
+    .join-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; font-family: sans-serif; }
+    .join-form-wrapper { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; color: #333; }
+    .join-form-wrapper h1 { margin-bottom: 24px; font-size: 28px; font-weight: 600; }
+    .join-form-wrapper input { display: block; width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+    .join-form-wrapper button { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; font-weight: 500; }
+    .join-form-wrapper button:hover { background-color: #0056b3; }
+    .join-form-wrapper p { margin-top: 20px; color: #666; font-size: 14px; line-height: 1.5; }
+`;
+const videoCallStyles = `
+    .video-call-wrapper { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: #202124; color: #fff; }
+    .main-content { flex-grow: 1; display: flex; padding: 16px; gap: 16px; overflow: hidden; }
+    .focused-layout { display: flex; flex-direction: column; flex-grow: 1; gap: 16px; width: 100%; height: 100%; }
+    .main-video-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; background-color: #000; border-radius: 12px; overflow: hidden; position: relative; min-height: 0; }
+    .thumbnail-strip { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; max-height: 180px; overflow-y: auto; padding: 8px; }
+    .thumbnail-strip .video-item-container { width: 240px; height: 160px; flex-shrink: 0; }
+    .grid-layout { display: grid; flex-grow: 1; gap: 16px; width: 100%; height: 100%; align-content: center; justify-content: center; }
+    .grid-layout.grid-cols-1 { grid-template-columns: minmax(0, 1fr); }
+    .grid-layout.grid-rows-1 { grid-template-rows: minmax(0, 1fr); }
+    .grid-layout.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-layout.grid-rows-2 { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+    .video-item-container { position: relative; background-color: #3c4043; border-radius: 12px; overflow: hidden; transition: box-shadow 0.3s; border: 2px solid transparent; width: 100%; height: 100%; cursor: pointer; }
+    .video-item-container:hover { box-shadow: 0 0 15px rgba(128, 189, 255, 0.7); }
+    .video-item-container video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .participant-name { position: absolute; bottom: 8px; left: 8px; background: rgba(0, 0, 0, 0.6); padding: 4px 8px; border-radius: 6px; font-size: 14px; }
+    .controls-bar { flex-shrink: 0; display: flex; justify-content: center; align-items: center; padding: 16px; background-color: #2c2d30; }
+    .control-btn { background: #4a4a4a; color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; margin: 0 10px; cursor: pointer; transition: background-color 0.3s; }
+    .control-btn.on { background-color: #8ab4f8; color: #202124; }
+    .control-btn.off { background-color: #3c4043; }
+    .control-btn.leave { background-color: #ea4335; }
+`;
+
 export default VideoCall;
-
-
-// v2
-// import React, { useState, useEffect, useRef, useCallback } from 'react';
-// import { OpenVidu } from 'openvidu-browser';
-//
-// // API 서버 URL을 명확하게 지정합니다.
-// // 브라우저에서 접속하는 주소와 동일하게 맞춰주는 것이 좋습니다.
-// const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
-//
-// function VideoCall() {
-//     const [session, setSession] = useState(null);
-//     const [publisher, setPublisher] = useState(null);
-//     const [subscribers, setSubscribers] = useState([]);
-//     const [sessionId, setSessionId] = useState('');
-//     const [isConnected, setIsConnected] = useState(false);
-//     const [sessionIdInput, setSessionIdInput] = useState('');
-//     const publisherRef = useRef(null);
-//     const [isMicEnabled, setIsMicEnabled] = useState(true); // 마이크 상태관리 state
-//     const [isVideoEnabled, setIsVideoEnabled] = useState(true); // 비디오 상태관리 state
-//
-//     // 토큰 받아오기
-//     const getToken = async (currentSessionId) => { // 파라미터 이름 변경 (sessionId와 혼동 방지)
-//         try {
-//             // API URL 수정
-//             const response = await fetch(`${APPLICATION_SERVER_URL}/api/sessions/${currentSessionId}/connections`, {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({}) // 빈 객체 전송
-//             });
-//             if (response.ok) {
-//                 const token = await response.text();
-//                 console.log('토큰 받음:', token);
-//                 return token;
-//             } else {
-//                 const errorText = await response.text();
-//                 console.error('토큰 생성 실패 응답:', errorText);
-//                 throw new Error(`토큰 생성 실패: ${response.status} ${errorText}`);
-//             }
-//         } catch (error) {
-//             console.error('토큰 생성 오류:', error);
-//             throw error;
-//         }
-//     };
-//
-//     // ... (handleStreamCreated, handleStreamDestroyed, useEffect 등 나머지 코드는 동일) ...
-//     // 스트림 생성 이벤트 핸들러 (useCallback으로 고정)
-//     const handleStreamCreated = useCallback((event) => {
-//         console.log('새로운 스트림 생성됨');
-//         if (session) { // session이 유효할 때만 subscribe 시도
-//             const subscriber = session.subscribe(event.stream, undefined);
-//             setSubscribers(prev => [...prev, subscriber]);
-//         } else {
-//             console.warn('세션이 아직 준비되지 않아 구독할 수 없습니다.');
-//         }
-//     }, [session]); // session을 의존성 배열에 추가
-//
-//     // 스트림 제거 이벤트 핸들러 (useCallback으로 고정)
-//     const handleStreamDestroyed = useCallback((event) => {
-//         console.log('스트림 제거됨');
-//         setSubscribers(prev => prev.filter(sub => sub !== event.stream.streamManager));
-//     }, []);
-//
-//     // Publisher 비디오 요소 연결 (useEffect로 DOM 업데이트 감지)
-//     useEffect(() => {
-//         if (publisher && publisherRef.current) {
-//             console.log('Publisher 비디오 요소 연결 중...');
-//             publisher.addVideoElement(publisherRef.current);
-//             console.log('Publisher 비디오 요소 연결 완료');
-//         }
-//     }, [publisher]);
-//
-//     // 세션 이벤트 리스너 등록 (useEffect로 관리)
-//     useEffect(() => {
-//         if (session) {
-//             session.on('streamCreated', handleStreamCreated);
-//             session.on('streamDestroyed', handleStreamDestroyed);
-//
-//             // 컴포넌트 언마운트 시 또는 session이 변경될 때 리스너 제거
-//             return () => {
-//                 session.off('streamCreated', handleStreamCreated);
-//                 session.off('streamDestroyed', handleStreamDestroyed);
-//             };
-//         }
-//     }, [session, handleStreamCreated, handleStreamDestroyed]);
-//
-//
-//     // 화상통화 시작하기
-//     const joinSession = async () => {
-//         try {
-//             // 1. 입력받은 세션 ID로 세션 생성 (또는 기본값 사용)
-//             const roomName = sessionIdInput || "test-room-123";
-//
-//             // API URL 수정
-//             const response = await fetch(`${APPLICATION_SERVER_URL}/api/sessions`, {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({
-//                     customSessionId: roomName  // 고정된 또는 입력받은 세션 ID
-//                 })
-//             });
-//
-//             if (!response.ok) {
-//                 const errorText = await response.text();
-//                 console.error('세션 생성 실패 응답:', errorText);
-//                 throw new Error(`세션 생성 실패: ${response.status} ${errorText}`);
-//             }
-//
-//             const newSessionId = await response.text();
-//             setSessionId(newSessionId);
-//             console.log('세션 생성됨:', newSessionId);
-//
-//             // 2. OpenVidu 객체 생성
-//             const OV = new OpenVidu();
-//             const mySession = OV.initSession();
-//
-//             // 3. 세션 상태 설정 (이벤트는 useEffect에서 처리)
-//             setSession(mySession); // 이 시점에 session 객체가 할당됨
-//
-//             // 4. 토큰 받아서 세션 연결
-//             const token = await getToken(newSessionId); // 여기서 newSessionId를 사용
-//             await mySession.connect(token);
-//
-//             // 5. 내 비디오 퍼블리셔 생성
-//             const myPublisher = OV.initPublisher(undefined, { // 'publisherVideoElement' 대신 undefined 사용
-//                 audioSource: undefined,
-//                 videoSource: undefined,
-//                 publishAudio: true,
-//                 publishVideo: true,
-//                 resolution: '1280x720', // 해상도 확인 (640x480 등 작은 값으로 테스트)
-//                 frameRate: 30,
-//                 insertMode: 'APPEND', // Publisher가 DOM에 추가될 방식
-//                 mirror: false
-//             });
-//
-//             // 6. 퍼블리셔를 세션에 발행
-//             await mySession.publish(myPublisher);
-//             setPublisher(myPublisher); // publisher 상태 업데이트
-//             setIsConnected(true);
-//
-//             console.log('화상통화 연결 완료!');
-//         } catch (error) {
-//             console.error('화상통화 연결 실패:', error);
-//             // 연결 실패 시 상태 초기화
-//             if (session) {
-//                 session.disconnect();
-//             }
-//             setSession(null);
-//             setPublisher(null);
-//             setSubscribers([]);
-//             setIsConnected(false);
-//             setSessionId('');
-//             alert(`화상통화 연결에 실패했습니다: ${error.message}`);
-//         }
-//     };
-//
-//     // ... (leaveSession 및 JSX 부분은 거의 동일, publisherRef 사용 확인) ...
-//     // 화상통화 종료하기
-//     const leaveSession = () => {
-//         if (session) {
-//             session.disconnect();
-//         }
-//         // 상태 초기화
-//         setSession(null);
-//         setPublisher(null);
-//         setSubscribers([]);
-//         setIsConnected(false);
-//         setSessionId(''); // 세션 ID도 초기화
-//         setSessionIdInput(''); // 입력 필드도 초기화
-//         console.log('화상통화 종료됨');
-//     };
-//     // 마이크 토글 함수
-//     const toggleMicrophone = () => {
-//         if (publisher) {
-//             const newMicState = !isMicEnabled;
-//             publisher.publishAudio(newMicState);
-//             setIsMicEnabled(newMicState);
-//         }
-//     };
-//
-//     // 비디오 토글 함수
-//     const toggleVideo = () => {
-//         if (publisher) {
-//             const newVideoState = !isVideoEnabled;
-//             publisher.publishVideo(newVideoState);
-//             setIsVideoEnabled(newVideoState);
-//         }
-//     };
-//
-//     return (
-//         <div style={{ padding: '20px' }}>
-//             <h1>MOIM 화상통화</h1>
-//
-//             {!isConnected ? (
-//                 <div>
-//                     <input
-//                         type="text"
-//                         placeholder="방 이름을 입력하세요 (예: room-123) 또는 비워두세요"
-//                         value={sessionIdInput}
-//                         onChange={(e) => setSessionIdInput(e.target.value)}
-//                         style={{
-//                             padding: '10px',
-//                             marginRight: '10px',
-//                             width: '300px',
-//                             fontSize: '14px',
-//                             border: '1px solid #ccc',
-//                             borderRadius: '5px'
-//                         }}
-//                     />
-//                     <button
-//                         onClick={joinSession}
-//                         style={{
-//                             padding: '10px 20px',
-//                             fontSize: '16px',
-//                             backgroundColor: '#007bff',
-//                             color: 'white',
-//                             border: 'none',
-//                             borderRadius: '5px',
-//                             cursor: 'pointer'
-//                         }}
-//                     >
-//                         화상통화 시작
-//                     </button>
-//                     <p style={{ marginTop: '10px', color: '#666', fontSize: '14px' }}>
-//                         같은 방 이름을 입력한 사람들끼리 화상통화가 됩니다.<br/>
-//                         비워두면 기본 방(test-room-123)에 입장합니다.
-//                     </p>
-//                 </div>
-//             ) : (
-//                 <div>
-//                     <button
-//                         onClick={leaveSession}
-//                         style={{
-//                             padding: '10px 20px',
-//                             fontSize: '16px',
-//                             backgroundColor: '#dc3545',
-//                             color: 'white',
-//                             border: 'none',
-//                             borderRadius: '5px',
-//                             cursor: 'pointer',
-//                             marginBottom: '20px'
-//                         }}
-//                     >
-//                         화상통화 종료
-//                     </button>
-//
-//                     <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-//                         {/* 내 비디오 - publisherRef 사용 */}
-//                         {publisher && ( // publisher가 있을 때만 렌더링
-//                             <div>
-//                                 <h3>내 화면</h3>
-//                                 <video
-//                                     ref={publisherRef}
-//                                     autoPlay
-//                                     muted // 내 화면은 음소거
-//                                     style={{
-//                                         width: '320px',
-//                                         height: '240px',
-//                                         backgroundColor: '#000',
-//                                         border: '2px solid #007bff',
-//                                         objectFit: 'contain'
-//                                     }}
-//                                 />
-//                             </div>
-//                         )}
-//
-//                         {/* 다른 참가자들 비디오 - Callback ref 사용 */}
-//                         {subscribers.map((subscriber, index) => (
-//                             <div key={subscriber.stream.streamId || index}> {/* streamId를 key로 사용 */}
-//                                 <h3>참가자 {index + 1}</h3>
-//                                 <video
-//                                     ref={(el) => {
-//                                         if (el && subscriber) {
-//                                             console.log(`Subscriber ${index} 비디오 요소 연결 중 (streamId: ${subscriber.stream.streamId})...`);
-//                                             subscriber.addVideoElement(el);
-//                                             console.log(`Subscriber ${index} 비디오 요소 연결 완료`);
-//                                         }
-//                                     }}
-//                                     autoPlay
-//                                     style={{
-//                                         width: '320px',
-//                                         height: '240px',
-//                                         backgroundColor: '#000',
-//                                         border: '2px solid #28a745',
-//                                         objectFit: 'contain'
-//                                     }}
-//                                 />
-//                             </div>
-//                         ))}
-//                     </div>
-//
-//                     <p style={{ marginTop: '20px', color: '#666' }}>
-//                         현재 방: {sessionId}
-//                     </p>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// }
-//
-// export default VideoCall;
-
-// import React, { useState, useEffect, useRef, useCallback } from 'react';
-// import { OpenVidu } from 'openvidu-browser';
-//
-// function VideoCall() {
-//     const [session, setSession] = useState(null);
-//     const [publisher, setPublisher] = useState(null);
-//     const [subscribers, setSubscribers] = useState([]);
-//     const [sessionId, setSessionId] = useState('');
-//     const [isConnected, setIsConnected] = useState(false);
-//     const [sessionIdInput, setSessionIdInput] = useState('');
-//     const publisherRef = useRef(null);
-//
-//     // 토큰 받아오기
-//     const getToken = async (sessionId) => {
-//         try {
-//             const response = await fetch(`http://localhost:8081/api/sessions/${sessionId}/connections`, {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({}) // 빈 객체 전송
-//             });
-//             if (response.ok) {
-//                 const token = await response.text();
-//                 console.log('토큰 받음:', token);
-//                 return token;
-//             } else {
-//                 throw new Error('토큰 생성 실패');
-//             }
-//         } catch (error) {
-//             console.error('토큰 생성 오류:', error);
-//             throw error;
-//         }
-//     };
-//
-//     // 스트림 생성 이벤트 핸들러 (useCallback으로 고정)
-//     const handleStreamCreated = useCallback((event) => {
-//         console.log('새로운 스트림 생성됨');
-//         const subscriber = session.subscribe(event.stream, undefined);
-//         setSubscribers(prev => [...prev, subscriber]);
-//     }, [session]);
-//
-//     // 스트림 제거 이벤트 핸들러 (useCallback으로 고정)
-//     const handleStreamDestroyed = useCallback((event) => {
-//         console.log('스트림 제거됨');
-//         setSubscribers(prev => prev.filter(sub => sub !== event.stream.streamManager));
-//     }, []);
-//
-//     // Publisher 비디오 요소 연결 (useEffect로 DOM 업데이트 감지)
-//     useEffect(() => {
-//         if (publisher && publisherRef.current) {
-//             console.log('Publisher 비디오 요소 연결 중...');
-//             publisher.addVideoElement(publisherRef.current);
-//             console.log('Publisher 비디오 요소 연결 완료');
-//         }
-//     }, [publisher]);
-//
-//     // 세션 이벤트 리스너 등록 (useEffect로 관리)
-//     useEffect(() => {
-//         if (session) {
-//             session.on('streamCreated', handleStreamCreated);
-//             session.on('streamDestroyed', handleStreamDestroyed);
-//
-//             return () => {
-//                 session.off('streamCreated', handleStreamCreated);
-//                 session.off('streamDestroyed', handleStreamDestroyed);
-//             };
-//         }
-//     }, [session, handleStreamCreated, handleStreamDestroyed]);
-//
-//     // 화상통화 시작하기
-//     const joinSession = async () => {
-//         try {
-//             // 1. 입력받은 세션 ID로 세션 생성 (또는 기본값 사용)
-//             const roomName = sessionIdInput || "test-room-123";
-//
-//             const response = await fetch('http://localhost:8081/api/sessions', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({
-//                     customSessionId: roomName  // 고정된 또는 입력받은 세션 ID
-//                 })
-//             });
-//
-//             if (!response.ok) {
-//                 throw new Error('세션 생성 실패');
-//             }
-//
-//             const newSessionId = await response.text();
-//             setSessionId(newSessionId);
-//             console.log('세션 생성됨:', newSessionId);
-//
-//             // 2. OpenVidu 객체 생성
-//             const OV = new OpenVidu();
-//             const mySession = OV.initSession();
-//
-//             // 3. 세션 상태 설정 (이벤트는 useEffect에서 처리)
-//             setSession(mySession);
-//
-//             // 4. 토큰 받아서 세션 연결
-//             const token = await getToken(newSessionId);
-//             await mySession.connect(token);
-//
-//             // 5. 내 비디오 퍼블리셔 생성
-//             const myPublisher = OV.initPublisher(undefined, {
-//                 audioSource: undefined,
-//                 videoSource: undefined,
-//                 publishAudio: true,
-//                 publishVideo: true,
-//                 resolution: '1280x720',
-//                 frameRate: 30,
-//                 insertMode: 'APPEND',
-//                 mirror: false
-//             });
-//
-//             // 6. 퍼블리셔를 세션에 발행
-//             await mySession.publish(myPublisher);
-//             setPublisher(myPublisher);
-//             setIsConnected(true);
-//
-//             console.log('화상통화 연결 완료!');
-//         } catch (error) {
-//             console.error('화상통화 연결 실패:', error);
-//             alert('화상통화 연결에 실패했습니다.');
-//         }
-//     };
-//
-//     // 화상통화 종료하기
-//     const leaveSession = () => {
-//         if (session) {
-//             session.disconnect();
-//             setSession(null);
-//             setPublisher(null);
-//             setSubscribers([]);
-//             setIsConnected(false);
-//             setSessionId('');
-//             console.log('화상통화 종료됨');
-//         }
-//     };
-//
-//     return (
-//         <div style={{ padding: '20px' }}>
-//             <h1>MOIM 화상통화</h1>
-//
-//             {!isConnected ? (
-//                 <div>
-//                     <input
-//                         type="text"
-//                         placeholder="방 이름을 입력하세요 (예: room-123) 또는 비워두세요"
-//                         value={sessionIdInput}
-//                         onChange={(e) => setSessionIdInput(e.target.value)}
-//                         style={{
-//                             padding: '10px',
-//                             marginRight: '10px',
-//                             width: '300px',
-//                             fontSize: '14px',
-//                             border: '1px solid #ccc',
-//                             borderRadius: '5px'
-//                         }}
-//                     />
-//                     <button
-//                         onClick={joinSession}
-//                         style={{
-//                             padding: '10px 20px',
-//                             fontSize: '16px',
-//                             backgroundColor: '#007bff',
-//                             color: 'white',
-//                             border: 'none',
-//                             borderRadius: '5px',
-//                             cursor: 'pointer'
-//                         }}
-//                     >
-//                         화상통화 시작
-//                     </button>
-//                     <p style={{ marginTop: '10px', color: '#666', fontSize: '14px' }}>
-//                         같은 방 이름을 입력한 사람들끼리 화상통화가 됩니다.<br/>
-//                         비워두면 기본 방(test-room-123)에 입장합니다.
-//                     </p>
-//                 </div>
-//             ) : (
-//                 <div>
-//                     <button
-//                         onClick={leaveSession}
-//                         style={{
-//                             padding: '10px 20px',
-//                             fontSize: '16px',
-//                             backgroundColor: '#dc3545',
-//                             color: 'white',
-//                             border: 'none',
-//                             borderRadius: '5px',
-//                             cursor: 'pointer',
-//                             marginBottom: '20px'
-//                         }}
-//                     >
-//                         화상통화 종료
-//                     </button>
-//
-//                     <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-//                         {/* 내 비디오 - 직접 video 태그 사용 */}
-//                         <div>
-//                             <h3>내 화면</h3>
-//                             <video
-//                                 ref={publisherRef}
-//                                 autoPlay
-//                                 muted
-//                                 style={{
-//                                     width: '320px',
-//                                     height: '240px',
-//                                     backgroundColor: '#000',
-//                                     border: '2px solid #007bff',
-//                                     objectFit: 'contain'
-//                                 }}
-//                             />
-//                         </div>
-//
-//                         {/* 다른 참가자들 비디오 - Callback ref 사용 */}
-//                         {subscribers.map((subscriber, index) => (
-//                             <div key={subscriber.id || index}>
-//                                 <h3>참가자 {index + 1}</h3>
-//                                 <video
-//                                     ref={(el) => {
-//                                         if (el && subscriber) {
-//                                             console.log(`Subscriber ${index} 비디오 요소 연결 중...`);
-//                                             subscriber.addVideoElement(el);
-//                                             console.log(`Subscriber ${index} 비디오 요소 연결 완료`);
-//                                         }
-//                                     }}
-//                                     autoPlay
-//                                     style={{
-//                                         width: '320px',
-//                                         height: '240px',
-//                                         backgroundColor: '#000',
-//                                         border: '2px solid #28a745',
-//                                         objectFit: 'contain'
-//                                     }}
-//                                 />
-//                             </div>
-//                         ))}
-//                     </div>
-//
-//                     <p style={{ marginTop: '20px', color: '#666' }}>
-//                         현재 방: {sessionId}
-//                     </p>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// }
-//
-// export default VideoCall;
