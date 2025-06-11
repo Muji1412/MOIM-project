@@ -101,7 +101,7 @@ public class UserController {
         refreshTokenRepository.delete(storedTokenOpt.get());
 
         RefreshToken newRefreshTokenEntity = new RefreshToken();
-        newRefreshTokenEntity.setTokenCont(refreshToken);
+        newRefreshTokenEntity.setTokenCont(newRefreshToken);
         newRefreshTokenEntity.setUser(user);
         newRefreshTokenEntity.setTokenExpires(Timestamp.valueOf(LocalDateTime.now().plusDays(7)));
         refreshTokenRepository.save(newRefreshTokenEntity);
