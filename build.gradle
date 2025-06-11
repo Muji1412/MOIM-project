@@ -32,6 +32,9 @@ dependencies {
     implementation 'org.springframework.session:spring-session-core'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    //redis 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     //developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
@@ -43,6 +46,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/io.openvidu/openvidu-java-client
     implementation("io.openvidu:openvidu-java-client:2.30.0")
+
+
 }
 
 tasks.named('test') {
