@@ -14,10 +14,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "dev": "vite",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vite --config src/main/frontend/vite.config.js",
+    "build": "vite build --config src/main/frontend/vite.config.js",
+    "watch": "vite build --watch --config src/main/frontend/vite.config.js"
   },
   "eslintConfig": {
     "extends": [
