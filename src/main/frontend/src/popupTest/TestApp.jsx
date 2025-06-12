@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import './TestApp.css';
 
 // CSS를 위한 간단한 스타일 객체
 const styles = {
@@ -22,16 +22,13 @@ const styles = {
 };
 
 function TestApp() {
-    // 팝업 창을 여는 함수
     const openPopup = (url) => {
         const popupWidth = 1024;
         const popupHeight = 768;
 
-        // 화면 중앙에 팝업이 위치하도록 좌표 계산
         const left = (window.screen.width / 2) - (popupWidth / 2);
         const top = (window.screen.height / 2) - (popupHeight / 2);
 
-        // window.open(URL, 창이름, 창 속성)
         window.open(
             url,
             'mpaPopup',
@@ -45,13 +42,10 @@ function TestApp() {
             <p style={styles.p}>이 페이지는 <strong>test.html</strong>과 <strong>test.jsx</strong>로부터 로드되었습니다.</p>
             <hr style={styles.hr}/>
             <h3>다른 페이지로 이동하기 (팝업 창으로 열기)</h3>
-            <p style={styles.p}>
-                새로운 탭으로 열기 테스트
-            </p>
+            <p style={styles.p}>새로운 탭으로 열기 테스트</p>
             <ul style={styles.ul}>
                 <li style={styles.li}>
-                    {/* ✨ a 태그에 target="_blank" 속성 추가 */}
-                    <a href="/" target="_blank" rel="noopener noreferrer" style={styles.a}>
+                    <a href="/" target="_blank" rel="noopener noreferrer">
                         ➡️ 메인 앱 (index.html)으로 가기 (새 탭)
                     </a>
                 </li>
@@ -61,14 +55,12 @@ function TestApp() {
             </p>
             <ul style={styles.ul}>
                 <li style={styles.li}>
-                    {/* 버튼 클릭 시 openPopup 함수 실행 */}
-                    <button style={styles.button} onClick={() => openPopup('/')}>
+                    <button style={styles.button} onClick={() => openPopup('/index.do')}>
                         ➡️ 메인 앱 (index.html)을 팝업으로 열기
                     </button>
                 </li>
                 <li style={styles.li}>
-                    {/* 버튼 클릭 시 openPopup 함수 실행 */}
-                    <button style={styles.button} onClick={() => openPopup('/video-call/test-room')}>
+                    <button style={styles.button} onClick={() => openPopup('/main.do')}>
                         ➡️ 화상 채팅 (video.html)을 팝업으로 열기
                     </button>
                 </li>
@@ -77,8 +69,4 @@ function TestApp() {
     );
 }
 
-ReactDOM.createRoot(document.getElementById('test-root')).render(
-    <React.StrictMode>
-        <TestApp/>
-    </React.StrictMode>
-);
+export default TestApp;
