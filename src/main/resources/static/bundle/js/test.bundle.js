@@ -1,0 +1,1 @@
+import{j as t,a as e,R as r}from"../chunk/client.chunk.js";function o(){return t.jsx("div",{children:"test app 코드를 수정~~~~~~ㄴ어라ㅣㄴ어라ㅣ너아ㅣ러ㅣㅏㅇ"})}e.createRoot(document.getElementById("root")).render(t.jsx(r.StrictMode,{children:t.jsx(o,{})}));
