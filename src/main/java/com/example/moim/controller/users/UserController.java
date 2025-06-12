@@ -1,29 +1,24 @@
 package com.example.moim.controller.users;
 
-import com.example.moim.command.CustomUserInfoVO;
-import com.example.moim.command.LoginVO;
+import com.example.moim.command.LoginDTO;
+import com.example.moim.command.PWChangeDTO;
 import com.example.moim.command.TokenResponseVO;
 import com.example.moim.command.UserVO;
-import com.example.moim.entity.RefreshToken;
 import com.example.moim.entity.Users;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.repository.RefreshTokenRepository;
+import com.example.moim.service.user.CustomUserDetails;
 import com.example.moim.service.user.UserService;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -42,25 +37,26 @@ public class UserController {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    @PostMapping("/signup")
+    //회원 가입
+    @PostMapping("/signUp")
     public ResponseEntity<?> signup(@RequestBody UserVO userVO) {
         System.out.println("요청 수신: " + userVO);
         try {
             Users savedUser = userService.signUp(userVO);
-            return ResponseEntity.ok(Map.of("user", savedUser.getUsername(),
-                                            "userNick", savedUser.getUserNick(),
-                                            "userEmail", savedUser.getUserEmail()));
+            return ResponseEntity.ok(Map.of(    "msg", "가입이 완료되었습니다",
+                                            "userNick", savedUser.getUserNick()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
+    //로그인
     @PostMapping("/login")
     public ResponseEntity<TokenResponseVO> getMemberProfile(
-            @Valid @RequestBody LoginVO loginVO
+            @Valid @RequestBody LoginDTO loginDTO
     ) {
         try {
-            TokenResponseVO tokenResponseVO = this.userService.login(loginVO);
+            TokenResponseVO tokenResponseVO = this.userService.login(loginDTO);
             log.info("tokenResponseVO: " + tokenResponseVO);
             return ResponseEntity.status(HttpStatus.OK).body(tokenResponseVO);
         } catch (IllegalArgumentException e) {
@@ -69,45 +65,50 @@ public class UserController {
         }
     }
 
+    //액세스 토큰 만료 시 리프레쉬 토큰 확인해 액세스 토큰 재발급되는 곳
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody TokenResponseVO tokenResponseVO) {
         String refreshToken = tokenResponseVO.getRefreshToken();
-
-        if(!jwtService.validateToken(refreshToken)) {
-            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("리프레시 토큰이 만료되었거나 유효하지 않습니다.");
-        }
-        //토큰에서 사용자 아이디 가져옴. 이 아이디로 DB에서 refresh token을 확인함
-        String username = jwtService.getUsername(refreshToken);
-        Optional<RefreshToken> storedTokenOpt = refreshTokenRepository.findByTokenCont(refreshToken);
-        if(storedTokenOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("리프레시 토큰을 찾을 수 없습니다.");
+        TokenResponseVO vo = userService.refresh(refreshToken);
+        if(vo.getToken() == null) {
+            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("재로그인하세요");
         }
 
-        Users user = storedTokenOpt.get().getUser();
-
-        //새 토큰 생성
-        CustomUserInfoVO vo = new CustomUserInfoVO(
-                user.getUserNo(),
-                user.getUsername(),
-                user.getUserEmail(),
-                user.getUserNick(),
-                null,
-                user.getUserLastLoggedDate()
-        );
-        String newToken = jwtService.createToken(vo);
-        String newRefreshToken = jwtService.createRefreshToken(vo);
-
-        //기존 토큰 삭제
-        refreshTokenRepository.delete(storedTokenOpt.get());
-
-        RefreshToken newRefreshTokenEntity = new RefreshToken();
-        newRefreshTokenEntity.setTokenCont(newRefreshToken);
-        newRefreshTokenEntity.setUser(user);
-        newRefreshTokenEntity.setTokenExpires(Timestamp.valueOf(LocalDateTime.now().plusDays(7)));
-        refreshTokenRepository.save(newRefreshTokenEntity);
-
-        return ResponseEntity.ok(new TokenResponseVO(newToken, newRefreshToken));
+        return ResponseEntity.ok(vo);
     }
 
+    //사용자 정보 확인
+    @GetMapping("/myAccount")
+    public ResponseEntity<?> getMyAccount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        log.info("userDetails: " + userDetails);
+
+        return ResponseEntity.ok(userDetails);
+    }
+
+    //사용자 정보 수정(비밀번호 제외)
+    @PostMapping("/myAccount/modifyInfo")
+    public ResponseEntity<?> modifyInfo(@Valid @RequestBody UserVO userVO) {
+        try {
+            Users savedUser = userService.modifyInfo(userVO);
+            return ResponseEntity.ok(Map.of(    "msg", "정보가 수정되었습니다.",
+                                            "userNick", savedUser.getUserNick()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    //비밀번호 수정
+    @PostMapping("/myAccount/modifyPw")
+    public ResponseEntity<?> modifyPw(@Valid @RequestBody PWChangeDTO pwChangeDTO) {
+        try {
+            Users pwChangedUser = userService.modifyPw(pwChangeDTO);
+            return ResponseEntity.ok(Map.of(    "msg", "비밀번호가 변경되어 재 로그인이 필요합니다.",
+                    "userNick", pwChangedUser.getUserNick()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
 }
