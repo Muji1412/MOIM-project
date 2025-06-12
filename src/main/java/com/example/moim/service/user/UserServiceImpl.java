@@ -181,7 +181,7 @@ public class UserServiceImpl implements UserService {
         //비밀번호 변경 후 DB에 저장
         user.setPassword(passwordEncoder.encode(pwChangeDTO.getNewPw()));
         //기존의 액세스 토큰 및 리프레쉬 토큰 삭제
-        Optional<RefreshToken> storedTokenOpt = refreshTokenRepository.findByUserNo(user.getUserNo());
+        Optional<RefreshToken> storedTokenOpt = refreshTokenRepository.findByUserUserNo(user.getUserNo());
         storedTokenOpt.ifPresent(refreshTokenRepository::delete);
 
         return usersRepository.save(user);
