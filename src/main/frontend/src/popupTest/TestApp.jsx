@@ -1,6 +1,7 @@
 import React from 'react';
 import './TestApp.css';
 
+
 // CSS를 위한 간단한 스타일 객체
 const styles = {
     body: { fontFamily: 'sans-serif', padding: '2rem', border: '2px solid #28a745', borderRadius: '8px', margin: '2rem' },
