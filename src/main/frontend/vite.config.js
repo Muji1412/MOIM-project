@@ -12,7 +12,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: path.resolve(__dirname,'src/main/index.jsx'),
-                test: path.resolve(__dirname,'src/test/Test.jsx'),
+                // test: path.resolve(__dirname,'src/test/Test.jsx'),
                 popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx')
 
                 // app: path.resolve(__dirname,'src/TestApp.jsx'),
