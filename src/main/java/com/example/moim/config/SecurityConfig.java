@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -73,7 +74,7 @@ public class SecurityConfig {
 
                 );
         //spring login form 기반 인증 메커니즘 비활성화
-        http.formLogin((form) -> form.disable());
+        http.formLogin(AbstractHttpConfigurer::disable);
 
         //CustomLoginFilter를 UsernameAuthenticationFilter 앞에 추가
         http.addFilterBefore(new CustomLoginFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
@@ -94,13 +95,10 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+}
+
 //    @Bean
 //    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager,
 //                                                  JWTService jwtService) {
 //        return new CustomLoginFilter(authenticationManager, jwtService);
 //    }
-
-
-
-
-}

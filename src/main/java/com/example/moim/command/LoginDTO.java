@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginVO {
+public class LoginDTO {
 
     @NotNull(message = "아이디를 입력하세요")
     private String username;
