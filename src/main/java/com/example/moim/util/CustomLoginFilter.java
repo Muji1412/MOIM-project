@@ -1,6 +1,7 @@
 package com.example.moim.util;
 
 import com.example.moim.jwt.JWTService;
+import com.example.moim.jwt.TokenType;
 import com.example.moim.service.user.CustomUserDetailsService;
 import com.example.moim.service.user.UserDetails;
 import jakarta.servlet.FilterChain;
@@ -38,8 +39,9 @@ public class CustomLoginFilter extends OncePerRequestFilter {
         //헤더에 jwt가 있는지 확인
         if(header != null && header.startsWith("Bearer ")){
             String token = header.substring(7); //Bearer 떼고 토큰만 가져옴
+            TokenType tokenType = jwtService.parseClaims(token).get("tokenType", TokenType.class);
             //jwt 유효성 검증
-            if(jwtService.validateToken(token)){
+            if(jwtService.validateToken(token, tokenType)){
                 String username = jwtService.getUsername(token);
                 //유저와 토큰이 일치하면 userDetails 생성
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);

@@ -27,6 +27,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         customUserInfoVO.setUserNick(user.getUserNick());
         customUserInfoVO.setUserLastLoggedDate(user.getUserLastLoggedDate());
 
-        return new CustomUserDetails(customUserInfoVO);
+        return new CustomUserDetails(customUserInfoVO, user.getUserPhone(), user.getUserImg(), user.getUserMsg());
     }
 }

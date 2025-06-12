@@ -2,17 +2,28 @@ package com.example.moim.service.user;
 
 import com.example.moim.command.CustomUserInfoVO;
 import com.example.moim.entity.Users;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 import java.util.List;
 
+@Data
 public class CustomUserDetails implements UserDetails {
 
     private final CustomUserInfoVO customUserInfoVO;
+    private final String userPhone;
+    private final String userImg;
+    private final String userMsg;
 
-    public CustomUserDetails(CustomUserInfoVO customUserInfoVO) {
+    public CustomUserDetails(CustomUserInfoVO customUserInfoVO
+                            , String userPhone
+                            , String userImg
+                            , String userMsg) {
         this.customUserInfoVO = customUserInfoVO;
+        this.userPhone = userPhone;
+        this.userImg = userImg;
+        this.userMsg = userMsg;
     }
 
     @Override
