@@ -17,8 +17,9 @@ public class ViewController {
     // MPA 테스트페이지
     @GetMapping("/test")
     public String testPage() {
-        return "forward:/test.html";
+            return "forward:/test.html";
     }
+
 
     @GetMapping("/video-call/{roomId}")
     public String videoCall(@PathVariable String roomId, Model model) {

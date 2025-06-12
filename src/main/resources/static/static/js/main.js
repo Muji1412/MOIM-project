@@ -1,1 +1,0 @@
-import{j as e,R as t}from"./index.js";import{R as r}from"./client.js";import{V as o}from"./VideoCall.js";function s(){return e.jsx("div",{className:"App",children:e.jsx(o,{})})}r.createRoot(document.getElementById("root")).render(e.jsx(t.StrictMode,{children:e.jsx(s,{})}));
