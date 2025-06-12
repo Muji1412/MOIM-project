@@ -9,6 +9,7 @@ public class ChatMessage {
     public String user;
     public String color;
     public String text;
+    public String imageUrl; //이미지 추가해봤음
 
 
 
