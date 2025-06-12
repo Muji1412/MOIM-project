@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class ViewController {
 
-
         @GetMapping("/{pageName}.do") //.do 해주세요
         public String page(@PathVariable String pageName, Model model) {
             model.addAttribute("pageName", pageName);
