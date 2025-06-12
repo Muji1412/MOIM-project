@@ -1,22 +1,29 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
+import path from 'path' // path 모듈 import
+
 
 export default defineConfig({
     plugins: [react()],
+    root: 'src/main/react',
     build: {
-        outDir: 'build',
+        outDir: '../resources/static/bundle',
+        emptyOutDir: true,
         rollupOptions: {
             input: {
-                main: resolve(__dirname, 'index.html'),
-                video: resolve(__dirname, 'video.html'),
-                test: resolve(__dirname, 'test.html')
+                main: path.resolve(__dirname,'src/main/index.jsx'),
+                // test: path.resolve(__dirname,'src/test/Test.jsx'),
+                popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx')
+
+                // app: path.resolve(__dirname,'src/TestApp.jsx'),
+                // videoGrid: path.resolve(__dirname,'src/VideoGrid.jsx'),
+                // 필요한 만큼 entry 추가 가능
             },
             output: {
-                entryFileNames: `static/js/[name].js`,
-                chunkFileNames: `static/js/[name].js`,
-                assetFileNames: `static/assets/[name].[ext]`
+                entryFileNames: 'js/[name].bundle.js',
+                assetFileNames: 'css/[name].[ext]',
+                chunkFileNames: 'chunk/[name].chunk.js',
             }
-        }
-    }
+        },
+    },
 })

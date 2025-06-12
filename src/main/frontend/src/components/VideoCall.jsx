@@ -3,7 +3,8 @@ import { OpenVidu } from 'openvidu-browser';
 
 
 // 서버 URL
-const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
+// const APPLICATION_SERVER_URL = 'https://moim.o-r.kr';
+const APPLICATION_SERVER_URL = 'http://localhost:8089';
 
 
 // --- Helper Component ---
@@ -135,6 +136,7 @@ function VideoCall() {
     const leaveSession = () => {
         if (session) {
             session.disconnect();
+            window.close();
         }
     };
 

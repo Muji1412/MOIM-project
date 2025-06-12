@@ -3,6 +3,7 @@ package com.example.moim.controller;
 import com.example.moim.chatting.ChatMessage;
 import com.example.moim.chatting.ChatService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,6 +29,12 @@ public class ChatController {
     @GetMapping
     public List<ChatMessage> getAllChats() {
         return chatService.getAllChats();
+    }
+
+    @PostMapping("/image")
+    public String uploadImage(@RequestParam("file") MultipartFile file) {
+        String imageUrl = chatService.uploadImageToGCS(file);
+        return imageUrl;
     }
 
 }
