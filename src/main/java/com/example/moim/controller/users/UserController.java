@@ -111,4 +111,12 @@ public class UserController {
         }
     }
 
+    //비밀번호 찾기 - 임시비밀번호 발급
+    @PostMapping("/searchPw")
+    public ResponseEntity<?> searchPw(@Valid @RequestBody PWChangeDTO pwChangeDTO) {
+
+
+        return ResponseEntity.ok(null);
+    }
+
 }

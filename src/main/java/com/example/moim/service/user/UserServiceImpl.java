@@ -96,6 +96,7 @@ public class UserServiceImpl implements UserService {
         RefreshToken refreshTokenEntity = new  RefreshToken();
         refreshTokenEntity.setTokenCont(refreshToken);
         refreshTokenEntity.setUser(users);
+        refreshTokenEntity.setTokenCreated(new Timestamp(System.currentTimeMillis()));
         refreshTokenEntity.setTokenExpires(Timestamp.valueOf(LocalDateTime.now().plusDays(7)));
         refreshTokenRepository.save(refreshTokenEntity);
 
@@ -187,8 +188,34 @@ public class UserServiceImpl implements UserService {
         return usersRepository.save(user);
     }
 
+    @Override
+    public String getTmpPw() {
 
+        char[] charSet = new char[]{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b',
+                'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
+        String newPassword = "";
+
+        for (int i = 0; i < 10; i++) {
+            int idx = (int) (charSet.length * Math.random());
+            newPassword += charSet[idx];
+        }
+
+        return newPassword;
+    }
+
+    @Transactional
+    @Override
+    public void updatePw(String tmpPw, String email) {
+        String encodedPw = passwordEncoder.encode(tmpPw);
+        Users user = usersRepository.findByUserEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("해당 사용자가 없습니다."));
+        user.setPassword(encodedPw);
+        usersRepository.save(user);
+    }
 }
 
 //토큰에서 사용자 아이디 가져옴. 이 아이디로 DB에서 refresh token을 확인함
