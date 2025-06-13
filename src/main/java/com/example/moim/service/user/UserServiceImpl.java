@@ -9,6 +9,9 @@ import com.example.moim.repository.RefreshTokenRepository;
 import com.example.moim.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
+@Slf4j
 @Service("UserService")
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -58,7 +62,6 @@ public class UserServiceImpl implements UserService {
         user.setUserNick(uservo.getUserNick());
         user.setUserPhone(uservo.getUserPhone());
         user.setUserLastLoggedDate(timestamp);
-        user.setUserIsDeleted("n");
 
         return usersRepository.save(user);
         }
@@ -74,6 +77,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("아이디가 없습니다.");
         } else if (!passwordEncoder.matches(password, user.get().getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        } else if (user.get().isUserIsDeleted()) {
+            throw new EntityNotFoundException("탈퇴한 유저입니다.");
         }
 
         Users users = user.get();
@@ -113,7 +118,7 @@ public class UserServiceImpl implements UserService {
             return new TokenResponseVO(null, null);
             //return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("리프레시 토큰이 만료되었거나 유효하지 않습니다.");
         }
-        //리프레시토큰이 만료되지 않은 경우 토근 내용을 가져와 DB의 리프레시토큰 테이블에서 값을 비교
+        //리프레시토큰이 만료되지 않은 경우 토큰 내용을 가져와 DB의 리프레시토큰 테이블에서 값을 비교
         Optional<RefreshToken> storedTokenOpt = refreshTokenRepository.findByTokenCont(refreshToken);
         if(storedTokenOpt.isEmpty()) { //리프레시토큰이 없는 경우 빈 토큰vo 반환 -> 컨트롤러에서 빈 토큰vo 오는경우 재로그인 유도
             return new TokenResponseVO(null, null);
@@ -149,7 +154,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public Users modifyInfo(UserVO uservo) {
-        Users user = usersRepository.findByUsername(uservo.getUsername())
+        Users user = usersRepository.findByUsername(uservo.getUsername()).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
         //이메일, 닉네임 중복 체크. 이때 자기자신의 이메일과 닉네임은 체크되지 않게 함
         if(!uservo.getUserEmail().equals(uservo.getUserEmail()) &&
@@ -173,7 +178,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Users modifyPw(PWChangeDTO pwChangeDTO) {
         //dto의 유저아이디(username)을 받아 DB에서 해당 유저를 찾음
-        Users user = usersRepository.findByUsername(pwChangeDTO.getUsername())
+        Users user = usersRepository.findByUsername(pwChangeDTO.getUsername()).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
         //기존 비밀번호 잘못 입력 시 오류 메시지 출력
         if (!passwordEncoder.matches(pwChangeDTO.getOldPw(), user.getPassword())) {
@@ -188,6 +193,7 @@ public class UserServiceImpl implements UserService {
         return usersRepository.save(user);
     }
 
+    //비밀번호 찾기 시 메일로 전송되는 임시비밀번호 생성
     @Override
     public String getTmpPw() {
 
@@ -198,23 +204,64 @@ public class UserServiceImpl implements UserService {
                 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
         String newPassword = "";
-
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) { //위 char[]에서 랜덤 10글자로 생성
             int idx = (int) (charSet.length * Math.random());
             newPassword += charSet[idx];
         }
-
         return newPassword;
     }
 
+    //임시비밀번호 생성 후 DB에 기존 비밀번호를 임시비밀번호로 업데이트
     @Transactional
     @Override
     public void updatePw(String tmpPw, String email) {
-        String encodedPw = passwordEncoder.encode(tmpPw);
-        Users user = usersRepository.findByUserEmail(email).orElseThrow(
+        String encodedPw = passwordEncoder.encode(tmpPw); //임시비밀번호를 암호화
+        //비밀번호 찾기 시 입력한 이메일을 통해 DB에서 해당 사용자를 찾은 뒤 비밀번호를 업데이트
+        Users user = usersRepository.findByUserEmail(email).filter(u -> !u.isUserIsDeleted()).orElseThrow(
                 () -> new EntityNotFoundException("해당 사용자가 없습니다."));
         user.setPassword(encodedPw);
         usersRepository.save(user);
+    }
+
+    //비밀번호 찾기는 1시간에 한번으로 시간 제한
+    @Transactional
+    @Override
+    public boolean updatePwToken(String username, String userEmail) {
+        //사용자가 입력한 이메일로 DB에서 유저를 찾음
+        System.out.println(username +" " + userEmail);
+        Users user = usersRepository.findByUsernameAndUserEmail(username, userEmail).filter(u-> !u.isUserIsDeleted()).orElseThrow(
+                () -> new EntityNotFoundException("해당 사용자가 없습니다."));
+        //현재 시간
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        //유저가 마지막으로 비밀번호 찾기를 한 시간부터 아직 1시간이 지나지 않은 경우 false 반환
+        if(user.getPasswordToken() != null &&
+                now.getTime() - user.getPasswordToken().getTime() < 3600000) {
+            return false;
+        }
+        //비밀번호 찾기가 처음이거나, 마지막으로 비밀번호 찾기를 한 지 1시간이 지난 경우 true를 반환
+        return true;
+    }
+
+    //회원 탈퇴 - users 테이블의 user_is_deleted 컬럼을 true로 변경
+    @Override
+    public boolean deleteAccount(String password) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails principal = (CustomUserDetails)authentication.getPrincipal();
+        String username = principal.getCustomUserInfoVO().getUsername();
+        Users user = usersRepository.findByUsername(username).filter(u -> !u.isUserIsDeleted())
+                .orElseThrow( () -> new EntityNotFoundException("유저가 없습니다."));
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            System.out.println("비밀번호 일치 여부: " + passwordEncoder.matches(password, user.getPassword()));
+            System.out.println("입력 비밀번호: " + password);
+            System.out.println("DB 비밀번호: " + user.getPassword());
+            boolean isMatch = passwordEncoder.matches(password, user.getPassword());
+            System.out.println("일치 여부: " + isMatch);
+            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+        }
+        user.setUserIsDeleted(true);
+        usersRepository.save(user);
+
+        return true;
     }
 }
 

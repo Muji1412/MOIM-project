@@ -30,7 +30,7 @@ public class MailService {
         mailMessage.setFrom(from);
         mailMessage.setTo(mailDTO.to());
         mailMessage.setSubject(EMAIL_SUBJECT);
-        mailMessage.setText(EMAIL_CONTENT);
+        mailMessage.setText(mailDTO.content());
         mailSender.send(mailMessage);
     }
 

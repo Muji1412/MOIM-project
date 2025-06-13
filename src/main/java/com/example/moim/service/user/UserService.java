@@ -16,4 +16,7 @@ public interface UserService {
     public Users modifyPw(PWChangeDTO pwChangeDTO);
     public String getTmpPw();
     public void updatePw(String tmpPw, String email);
+    public boolean updatePwToken(String username, String email);
+    public boolean deleteAccount(String password);
+
 }

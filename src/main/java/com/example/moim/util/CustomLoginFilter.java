@@ -39,7 +39,9 @@ public class CustomLoginFilter extends OncePerRequestFilter {
         //헤더에 jwt가 있는지 확인
         if(header != null && header.startsWith("Bearer ")){
             String token = header.substring(7); //Bearer 떼고 토큰만 가져옴
-            TokenType tokenType = jwtService.parseClaims(token).get("tokenType", TokenType.class);
+            String tokenTypeStr = jwtService.parseClaims(token).get("tokenType", String.class);
+            TokenType tokenType = TokenType.valueOf(tokenTypeStr);
+            //TokenType tokenType = jwtService.parseClaims(token).get("tokenType", TokenType.class);
             //jwt 유효성 검증
             if(jwtService.validateToken(token, tokenType)){
                 String username = jwtService.getUsername(token);
