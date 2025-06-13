@@ -40,3 +40,4 @@ src/main/resources/application.properties
 # 리액트 빌드 결과물
 
 src/main/resources/static/bundle/
+/src/main/resources/static/bundle/
