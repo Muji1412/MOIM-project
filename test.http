@@ -1,0 +1,20 @@
+### 1. 구독자 수 확인 (API 추가 필요)
+GET http://localhost:8089/api/subscriptions
+
+### 2. 올바른 푸시 알림 발송 (body 포함)
+POST http://localhost:8089/api/send-all
+Content-Type: application/json
+
+{
+  "title": "인텔리제이 테스트",
+  "body": "HTTP Client로 보낸 푸시 알림입니다!"
+}
+
+### 3. 다른 메시지로 테스트
+POST http://localhost:8089/api/send-all
+Content-Type: application/json
+
+{
+  "title": "긴급 알림!",
+  "body": "바탕화면에 알림이 뜨는지 확인해주세요!"
+}
