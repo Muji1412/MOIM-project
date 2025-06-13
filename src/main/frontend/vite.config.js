@@ -1,4 +1,4 @@
-// vite.config.js (수정 완료된 최종본)
+// vite.config.js
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -10,7 +10,7 @@ export default defineConfig({
     ],
 
     build: {
-        outDir: 'src/main/resources/static/bundle',
+        outDir: '../resources/static/bundle',
         emptyOutDir: true,
         rollupOptions: {
             input: {
