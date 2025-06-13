@@ -13,6 +13,10 @@ export default function Header() {
   const inputRef = useRef();
   const serverNameInputRef = useRef();
 
+  //아코디언 area
+  const [openChat, setOpenChat] = useState(true);
+  const [openVoice, setOpenVoice] = useState(true);
+
   // menuType과 선택 서버 객체 구하기
   const isFriendMenu = selectedServerId === "default";
   const selectedServer = servers.find((s) => s.id === selectedServerId);
@@ -59,7 +63,8 @@ export default function Header() {
       {
         id: Date.now().toString(),
         name: newServer.name,
-        image: newServer.image || "/img/default_server.png",
+        // image: newServer.image || "/img/default_server.png",
+        image: newServer.image || "",
       },
     ]);
     closeModal();
@@ -83,7 +88,8 @@ export default function Header() {
               <div className={styles.server_box}>
                 {/* 기본 서버(홈) */}
                 <div
-                  className={`${styles.list_item} ${styles.default_server} ${
+                  className={`${styles.list_item} ${styles.default_server} 
+                  ${styles.add_server}   ${
                     selectedServerId === "default" ? styles.selected : ""
                   }`}
                   onClick={() => handleServerClick("default")}
@@ -129,19 +135,32 @@ export default function Header() {
                         selectedServerId === server.id ? styles.active_ic : ""
                       }`}
                       style={{
-                        backgroundImage: `url(${
-                          server.image || "/img/default_server.png"
-                        })`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
+                        background: !server.image
+                          ? selectedServerId === server.id
+                            ? "#c3ee41"
+                            : "#d9d9d9"
+                          : "transparent",
                         overflow: "hidden",
                       }}
-                    />
+                    >
+                      {server.image && (
+                        <img
+                          src={server.image}
+                          alt={server.name}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                 ))}
                 {/* 서버 추가 버튼 */}
                 <div
-                  className={styles.list_item}
+                  className={`${styles.list_item} ${styles.add_server}`}
                   onClick={openModal}
                   title="서버 추가"
                 >
@@ -159,43 +178,195 @@ export default function Header() {
                     Search or Start Talk
                   </button>
                 ) : (
-                  <p className={styles.server_title}>{selectedServerName}</p>
+                  <div className={styles.change_shild}>
+                    <p className={styles.server_name}>{selectedServerName}</p>
+                  </div>
                 )}
               </div>
+
               <div className={styles.server_menu_list}>
-                <div className={styles.menu_box}>
-                  <div className={styles.menu_item}>
-                    <img src="/img/friend_ic.png" alt="#" />
-                    <p>Friend</p>
+                {isFriendMenu ? (
+                  <div className={styles.menu_box}>
+                    <div className={styles.menu_item}>
+                      <img src="/img/friend_ic.png" alt="friend_ic" />
+                      <p>Friend</p>
+                    </div>
                   </div>
-                </div>
-                <div className={styles.menu_box}>
-                  <div className={styles.menu_item}>
-                    <img src="/img/friend_ic.png" alt="#" />
-                    <p>Friend</p>
-                  </div>
-                </div>
+                ) : (
+                  <>
+                    <div className={styles.menu_box}>
+                      <div className={styles.menu_item}>
+                        <img src="/img/cal_ic.png" alt="cal_ic" />
+                        <p>Calendar</p>
+                      </div>
+                    </div>
+                    <div className={styles.menu_box}>
+                      <div className={styles.menu_item}>
+                        <img src="/img/todo_ic.png" alt="cal_ic" />
+                        <p>Todo List</p>
+                      </div>
+                    </div>
+                    <div className={styles.menu_box}>
+                      <div className={styles.menu_item}>
+                        <img src="/img/board_ic.png" alt="cal_ic" />
+                        <p>White Board</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
               <div className={styles.server_menu_con}>
                 <div className={styles.menu_con_container}>
-                  <div className={styles.menu_con_title}>
-                    <p>Direct Message</p>
-                    <img src="/img/add_plus_ic.png" alt="add_something" />
-                  </div>
-                  <div className={styles.server_menu_user_area}>
-                    <div className={styles.menu_user_box}>
-                      <div className={styles.menu_user_list}>
-                        <img src="#" alt="#" />
-                        <p>User</p>
+                  {isFriendMenu ? (
+                    // 친구 컨텐츠
+                    <>
+                      <div className={styles.menu_con_title}>
+                        <p>Direct Message</p>
+                        <img src="/img/add_plus_ic.png" alt="add_something" />
                       </div>
-                    </div>
-                    <div className={styles.menu_user_box}>
-                      <div className={styles.menu_user_list}>
-                        <img src="#" alt="#" />
-                        <p>User</p>
+                      <div className={styles.server_menu_user_area}>
+                        <div className={styles.menu_user_box}>
+                          <div className={styles.menu_user_list}>
+                            <img src="#" alt="#" />
+                            <p>User</p>
+                          </div>
+                        </div>
+                        <div className={styles.menu_user_box}>
+                          <div className={styles.menu_user_list}>
+                            <img src="#" alt="#" />
+                            <p>User</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </>
+                  ) : (
+                    // 서버별 컨텐츠
+                    <>
+                      <div className="acodion_box">
+                        <div
+                          className={styles.aco_con_title}
+                          style={{
+                            background: openChat ? "" : "transparent",
+                            transition: "background 0.2s",
+                          }}
+                        >
+                          <div
+                            className={styles.chat_box}
+                            onClick={() => setOpenChat((prev) => !prev)}
+                            style={{
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <p
+                              
+                            >
+                              chat
+                            </p>
+                            <img
+                              src="/img/arrow_ic.png"
+                              alt="arrow_ic"
+                              style={{
+                                marginRight: 8,
+                                transform: openChat
+                                  ? "rotate(0deg)"
+                                  : "rotate(-90deg)",
+                                transition: "transform 0.2s",
+                              }}
+                            />
+                          </div>
+                          <img
+                            src="/img/add_plus_ic.png"
+                            alt="add_ic"
+                            style={{ cursor: "pointer" }}
+                          />
+                        </div>
+
+                        {/* 아코디언 내용 */}
+                        <div
+                          className={styles.channel_list}
+                          style={{
+                            maxHeight: openChat ? "500px" : "0",
+                          }}
+                        >
+                          {openChat && (
+                            <ul
+                              style={{
+                                listStyle: "none",
+                                margin: 0,
+                                padding: 0,
+                              }}
+                            >
+                              <li className={styles.channel_item}>
+                                <div className={styles.channel_item_box}>
+                                  <img src="/img/chat_hash_ic.png" alt="chat" />
+                                  <span>
+                                    일반채팅
+                                  </span>
+                                </div>
+                              </li>
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="acodion_box">
+                        <div
+                          className={styles.aco_con_title}
+                          style={{
+                            background: openVoice ? "" : "transparent",
+                            transition: "background 0.2s",
+                          }}
+                        >
+                          <div
+                            className={styles.chat_box}
+                            onClick={() => setOpenVoice((prev) => !prev)}
+                          >
+                            <p>chat</p>
+                            <img
+                              src="/img/arrow_ic.png"
+                              alt="arrow_ic"
+                              style={{
+                                marginRight: 8,
+                                transform: openVoice
+                                  ? "rotate(0deg)"
+                                  : "rotate(-90deg)",
+                                transition: "transform 0.2s",
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* 아코디언 내용 */}
+                        <div
+                          className={styles.channel_list}
+                          style={{
+                            maxHeight: openVoice ? "500px" : "0",
+                          }}
+                        >
+                          {openVoice && (
+                            <ul
+                              style={{
+                                listStyle: "none",
+                                margin: 0,
+                                padding: 0,
+                              }}
+                            >
+                              <li className={styles.channel_item}>
+                                <div className={styles.channel_item_box}>
+                                  <img src="/img/voice_ic.png" alt="voice" />
+                                  <span>
+                                    음성채팅
+                                  </span>
+                                </div>
+                              </li>
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
