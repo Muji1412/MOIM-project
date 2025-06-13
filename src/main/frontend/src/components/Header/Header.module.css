@@ -99,7 +99,7 @@
 .server_ic {
   width: 50px;
   height: 50px;
-  background: #d9d9d9;
+
   border-radius: 10px;
   position: absolute;
   left: 50%;
@@ -112,7 +112,10 @@
   background-size: cover;
   background-position: center;
   overflow: hidden;
+  z-index: 1;
 }
+
+.add_server .server_ic{  background: #d9d9d9;}
 
 .home_ic img {
   width: 30px;
@@ -195,7 +198,7 @@
 
 .server_menu_list {
   width: 100%;
-  min-height: 60px;
+  min-height: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -357,3 +360,19 @@
   height: 20px;
   cursor: pointer;
 }
+
+/*---------- change_server -----------*/
+.change_shild{width: 85%;}
+.server_name{width: 100%;}
+
+.chat_box{display: flex; align-items: center; width: 100%;justify-content: flex-start; gap:10px;cursor: pointer;}
+.chat_box img{width: 10px;height: 5px;}
+.chat_box p{font-weight: 500;color: #777;letter-spacing: 1;}
+.channel_item{width: 100%;}
+
+.channel_item_box{width: 90%; display: flex; align-items: center; margin: 0 auto;  transition: max-height 0.3s;border-radius: 0 0 8px 8px;margin-bottom: 8px;}
+.channel_item_box img{width: 18; margin-right: 6px;}
+.channel_item_box span{color: #777; font-weight: 500;}
+.acodion_box{width: 100%;margin-bottom: 10px;}
+
+.aco_con_title{width: 90%;height: 30px;display: flex;flex-direction: row;align-items: center;justify-content: space-between;margin: 0 auto;}
