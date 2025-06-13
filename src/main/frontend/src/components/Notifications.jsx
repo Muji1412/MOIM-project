@@ -36,12 +36,15 @@ function NotificationComponent({ userId }) {
 
 
     // --- ⭐️ 푸시 알림 관련 로직 추가 ---
-
-    // 푸시 구독 및 서버에 정보 전송
     const subscribeToPush = async () => {
+        console.log('🔥 subscribeToPush 함수 시작!'); // 추가
+
         // 1. 알림 권한 확인 및 요청
+        console.log('현재 알림 권한:', Notification.permission); // 추가
         if (Notification.permission !== 'granted') {
+            console.log('알림 권한 요청 중...'); // 추가
             const permission = await Notification.requestPermission();
+            console.log('알림 권한 요청 결과:', permission); // 추가
             if (permission !== 'granted') {
                 alert('알림 권한이 거부되었습니다.');
                 return;
@@ -49,30 +52,77 @@ function NotificationComponent({ userId }) {
         }
 
         try {
+            console.log('서비스 워커 준비 상태 확인 중...'); // 추가
             // 2. 서비스 워커 등록 확인 및 구독
             const swRegistration = await navigator.serviceWorker.ready;
+            console.log('서비스 워커 준비 완료:', swRegistration); // 추가
+
+            console.log('푸시 구독 시작...'); // 추가
             const subscription = await swRegistration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
 
-            console.log("✅ 푸시 구독 성공:", JSON.stringify(subscription));
+            console.log("✅ 푸시 구독 성공:", subscription); // 기존
+            console.log("구독 정보 상세:", JSON.stringify(subscription, null, 2)); // 추가
 
+            console.log('백엔드로 구독 정보 전송 중...'); // 추가
             // 3. 구독 정보를 서버로 전송
-            await fetch('/api/subscribe', {
+            const response = await fetch('/api/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(subscription)
             });
+
+            console.log('백엔드 응답 상태:', response.status); // 추가
+            console.log('백엔드 응답:', await response.text()); // 추가
 
             alert("푸시 알림 구독이 완료되었습니다!");
             setIsPushSubscribed(true);
 
         } catch (error) {
             console.error("❌ 푸시 구독 실패:", error);
+            console.error("에러 스택:", error.stack); // 추가
             alert("푸시 알림 구독에 실패했습니다. 콘솔을 확인해주세요.");
         }
     };
+
+    // 푸시 구독 및 서버에 정보 전송
+    // const subscribeToPush = async () => {
+    //     // 1. 알림 권한 확인 및 요청
+    //     if (Notification.permission !== 'granted') {
+    //         const permission = await Notification.requestPermission();
+    //         if (permission !== 'granted') {
+    //             alert('알림 권한이 거부되었습니다.');
+    //             return;
+    //         }
+    //     }
+    //
+    //     try {
+    //         // 2. 서비스 워커 등록 확인 및 구독
+    //         const swRegistration = await navigator.serviceWorker.ready;
+    //         const subscription = await swRegistration.pushManager.subscribe({
+    //             userVisibleOnly: true,
+    //             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    //         });
+    //
+    //         console.log("✅ 푸시 구독 성공:", JSON.stringify(subscription));
+    //
+    //         // 3. 구독 정보를 서버로 전송
+    //         await fetch('/api/subscribe', {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify(subscription)
+    //         });
+    //
+    //         alert("푸시 알림 구독이 완료되었습니다!");
+    //         setIsPushSubscribed(true);
+    //
+    //     } catch (error) {
+    //         console.error("❌ 푸시 구독 실패:", error);
+    //         alert("푸시 알림 구독에 실패했습니다. 콘솔을 확인해주세요.");
+    //     }
+    // };
 
     // 백엔드로 테스트 알림 발송 요청
     const sendTestNotification = async () => {
