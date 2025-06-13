@@ -14,5 +14,9 @@ public interface UserService {
     public TokenResponseVO refresh(String refreshToken);
     public Users modifyInfo(UserVO userVO);
     public Users modifyPw(PWChangeDTO pwChangeDTO);
+    public String getTmpPw();
+    public void updatePw(String tmpPw, String email);
+    public boolean updatePwToken(String username, String email);
+    public boolean deleteAccount(String password);
 
 }

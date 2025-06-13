@@ -60,6 +60,10 @@ dependencies {
     //웹소켓
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+    //비밀번호 찾기 - 메일 전송
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
+
     implementation 'nl.martijndwars:web-push:5.1.1'
     implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.78.1'

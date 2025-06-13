@@ -14,9 +14,17 @@ export default defineConfig({
         emptyOutDir: true,
         rollupOptions: {
             input: {
-                main: path.resolve(__dirname, 'src/main/index.jsx'),
-                popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
+
+                main: path.resolve(__dirname,'src/main/index.jsx'),
+                //test: path.resolve(__dirname,'src/test/Test.jsx'),
+                popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
+                login: path.resolve(__dirname, 'src/user/login.jsx')
+
+                // app: path.resolve(__dirname,'src/TestApp.jsx'),
+                // videoGrid: path.resolve(__dirname,'src/VideoGrid.jsx'),
+                // 필요한 만큼 entry 추가 가능
+
             },
             output: {
                 entryFileNames: 'js/[name].bundle.js',

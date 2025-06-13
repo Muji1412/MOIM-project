@@ -46,7 +46,10 @@ public class Users {
     private Timestamp userLastLoggedDate;
 
     @Column(name = "USER_IS_DELETED")
-    private String userIsDeleted;
+    private boolean userIsDeleted;
+
+    @Column(name = "PASSWORD_TOKEN")
+    private Timestamp passwordToken;
 
 
 
