@@ -1,0 +1,34 @@
+.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);float: left;}
+.section_cotainer {width: 100%;height: 100%;background: #fff;}
+
+/* section_title */
+.section_title {width: 100%;height: 60px;border-bottom: 1px solid #d9d9d9;margin: 0 auto;}
+.section_title_box {width: 100%;height: 100%;}
+.section_title_wrap {width: 95%;height: 60px;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;gap: 0px;margin: 0 auto;}
+.section_title_area {width: 110px;display: flex;flex-direction: row;align-items: center;gap: 15px;}
+.section_title_area img {width: 19px;height: 20px;}
+
+.add_friend_btn {width: 90px;height: 25px;border: none;background: #c3ee41;border-radius: 5px;color: #fff;cursor: pointer;}
+.add_friend_btn:hover {background: #a4cc2d;}
+
+/* section_content */
+.section_content {width: 100%;display: flex;flex-direction: column;align-items: center;}
+
+/* section_search_box */
+.section_search_box {width: 95%;height: 40px;background: #f3f3f4;margin: 12px auto 25px auto;border: 1px solid #d1d1d5;border-radius: 10px;}
+.section_search_box:focus-within {border: 2px solid #c3ee41;}
+
+.section_form_container {width: 95%;height: 40px;display: flex;align-items: center;position: relative;margin: 0 auto;}
+.section_form_container > input {width: 100%;height: 80%;border: none;background: #f3f3f4;outline: none;}
+.section_search_ic {position: absolute;right: 0px;cursor: pointer;}
+
+/* friend_area */
+.section_friend_container {width: 95%;min-height: 50%;margin-top: 25px;display: flex;flex-direction: column;border-top: 1px solid #e1e0e1;margin: 0 auto;}
+
+.friend_list_box {width: 100%;height: 60px;border-bottom: 1px solid #e1e0e1;display: flex;justify-content: space-between;align-items: center;}
+.friend_list_box:hover {background: #e1e0e1;border-radius: 10px;}
+.friend_profile_area {width: 100px;height: 100%;display: flex;align-items: center;gap: 10px;margin-left: 15px;}
+.friend_profile_area > img {width: 35px;height: 35px;border-radius: 100%;border: 1px solid black;}
+.friend_profile_area > p {font-size: 17px;}
+.friend_setting_area {width: 60px;display: flex;align-items: center;gap: 30px;margin-right: 15px;}
+.friend_setting_area img {cursor: pointer;}
