@@ -12,8 +12,9 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: path.resolve(__dirname,'src/main/index.jsx'),
-                // test: path.resolve(__dirname,'src/test/Test.jsx'),
-                popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx')
+                //test: path.resolve(__dirname,'src/test/Test.jsx'),
+                popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
+                chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx')
 
                 // app: path.resolve(__dirname,'src/TestApp.jsx'),
                 // videoGrid: path.resolve(__dirname,'src/VideoGrid.jsx'),
@@ -27,3 +28,5 @@ export default defineConfig({
         },
     },
 })
+
+
