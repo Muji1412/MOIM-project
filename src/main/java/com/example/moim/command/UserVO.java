@@ -22,6 +22,7 @@ public class UserVO {
     private String userNId;
     private String userKId;
     private Timestamp userLastLoggedDate;
-    private String userIsDeleted;
+    private boolean userIsDeleted;
+    private Timestamp passwordToken;
 
 }

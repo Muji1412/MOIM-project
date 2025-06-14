@@ -19,6 +19,7 @@ export default defineConfig({
                 popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 // login: path.resolve(__dirname, 'src/user/App.jsx')
+
             },
             output: {
                 entryFileNames: 'js/[name].bundle.js',
