@@ -1,5 +1,4 @@
 // vite.config.js
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -8,22 +7,25 @@ export default defineConfig({
     plugins: [
         react()
     ],
+    // 💡 public 폴더의 위치를 명시적으로 지정합니다.
+    publicDir: path.resolve(__dirname, 'public'),
 
     build: {
-        outDir: '../resources/static/bundle',
+        outDir: path.resolve(__dirname, '../../main/resources/static/bundle'),
         emptyOutDir: true,
         rollupOptions: {
             input: {
-                main: path.resolve(__dirname, 'src/main/index.jsx'),
-                popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
+                main: path.resolve(__dirname,'src/main/index.jsx'),
+                popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
+                // login: path.resolve(__dirname, 'src/user/App.jsx')
             },
             output: {
                 entryFileNames: 'js/[name].bundle.js',
                 chunkFileNames: 'js/[name].chunk.js',
                 assetFileNames: (assetInfo) => {
                     if (assetInfo.name?.endsWith('.css')) {
-                        return 'css/[name][extname]'; // CSS 파일 경로 명시적 지정
+                        return 'css/[name][extname]';
                     }
                     return 'assets/[name][extname]';
                 }
@@ -31,6 +33,7 @@ export default defineConfig({
         },
     },
 });
+
 // import { defineConfig } from 'vite'
 // import react from '@vitejs/plugin-react'
 // import path from 'path' // path 모듈 import
