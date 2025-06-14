@@ -15,60 +15,61 @@ function ChattingView() {
     // 채널명 (방 이름) - 여기서는 예시로 'general' 사용
     const channel = "general";
 
+    //파라미터 변수넘기기..
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get("projectId");
+    const channelNum = params.get("channelNum");
+
+    //console.log("projectId:", projectId);
+    //console.log("channelNum:", channelNum);
+
     useEffect(() => {
-        // 1. STOMP 클라이언트 생성 (WebSocket 연결)
+        // 1. WebSocket 연결 (프로젝트 단위)
         const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8089/ws"), // 서버 WebSocket 엔드포인트
-            debug: (str) => {
-                console.log("%c[STOMP]", "color: green", str);
-            },
-            reconnectDelay: 5000 // 연결이 끊기면 5초 후 자동 재연결
+            webSocketFactory: () => new SockJS(`http://localhost:8089/ws`),
+            reconnectDelay: 5000
         });
 
-        // 2. 서버와 연결이 성공하면 실행되는 함수
         client.onConnect = () => {
-            client.subscribe(`/topic/chat/${channel}`, (msg) => {
+            // 프로젝트 전체 구독
+            client.subscribe(`/topic/chat/${projectId}`, (msg) => {
                 const message = JSON.parse(msg.body);
-                setMessages(prev => [...prev, message]);
+                // 현재 보고 있는 채널의 메시지만 화면에 추가
+                if (message.channel === channelNum) {
+                    setMessages(prev => [...prev, message]);
+                }
             });
-            console.log("%c[WebSocket 연결 성공!]", "color: blue; font-weight: bold");
         };
 
-        client.onDisconnect = () => {
-            console.log("%c[WebSocket 연결 종료]", "color: orange; font-weight: bold");
-        };
-
-        client.onStompError = (frame) => {
-            console.error("[WebSocket 연결 에러]", frame);
-        };
-
-        // 3. 클라이언트 활성화 (실제로 연결 시작)
         client.activate();
         stompClient.current = client;
 
-        // 4. 과거 메시지 조회 (REST API로 오늘 날짜의 메시지 가져오기)
-        fetch(`http://localhost:8089/api/chat/${channel}/${getToday()}`)
+        // 2. 채널별 전체 메시지 조회 (REST)
+        fetch(`http://localhost:8089/api/chat/${projectId}/${channelNum}/all`)
             .then(res => res.json())
             .then(data => setMessages(data));
 
-        // 5. 컴포넌트가 사라질 때(언마운트) WebSocket 연결 해제
         return () => {
             client.deactivate();
         };
-    }, [channel]);
+
+
+
+    }, [projectId, channelNum]);
+
 
     // 메시지 전송 함수
     const handleSend = () => {
         if (!inputValue.trim() || !stompClient.current) return;
         const newMsg = {
-            date: getToday(),
+            date: new Date().toISOString(),
             user: '박종범',
             color: 'purple',
             text: inputValue,
-            channel: channel
+            channel: channelNum// 반드시 현재 채널 ID //channel: channelNum 이런식으로 channelNum
         };
         stompClient.current.publish({
-            destination: `/app/chat/${channel}`,
+            destination: `/app/chat/${projectId}`, //나중에 destination: `/app/chat/${projectId}`, 이런식으로 넘어와야함
             body: JSON.stringify(newMsg)
         });
         setInputValue('');
@@ -121,15 +122,29 @@ function ChattingView() {
         }
     };
 
-    // 날짜별로 메시지 묶기
-    const groupByDate = messages.reduce((acc, cur) => {
-        acc[cur.date] = acc[cur.date] ? [...acc[cur.date], cur] : [cur];
+    // 날짜별로 그룹핑
+    const groupByDate = messages.reduce((acc, msg) => {
+        // 날짜만 추출 ('2025-06-05T16:20:00' → '2025-06-05')
+        const date = msg.date ? msg.date.slice(0, 10) : '';
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(msg);
         return acc;
     }, {});
 
     // 오늘 날짜를 'YYYY-MM-DD' 형식으로 반환
     function getToday() {
         return new Date().toISOString().slice(0, 10);
+    }
+
+    // 날짜 라벨 포맷 함수 예시
+    function formatDateLabel(dateStr) {
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        if (dateStr === today) return "오늘";
+        if (dateStr === yesterday) return "어제";
+        // 원하는 형식으로 변환 (예: '6월 5일 목요일')
+        const dateObj = new Date(dateStr);
+        return dateObj.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "long" });
     }
 
     return (
@@ -140,28 +155,25 @@ function ChattingView() {
                 <div className="channel-desc">#Channel's start point.</div>
             </div>
             {/* 날짜별로 메시지 구분해서 렌더링 */}
-            {Object.entries(groupByDate).map(([date, msgs]) => (
-                <div key={date}>
-                    <div className="chat-date-divider">{date}</div>
-                    {msgs.map((msg, idx) => (
-                        <div className="chat-message-row" key={idx}>
-                            <div className={`chat-avatar avatar-${msg.color}`}></div>
-                            <div className="chat-message-bubble">
-                                <div className="chat-message-user">{msg.user}</div>
-                                <div className="chat-message-text">
-                                    {msg.imageUrl ? (
-                                        <img src={msg.imageUrl} alt="chat-img" style={{ maxWidth: '200px' }} />
-                                    ) : (
-                                        msg.text.split('\n').map((line, i) => (
-                                            <span key={i}>{line}<br /></span>
-                                        ))
-                                    )}
+            <div>
+                {Object.entries(groupByDate).map(([date, msgs]) => (
+                    <div key={date}>
+                        {/* 날짜 구분선/라벨 */}
+                        <div className="chat-date-divider">{formatDateLabel(date)}</div>
+                        {/* 해당 날짜의 메시지들 */}
+                        {msgs.map((msg, idx) => (
+                            <div className="chat-message-row" key={idx}>
+                                {/* ...메시지 렌더링... */}
+                                <div className="chat-avatar avatar-{msg.color}"></div>
+                                <div className="chat-message-bubble">
+                                    <div className="chat-message-user">{msg.user}</div>
+                                    <div className="chat-message-text">{msg.text}</div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            ))}
+                        ))}
+                    </div>
+                ))}
+            </div>
 
             {/* 입력창 + 이미지 업로드 (+ 버튼) */}
             <div className="chat-input-row">

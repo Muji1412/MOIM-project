@@ -43,10 +43,16 @@ public class ChatService {
         return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
     }
 
-    // 3. 채널+날짜별 메시지 조회 (프론트에서 새로고침/입장 시 사용)
-    public List<ChatMessage> getChatsByChannelAndDate(String channel, String date) {
-        // Redis에서 해당 채널+날짜의 메시지 리스트 불러오기
-        List<Object> list = redisTemplate.opsForList().range("chat:" + channel + ":" + date, 0, -1);
+    // 저장
+    public void saveChat(String projectId, String channelId, ChatMessage message) {
+        String key = "chat:" + projectId + ":" + channelId;
+        redisTemplate.opsForList().rightPush(key, message);
+    }
+
+    // 조회
+    public List<ChatMessage> getChatsByChannel(String projectId, String channelId) {
+        String key = "chat:" + projectId + ":" + channelId;
+        List<Object> list = redisTemplate.opsForList().range(key, 0, -1);
         List<ChatMessage> result = new ArrayList<>();
         if (list != null) {
             for (Object obj : list) {
@@ -57,4 +63,6 @@ public class ChatService {
         }
         return result;
     }
+
+
 }
