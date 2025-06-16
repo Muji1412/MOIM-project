@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-// import './Login.css';
-import Login from "./Login";
+// import './login.css';
+import Login from "./login";
 
 
 const rootElement = document.getElementById('root');
