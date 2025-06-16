@@ -139,8 +139,29 @@ export default function Header() {
             {/* 상단 헤더 */}
             <header className={styles.header}>
                 <div className={styles.hr_box}>
-                    <img src="/img/friend_ic_white.png" alt="friend_tab"/>
-                    <p>Friend</p>
+                    {selectedServerId === "default" ? (
+                        <>
+                            <img src="/img/friend_ic_white.png" alt="friend_tab" />
+                            <p>Friend</p>
+                        </>
+                    ) : (
+                        <>
+                            {selectedServer && selectedServer.image ? (
+                                <img
+                                    src={selectedServer.image}
+                                    alt="server_icon"
+                                    className={styles.server_icon}
+                                />
+                            ) : (
+                                // 이미지가 없을 때: 원형 div로 대체
+                                <div className={styles.server_icon_placeholder}>
+                                    {/* 서버 이름의 첫 글자 등으로 표시해도 좋음 */}
+                                    {selectedServerName && selectedServerName[0]}
+                                </div>
+                            )}
+                            <p>{selectedServerName}</p>
+                        </>
+                    )}
                 </div>
             </header>
             {/* 서버/사이드 메뉴 영역 */}

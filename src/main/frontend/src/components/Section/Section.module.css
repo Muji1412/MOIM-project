@@ -1,6 +1,7 @@
 /*.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);float: left;}*/
 /* 표시 안되는 문제 디버깅중입니다 */
-.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);margin-left: 350px;}
+/* section부분 밀려 올라가는 현상 position:absolute과 margin-top로 현상 해결 */
+.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);margin-left: 350px;margin-top: 50px;position: absolute;}
 .section_cotainer {width: 100%;height: 100%;background: #fff;}
 
 /* section_title */
@@ -34,3 +35,21 @@
 .friend_profile_area > p {font-size: 17px;}
 .friend_setting_area {width: 60px;display: flex;align-items: center;gap: 30px;margin-right: 15px;}
 .friend_setting_area img {cursor: pointer;}
+
+/* ad_fr_area */
+/* addFriend btn 클릭 시 css 적용문제 개선 */
+.add_friend_area{width: 100%;height: 170px;border-bottom: 1px solid #e1e0e1;;}
+
+.add_friend_container{width: 70%;height: 100%; display: flex; flex-direction: column;justify-content: center;margin: 0;}
+
+.add_friend_title{display: flex; flex-direction: column; gap: 5px; height: 50%; width: 95%; margin: 0 auto;}
+.add_friend_main_title{width: 100%; font-size: 20px;}
+.add_friend_sub_title{font-size: 15px;}
+
+.add_friend_search_box{width: 95%;height: 40px;border: 1px solid #d1d1d5; background: #f3f3f4;margin: 0 auto;border-radius: 10px;}
+.add_friend_search_box:focus-within{border: 2px solid #c3ee41;}
+
+.add_friend_search_bar{width: 95%;height: 100%;margin: 0 auto;}
+.add_friend_search_bar>form{width: 100%;height: 100%; display: flex; align-items: center;justify-content: center;}
+.afs_bar{width: 100%; height: 100%; outline: none;border: none;background: #f3f3f4;}
+.afs_btn{outline: none; border: none;background: #c3ee41;color: #fff; width: 80px;height: 30px;border-radius: 5px; cursor: pointer;}
