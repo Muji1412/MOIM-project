@@ -20,10 +20,12 @@ export default defineConfig({
                 // ✅ 로그인/회원가입처럼 완전히 다른 페이지는 그대로 둡니다.
                 login: path.resolve(__dirname, 'src/user/login/Main.jsx'),
                 signup: path.resolve(__dirname, 'src/user/signup/Main.jsx'),
+                searchPassword: path.resolve(__dirname, 'src/user/searchPassword/Main.jsx'),
 
                 // 필요에 따른 기타 페이지들
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
+                myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
 
             },
             output: {
