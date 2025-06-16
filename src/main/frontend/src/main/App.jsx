@@ -1,7 +1,7 @@
 import React from 'react';
 import VideoCall from "../components/VideoCall";
 
-function App() {
+function Login() {
   return (
       <div className="App">
       <VideoCall/>

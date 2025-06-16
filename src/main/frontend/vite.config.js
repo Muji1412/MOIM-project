@@ -7,12 +7,15 @@ export default defineConfig({
     plugins: [
         react()
     ],
+
     // 💡 public 폴더의 위치를 명시적으로 지정합니다.
     publicDir: path.resolve(__dirname, 'public'),
 
     build: {
         outDir: path.resolve(__dirname, '../../main/resources/static/bundle'),
+
         emptyOutDir: true,
+        cssCodeSplit: true,  // 설정추가:CSS 분리 유지
         rollupOptions: {
             input: {
                 // 헤더
@@ -22,6 +25,11 @@ export default defineConfig({
                 main: path.resolve(__dirname,'src/main/index.jsx'),
                 popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
+                login: path.resolve(__dirname, 'src/user/login/Main.jsx'),
+                signup: path.resolve(__dirname, 'src/user/signup/Main.jsx')
+                // app: path.resolve(__dirname,'src/TestApp.jsx'),
+                // videoGrid: path.resolve(__dirname,'src/VideoGrid.jsx'),
+                // 필요한 만큼 entry 추가 가능
                 // login: path.resolve(__dirname, 'src/user/App.jsx')
                 home: path.resolve(__dirname, 'src/home/index.jsx'),
             },
@@ -33,7 +41,7 @@ export default defineConfig({
                         return 'css/[name][extname]';
                     }
                     return 'assets/[name][extname]';
-                }
+                },
             }
         },
     },
