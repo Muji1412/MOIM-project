@@ -15,9 +15,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .setCachePeriod(0); // 개발 중에는 캐시 비활성화
 
         // 서비스 워커 파일 특별 처리
-        registry.addResourceHandler("/bundle/sw.js")
-                .addResourceLocations("classpath:/static/bundle/")
-                .setCachePeriod(0)
-                .resourceChain(false); // 리소스 체인 비활성화
+//        registry.addResourceHandler("/bundle/sw.js")
+//                .addResourceLocations("classpath:/static/bundle/")
+//                .setCachePeriod(0)
+//                .resourceChain(false); // 리소스 체인 비활성화
     }
 }

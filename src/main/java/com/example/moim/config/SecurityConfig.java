@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -66,6 +65,7 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -76,14 +76,12 @@ public class SecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/ws").permitAll()
                         .anyRequest().permitAll()
-
                 );
-        //spring login form 기반 인증 메커니즘 비활성화
+
         http.formLogin(AbstractHttpConfigurer::disable);
 
-        //CustomLoginFilter를 UsernameAuthenticationFilter 앞에 추가
         http.addFilterBefore(new CustomLoginFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
-        //인증 실패 시 발생하는 Exception에 대한 핸들러
+
         http.exceptionHandling((exceptionhandler) -> exceptionhandler
                 .authenticationEntryPoint(authenticationEntryPoint));
 
