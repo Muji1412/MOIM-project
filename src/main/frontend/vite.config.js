@@ -1,5 +1,4 @@
 // vite.config.js
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -8,17 +7,18 @@ export default defineConfig({
     plugins: [
         react()
     ],
-
     build: {
-        outDir: '../resources/static/bundle',
+        outDir: path.resolve(__dirname, '../resources/static/bundle'), // 설정추가
         emptyOutDir: true,
+        cssCodeSplit: true,  // 설정추가:CSS 분리 유지
         rollupOptions: {
             input: {
                 main: path.resolve(__dirname,'src/main/index.jsx'),
                 //test: path.resolve(__dirname,'src/test/Test.jsx'),
                 popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
-                login: path.resolve(__dirname, 'src/user/App.jsx')
+                login: path.resolve(__dirname, 'src/user/login/Main.jsx'),
+                signup: path.resolve(__dirname, 'src/user/signup/Main.jsx')
 
                 // app: path.resolve(__dirname,'src/TestApp.jsx'),
                 // videoGrid: path.resolve(__dirname,'src/VideoGrid.jsx'),
@@ -32,7 +32,7 @@ export default defineConfig({
                         return 'css/[name][extname]'; // CSS 파일 경로 명시적 지정
                     }
                     return 'assets/[name][extname]';
-                }
+                },
             }
         },
     },

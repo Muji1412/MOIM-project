@@ -1,0 +1,123 @@
+/* 로그인 페이지 */
+
+/* 1. 전체 배경 -  중앙 정렬 */
+.login-background {
+  min-height: 100vh;
+  background-image: url('/img/loginBg.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 2. 로그인 박스 - 그림자, 패딩, 둥근 모서리 */
+.login-container {
+  background: #23272a;
+  padding: 40px 32px;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  width: 340px;
+  text-align: center;
+}
+
+/* 3. 로고 이미지 - 위쪽 마진 */
+.login-logo {
+  /*width: px;*/
+  margin-bottom: 18px;
+}
+
+/* 4. 입력 그룹 - 입력창과 라벨 정렬 */
+.login-input-group {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+/* 5. 라벨 스타일 (필수 별과 수평정렬) */
+.login-input-group label {
+  font-size: 15px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+/* 6. 필수 별 표시 - 빨간색, 라벨 옆 */
+.required {
+  color: #ee2349;
+  margin-left: 3px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+/* 7. 입력창 스타일 */
+.login-input {
+  width: 100%;
+  border: 1px solid #3f4147;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 15px;
+  margin-top: 2px;
+  outline: none;
+  box-sizing: border-box;
+  background: #3f4147;   /* 입력창 배경색 */
+  transition: border-color 0.18s;
+}
+
+/* 8. 입력창 포커스 효과 */
+.login-input:focus {
+  border-color: #c3ee41;
+  box-shadow: 0 0 0 1.5px #478bfa22;
+}
+
+/* 비밀번호 찾기 링크 */
+.search-pw a {
+  color: #97b82d;
+  transition: color 0.18s;
+}
+
+/* 9. 로그인 버튼 */
+.login-btn {
+  width: 100%;
+  background: #97b82d;
+  color: #fff;
+  padding: 12px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(71,139,250,0.14);
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.login-error {
+  color: #ee2349;
+  margin-bottom: 12px;
+  font-size: 14px;
+  text-align: left;
+  min-height: 18px;
+}
+
+
+/* 10. 버튼 hover 효과 */
+/* .login-btn:hover {
+  background: #296dda;
+} */
+
+/* 11. 하단 회원가입 영역 */
+.login-bottom {
+  margin-top: 18px;
+  font-size: 14px;
+  color: white;
+}
+
+/* 12. 회원가입 링크 */
+.login-bottom a {
+  color: #97b82d;
+  /* text-decoration: underline; */
+  transition: color 0.18s;
+}
+
+
