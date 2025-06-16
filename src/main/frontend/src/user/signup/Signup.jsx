@@ -20,6 +20,7 @@ export default function Signup() {
     const userEmailRef = useRef(null);
     const userNickRef = useRef(null);
     const userPhoneRef = useRef(null);
+    const [showModal, setShowModal] = useState(false);
 
     // 아이디 중복 체크
     const checkUsername = useCallback(
@@ -153,7 +154,6 @@ export default function Signup() {
             if (res.status === 200) {
                 //alert("회원가입 성공!");
                 setShowModal(true);
-                // window.location.href("/user/login");
             } else {
                 alert(data.message || "오류로 인하여 가입에 실패하였습니다.");
             }
@@ -163,7 +163,7 @@ export default function Signup() {
     const handleCloseModal = () => {
         setShowModal(false);
         // 원하면 여기서 로그인 페이지로 이동 가능
-        window.location.href("/user/login");
+        window.location.href = "login.do";
     };
 
     return (
@@ -262,6 +262,7 @@ export default function Signup() {
         <button className="signup-btn" onClick={handleSignup}>
           Sign up
         </button>
+          <SignupSuccessModal isOpen={showModal} onClose={handleCloseModal} />
         </div>
     </div>
     )

@@ -62,6 +62,7 @@
   box-sizing: border-box;
   background: #3f4147;   /* 입력창 배경색 */
   transition: border-color 0.18s;
+  color: #fff;
 }
 
 /* 8. 입력창 포커스 효과 */

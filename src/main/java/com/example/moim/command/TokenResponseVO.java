@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class TokenResponseVO {
-    private String token;
+    private String accessToken;
     private String refreshToken;
 
-    public TokenResponseVO(String token, String refreshToken) {
-        this.token = token;
+    public TokenResponseVO(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }
 }
