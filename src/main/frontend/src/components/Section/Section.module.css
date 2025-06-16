@@ -1,4 +1,6 @@
-.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);float: left;}
+/*.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);float: left;}*/
+/* 표시 안되는 문제 디버깅중입니다 */
+.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);margin-left: 350px;}
 .section_cotainer {width: 100%;height: 100%;background: #fff;}
 
 /* section_title */

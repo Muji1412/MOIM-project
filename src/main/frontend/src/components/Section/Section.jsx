@@ -10,7 +10,7 @@ export default function Section() {
           <div className={styles.section_title_box}>
             <div className={styles.section_title_wrap}>
               <div className={styles.section_title_area}>
-                <img src="/img/friend_ic.png" alt="#" />
+                <img src="/bundle/img/friend_ic.png" alt="#" />
                 <p>Friend</p>
               </div>
               <button className={styles.add_friend_btn}>Add Friend</button>
