@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -57,10 +57,14 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true); // 자격 증명 허용
         configuration.setMaxAge(3600L);
 
+        // WebSocket 연결을 위한 추가 설정
+        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -69,15 +73,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws").permitAll()
                         .anyRequest().permitAll()
-
                 );
-        //spring login form 기반 인증 메커니즘 비활성화
-        http.formLogin((form) -> form.disable());
 
-        //CustomLoginFilter를 UsernameAuthenticationFilter 앞에 추가
+        http.formLogin(AbstractHttpConfigurer::disable);
+
         http.addFilterBefore(new CustomLoginFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
-        //인증 실패 시 발생하는 Exception에 대한 핸들러
+
         http.exceptionHandling((exceptionhandler) -> exceptionhandler
                 .authenticationEntryPoint(authenticationEntryPoint));
 
@@ -94,13 +98,10 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+}
+
 //    @Bean
 //    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager,
 //                                                  JWTService jwtService) {
 //        return new CustomLoginFilter(authenticationManager, jwtService);
 //    }
-
-
-
-
-}

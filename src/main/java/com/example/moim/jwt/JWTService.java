@@ -5,6 +5,7 @@ import com.example.moim.command.CustomUserInfoVO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ public class JWTService {
         claims.put("userEmail", vo.getUserEmail());
         claims.put("userNick", vo.getUserNick());
         claims.put("userLastLoggedDate", vo.getUserLastLoggedDate());
+        claims.put("tokenType", TokenType.ACCESS.name());
 
         ZonedDateTime now = ZonedDateTime.now();
         long expireTime = 10800000; //유효 3시간
@@ -59,6 +61,7 @@ public class JWTService {
         Claims claims = Jwts.claims();
         claims.put("userNo", vo.getUserNo());
         claims.put("username", vo.getUsername());
+        claims.put("tokenType", TokenType.REFRESH.name());
 
         ZonedDateTime now = ZonedDateTime.now();
         long expireTime = 604800000; //유효 7일
@@ -98,9 +101,15 @@ public class JWTService {
     * @param token
     * @return IsValidate
     */
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, TokenType expectedType) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            // 토큰에 명시된 타입 확인
+            String tokenType = claims.get("tokenType", String.class);
+            if (expectedType != null && !expectedType.name().equals(tokenType)) {
+                log.warn("Token type mismatch. Expected: {}, Found: {}", expectedType.name(), tokenType);
+                return false;
+            }
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid Token", e);
