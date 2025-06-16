@@ -5,21 +5,24 @@
     <title>[[${pageName}]]</title>
 
     <link rel="icon" th:href="@{/img/favicon.ico}"/>
-    <link th:href="@{'/bundle/css/' + ${pageName} + '.css'}" rel="stylesheet" onerror="this.remove()"/>
 
+    <link th:href="@{/bundle/css/header.css}" rel="stylesheet" />
+
+    <link th:href="@{'/bundle/css/' + ${pageName} + '.css'}" rel="stylesheet" onerror="this.remove()"/>
 </head>
 <body>
+<div id="header-root"></div>
+
 <div id="root"></div>
 
+<script type="module" th:src="@{/bundle/js/header.bundle.js}"></script>
 <script type="module" th:src="@{'/bundle/js/' + ${pageName} + '.bundle.js'}"></script>
 
 <script th:inline="javascript">
     window.addEventListener('load', () => {
         if ('serviceWorker' in navigator) {
-            // ✅ 아래 경로를 수정합니다.
-            navigator.serviceWorker.register('/sw.js') // '/bundle/sw.js' -> '/sw.js'
+            navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
-                    // 이제 범위(scope)가 최상위 경로로 찍히는 것을 확인 할 수 있습니다.
                     console.log('✅ Service Worker 등록 성공! 범위:', registration.scope);
                 })
                 .catch(error => {
