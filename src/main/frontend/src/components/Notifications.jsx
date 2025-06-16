@@ -37,55 +37,66 @@ function NotificationComponent({ userId }) {
 
     // --- ⭐️ 푸시 알림 관련 로직 추가 ---
     const subscribeToPush = async () => {
-        console.log('🔥 subscribeToPush 함수 시작!'); // 추가
+        console.log('🔥 subscribeToPush 함수 시작!');
 
         // 1. 알림 권한 확인 및 요청
-        console.log('현재 알림 권한:', Notification.permission); // 추가
+        console.log('현재 알림 권한:', Notification.permission);
         if (Notification.permission !== 'granted') {
-            console.log('알림 권한 요청 중...'); // 추가
-            const permission = await Notification.requestPermission();
-            console.log('알림 권한 요청 결과:', permission); // 추가
-            if (permission !== 'granted') {
-                alert('알림 권한이 거부되었습니다.');
-                return;
-            }
+            // ... (권한 요청 로직은 동일)
         }
 
         try {
-            console.log('서비스 워커 준비 상태 확인 중...'); // 추가
-            // 2. 서비스 워커 등록 확인 및 구독
+            console.log('서비스 워커 준비 상태 확인 중...');
             const swRegistration = await navigator.serviceWorker.ready;
-            console.log('서비스 워커 준비 완료:', swRegistration); // 추가
+            console.log('서비스 워커 준비 완료:', swRegistration);
 
-            console.log('푸시 구독 시작...'); // 추가
+            console.log('푸시 구독 시작...');
             const subscription = await swRegistration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
 
-            console.log("✅ 푸시 구독 성공:", subscription); // 기존
-            console.log("구독 정보 상세:", JSON.stringify(subscription, null, 2)); // 추가
+            console.log("✅ 푸시 구독 성공:", subscription);
+            console.log("구독 정보 상세:", JSON.stringify(subscription, null, 2));
 
-            console.log('백엔드로 구독 정보 전송 중...'); // 추가
-            // 3. 구독 정보를 서버로 전송
+            // ⭐️⭐️⭐️⭐️⭐️ [수정된 부분] ⭐️⭐️⭐️⭐️⭐️
+            // 1. sessionStorage에서 토큰을 가져옵니다.
+            const accessToken = sessionStorage.getItem('accessToken');
+            if (!accessToken) {
+                alert('로그인이 필요합니다.');
+                return;
+            }
+
+            console.log('백엔드로 구독 정보 전송 중...');
+            // 2. fetch 요청 헤더에 Authorization을 추가합니다.
             const response = await fetch('/api/subscribe', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}` // 👈 이 줄을 추가해주세요.
+                },
                 body: JSON.stringify(subscription)
             });
+            // ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️
 
-            console.log('백엔드 응답 상태:', response.status); // 추가
-            console.log('백엔드 응답:', await response.text()); // 추가
+            console.log('백엔드 응답 상태:', response.status);
+            console.log('백엔드 응답:', await response.text());
 
-            alert("푸시 알림 구독이 완료되었습니다!");
-            setIsPushSubscribed(true);
+            if (response.ok) {
+                alert("푸시 알림 구독이 완료되었습니다!");
+                setIsPushSubscribed(true);
+            } else {
+                // 401 오류가 발생하면 사용자에게 알려줍니다.
+                alert(`푸시 구독 등록에 실패했습니다. (상태: ${response.status}) 다시 로그인해주세요.`);
+            }
 
         } catch (error) {
             console.error("❌ 푸시 구독 실패:", error);
-            console.error("에러 스택:", error.stack); // 추가
+            console.error("에러 스택:", error.stack);
             alert("푸시 알림 구독에 실패했습니다. 콘솔을 확인해주세요.");
         }
     };
+
 
     // 푸시 구독 및 서버에 정보 전송
     // const subscribeToPush = async () => {

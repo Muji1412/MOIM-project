@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동으로 만들어줍니다.
@@ -31,16 +32,27 @@ public class PushNotificationService {
 
     // 구독 정보 저장 로직 (이하 동일)
     public void subscribe(PushSubscriptionDto subscriptionDto, Users user) {
-        // 엔드포인트가 중복되면 기존 것을 삭제하고 새로 저장합니다.
-        subscriptionRepository.findByEndpoint(subscriptionDto.endpoint()).ifPresent(subscriptionRepository::delete);
+        // ⭐️ [수정된 로직] ⭐️
+        // 1. endpoint로 기존 구독 정보를 조회합니다.
+        Optional<PushSubscription> existingSubscriptionOpt = subscriptionRepository.findByEndpoint(subscriptionDto.endpoint());
 
-        PushSubscription subscription = PushSubscription.builder()
-                .endpoint(subscriptionDto.endpoint())
-                .p256dh(subscriptionDto.keys().p256dh())
-                .auth(subscriptionDto.keys().auth())
-                .user(user) // ✅ 현재 로그인한 사용자 정보를 함께 저장합니다.
-                .build();
-        subscriptionRepository.save(subscription);
+        if (existingSubscriptionOpt.isPresent()) {
+            // 2. 구독 정보가 이미 존재하면, 기존 엔티티의 필드를 업데이트합니다.
+            PushSubscription existingSubscription = existingSubscriptionOpt.get();
+            existingSubscription.setP256dh(subscriptionDto.keys().p256dh());
+            existingSubscription.setAuth(subscriptionDto.keys().auth());
+            existingSubscription.setUser(user);
+            subscriptionRepository.save(existingSubscription); // JPA가 변경을 감지하고 UPDATE 쿼리를 실행합니다.
+        } else {
+            // 3. 구독 정보가 없으면, 새로 생성합니다.
+            PushSubscription newSubscription = PushSubscription.builder()
+                    .endpoint(subscriptionDto.endpoint())
+                    .p256dh(subscriptionDto.keys().p256dh())
+                    .auth(subscriptionDto.keys().auth())
+                    .user(user)
+                    .build();
+            subscriptionRepository.save(newSubscription); // INSERT 쿼리가 실행됩니다.
+        }
     }
 
     // 알림 보내기 로직 (이하 동일)
