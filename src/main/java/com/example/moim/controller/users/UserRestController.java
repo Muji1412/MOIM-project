@@ -93,7 +93,7 @@ public class UserRestController {
     public ResponseEntity<?> refresh(@RequestBody TokenResponseVO tokenResponseVO) {
         String refreshToken = tokenResponseVO.getRefreshToken();
         TokenResponseVO vo = userService.refresh(refreshToken);
-        if(vo.getToken() == null) {
+        if(vo.getAccessToken() == null) {
             return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("재로그인하세요");
         }
 
