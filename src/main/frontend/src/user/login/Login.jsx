@@ -25,9 +25,9 @@ export default function Login() {
         // 실패: 에러 메시지 추출
         const data = await res.json();
         if (res.status === 401) {
-          setResult(data.error || "아이디 혹은 비밀번호가 일치하지 않습니다");
+          setResult("ID or Password doesn't match");
         } else if (res.status === 404) {
-          setResult(data.error || "탈퇴한 사용자입니다");
+          setResult(data.error || "This account has been deactivated.");
         } else {
           setResult("알 수 없는 오류가 발생했습니다");
         }
@@ -86,18 +86,18 @@ export default function Login() {
             onChange={e => setPw(e.target.value)}
           />
         </div>
+        {result && <div className="login-error">{result}</div>}
         {/* 비밀번호 찾기 */}
         <div className="search-password">
-          <a href="/user/searchpw" className="searchPwBtn">Did you forget your password?</a>
+          <a href="searchpassword.do" className="searchPwBtn">Did you forget your password?</a>
         </div>
         {/* 44. 로그인 버튼 */}
-        {result && <div className="login-error">{result}</div>}
         <button className="login-btn" onClick={handleLogin}>
           Sign in
         </button>
         {/* 47. 하단 회원가입 링크 */}
         <div className="login-bottom">
-          Do you need an account? <a href="/user/signup" className="signupBtn">Sign up</a>
+          Do you need an account? <a href="signup.do" className="signupBtn">Sign up</a>
         </div>
       </div>
     </div>

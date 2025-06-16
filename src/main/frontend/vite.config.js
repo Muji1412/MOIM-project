@@ -32,6 +32,8 @@ export default defineConfig({
                 // 필요한 만큼 entry 추가 가능
                 // login: path.resolve(__dirname, 'src/user/App.jsx')
                 home: path.resolve(__dirname, 'src/home/index.jsx'),
+                searchPassword: path.resolve(__dirname, 'src/user/searchPassword/Main.jsx'),
+                myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
             },
             output: {
                 entryFileNames: 'js/[name].bundle.js',

@@ -76,6 +76,8 @@ public class UserServiceImpl implements UserService {
         if(user.isEmpty()) {
             throw new IllegalArgumentException("아이디가 없습니다.");
         } else if (!passwordEncoder.matches(password, user.get().getPassword())) {
+            log.info("내가 입력한거 "+passwordEncoder.encode(password));
+            log.info("DB에 있던거 "+user.get().getPassword());
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         } else if (user.get().isUserIsDeleted()) {
             throw new EntityNotFoundException("탈퇴한 유저입니다.");
@@ -87,8 +89,6 @@ public class UserServiceImpl implements UserService {
         CustomUserInfoVO vo = new CustomUserInfoVO(
                                     user.get().getUserNo(),
                                     user.get().getUsername(),
-                                    user.get().getUserEmail(),
-                                    user.get().getUserNick(),
                                     null,
                                     user.get().getUserLastLoggedDate()
         );
@@ -129,8 +129,6 @@ public class UserServiceImpl implements UserService {
         CustomUserInfoVO userInfoVO = new CustomUserInfoVO(
                 user.getUserNo(),
                 user.getUsername(),
-                user.getUserEmail(),
-                user.getUserNick(),
                 null,
                 user.getUserLastLoggedDate()
         );
@@ -220,6 +218,8 @@ public class UserServiceImpl implements UserService {
         Users user = usersRepository.findByUserEmail(email).filter(u -> !u.isUserIsDeleted()).orElseThrow(
                 () -> new EntityNotFoundException("해당 사용자가 없습니다."));
         user.setPassword(encodedPw);
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        user.setPasswordToken(now);
         usersRepository.save(user);
     }
 
