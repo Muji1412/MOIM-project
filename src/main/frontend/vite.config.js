@@ -26,7 +26,7 @@ export default defineConfig({
                 popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 login: path.resolve(__dirname, 'src/user/login/Main.jsx'),
-                signup: path.resolve(__dirname, 'src/user/signup/Main.jsx')
+                signup: path.resolve(__dirname, 'src/user/signup/Main.jsx'),
                 // app: path.resolve(__dirname,'src/TestApp.jsx'),
                 // videoGrid: path.resolve(__dirname,'src/VideoGrid.jsx'),
                 // 필요한 만큼 entry 추가 가능
