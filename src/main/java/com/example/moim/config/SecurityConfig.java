@@ -75,21 +75,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
                         .anyRequest().permitAll()
-                        // 인증 없이 접근 가능한 경로들
-//                        .requestMatchers(
-//                                "/api/user/login",
-//                                "login.do",
-//                                "/api/user/signup",
-//                                "signup.do",
-//                                "/api/user/searchPw",
-//                                "/api/mail/searchPw",
-//                                "/bundle/**",           // 정적 리소스 (React 빌드 파일 등)
-//                                "/css/**", "/js/**",    // 기타 정적 리소스
-//                                "/img/**"
-//                        ).permitAll()
-//
-//                        // 나머지는 인증 필요
-//                        .anyRequest().authenticated()
                 );
 
         http.formLogin(AbstractHttpConfigurer::disable);
