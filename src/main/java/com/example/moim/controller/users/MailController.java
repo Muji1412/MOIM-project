@@ -41,15 +41,15 @@ public class MailController {
                 userService.updatePw(tmpPw,  tmpPwDTO.userEmail());
                 //메일 전송
                 MailDTO mailDTO = mailService.createMail(tmpPw, tmpPwDTO.userEmail());
-                System.out.println("record가 문제? "+mailDTO.toString());
+                //System.out.println("record가 문제? "+mailDTO.toString());
                 mailService.sendMail(mailDTO);
             } else { // false인 경우 아이디와 이메일은 맞으나 임시비밀번호 재발급 1시간 지나지 않음
-                return ResponseEntity.badRequest().body("임시 비밀번호는 1시간 당 한 번만 발급 가능합니다.");
+                return ResponseEntity.badRequest().body(Map.of("error", "Temporary passwords can only be issued once every hour."));
             }
-            return ResponseEntity.ok("임시 비밀번호가 발급되었습니다.");
+            return ResponseEntity.ok(Map.of("msg", "Temporary password has been issued and sent to your email"));
         } catch (EntityNotFoundException e) {
             //아이디와 이메일을 맞지 않게 반환한 경우 exception 발생
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "Please check ID and Email again"));
         }
     }
 }

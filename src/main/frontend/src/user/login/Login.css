@@ -101,6 +101,13 @@
   min-height: 18px;
 }
 
+.search-password {
+  color: #8aa82b;
+  font-size: 14px;
+  text-align: left;
+  min-height: 18px;
+}
+
 
 /* 10. 버튼 hover 효과 */
 /* .login-btn:hover {
@@ -119,6 +126,12 @@
   color: #97b82d;
   /* text-decoration: underline; */
   transition: color 0.18s;
+}
+
+/*13. 비밀번호 찾기 버튼*/
+.searchPwBtn {
+  text-decoration: none;
+  color: #8aa82b;
 }
 
 
