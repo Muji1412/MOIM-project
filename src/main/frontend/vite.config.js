@@ -15,6 +15,10 @@ export default defineConfig({
         emptyOutDir: true,
         rollupOptions: {
             input: {
+                // 헤더
+                header: path.resolve(__dirname, 'src/Header.jsx'),
+
+                // 페이지 진입점들
                 main: path.resolve(__dirname,'src/main/index.jsx'),
                 popupTest: path.resolve(__dirname,'src/popupTest/Main.jsx'),
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),

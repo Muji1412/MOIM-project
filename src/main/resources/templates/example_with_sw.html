@@ -14,14 +14,12 @@
 <script type="module" th:src="@{'/bundle/js/' + ${pageName} + '.bundle.js'}"></script>
 
 <script th:inline="javascript">
-    // 페이지가 로드된 후 서비스 워커를 등록합니다.
     window.addEventListener('load', () => {
-        // 1. 브라우저가 서비스 워커를 지원하는지 확인
         if ('serviceWorker' in navigator) {
-            // 2. 서비스 워커 파일을 등록합니다.
-            // 현재 빌드 설정상 sw.js는 /bundle/sw.js 경로에 생성될 가능성이 높습니다.
-            navigator.serviceWorker.register('/bundle/sw.js')  // PWA 플러그인이 생성한 sw.js 등록
+            // ✅ 아래 경로를 수정합니다.
+            navigator.serviceWorker.register('/sw.js') // '/bundle/sw.js' -> '/sw.js'
                 .then(registration => {
+                    // 이제 범위(scope)가 최상위 경로로 찍히는 것을 확인 할 수 있습니다.
                     console.log('✅ Service Worker 등록 성공! 범위:', registration.scope);
                 })
                 .catch(error => {
