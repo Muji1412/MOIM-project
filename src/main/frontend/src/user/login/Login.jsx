@@ -21,6 +21,7 @@ export default function Login() {
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('refreshToken', data.refreshToken);
         //window.location.href = "/main.html";
+        window.location.href = "/popupTest.do";
       } else {
         // 실패: 에러 메시지 추출
         const data = await res.json();

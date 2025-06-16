@@ -36,3 +36,13 @@ Content-Type: application/json
   "title": "고태원",
   "body": "집갈때까지 100분남았습니다!"
 }
+
+### 5. 특정 유저 푸시알람 전송
+POST http://localhost:8089/api/send-user/test2
+Content-Type: application/json
+
+{
+  "title": "1",
+  "body": "테스트중"
+}
+
