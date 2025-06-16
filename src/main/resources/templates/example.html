@@ -3,19 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>[[${pageName}]]</title>
-
   <link rel="icon" th:href="@{/img/favicon.ico}"/>
-
-  <link th:href="@{/bundle/css/header.css}" rel="stylesheet" />
 
   <link th:href="@{'/bundle/css/' + ${pageName} + '.css'}" rel="stylesheet" onerror="this.remove()"/>
 </head>
 <body>
-<div id="header-root"></div>
 <div id="root"></div>
 
-<script type="module" th:src="@{/bundle/js/header.bundle.js}"></script>
 <script type="module" th:src="@{'/bundle/js/' + ${pageName} + '.bundle.js'}"></script>
-
 </body>
 </html>
