@@ -33,6 +33,9 @@
 //
 //    @PostMapping("/image")
 //    public String uploadImage(@RequestParam("file") MultipartFile file) {
+
+
+
 //        String imageUrl = chatService.uploadImageToGCS(file);
 //        return imageUrl;
 //    }

@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class GroupsInviteServiceImpl implements GroupsInviteService{
 
     private final GroupsInviteRepository groupsInviteRepository;
