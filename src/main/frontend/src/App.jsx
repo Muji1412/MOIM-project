@@ -6,6 +6,7 @@ import Section from './components/Section/Section'; // Section도 라우팅 대�
 import styles from './components/Default.module.css';
 import TestApp from "./popupTest/TestApp";
 import NotificationComponent from "./components/Notifications";
+import SectionContent from "./components/Section/SectionContent";
 
 // 서버 페이지 (예시)
 function ServerPage() {
@@ -31,6 +32,7 @@ export default function App() {
                     <Route path="/servers" element={<ServerPage />} />
                     <Route path="/popup" element={<TestApp />} />
                     <Route path="/main" element={<PopupMain />} />
+                    <Route path="/addfriend" element={<SectionContent />} />
                     {/*<Route path="/servers/:serverId" element={<ServerPage />} />*/}
                     {/* 기타 다른 페이지들 */}
                     {/* <Route path="/todos" element={<TodoPage />} /> */}
