@@ -1,5 +1,5 @@
 import React from 'react';
-import './SignupSuccessModal.css'; // 스타일 분리
+import './signupSuccessModal.css'; // 스타일 분리
 
 const SignupSuccessModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;

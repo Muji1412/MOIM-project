@@ -1,0 +1,200 @@
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import './MyAccountModifyModal.css';
+import debounce from "lodash/debounce";
+
+const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
+    const [username, setUsername] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const [newEmail, setNewEmail] = useState('');
+    const [userNick, setUserNick] = useState('');
+    const [newNick, setNewNick] = useState('');
+    const [userPhone, setUserPhone] = useState('');
+    const [userImg, setUserImg] = useState('');
+    const [userMsg, setUserMsg] = useState('');
+    const [emailCheck, setEmailCheck] = useState('');
+    const [phoneCheck, setPhoneCheck] = useState('');
+    const [nickCheck, setNickCheck] = useState('');
+    const userEmailRef = useRef(null);
+    const userNickRef = useRef(null);
+    const userPhoneRef = useRef(null);
+
+    useEffect(() => {
+        if (!userInfo) return;
+        setUsername(userInfo.username);
+        setUserEmail(userInfo.email);
+        setNewEmail(userInfo.email);
+        setUserNick(userInfo.nickname);
+        setNewNick(userInfo.nickname);
+        setUserPhone(userInfo.phone);
+        setUserImg(userInfo.img);
+        setUserMsg(userInfo.message);
+        console.log(userEmail, newEmail);
+    }, [userInfo]);
+
+    const handleSave = () => {
+        // 저장 요청 보내기
+        fetch("/api/user/myAccount/modifyPw", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({username, userEmail : newEmail, userNick : newNick, userPhone, userImg, userMsg})
+        })
+            .then(res => res.json())
+            .then(() => {
+
+                onClose();
+            });
+    };
+
+    //이메일 정규식
+    const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i;
+
+    // 이메일 중복 체크
+    const checkUserEmail = useCallback(
+        debounce(() => {
+            console.log("새로입력 : ", newEmail, " 기존이메일 : ",userEmail);
+            if(newEmail === userEmail) {
+                return;
+            }
+            if (!emailRegEx.test(userEmail)) {
+                setEmailCheck(true);
+                return;
+            }
+            if (!userEmail) {
+                setEmailCheck(null);
+                return;
+            }
+            fetch(`/api/user/emailCheck?userEmail=${encodeURIComponent(newEmail)}`)
+                .then(res => res.text())
+                .then(text => setEmailCheck(text === "true"))
+                .catch(() => setEmailCheck(null));
+        }, 500), [newEmail, userEmail]
+    );
+
+    //이메일 변경시 호출
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setNewEmail(value);
+        checkUserEmail();
+    }
+
+    // 닉네임 중복 체크
+    const checkUserNick = useCallback(
+        debounce(() => {
+            if(userNick === newNick) {
+                return;
+            }
+            if (!userNick) {
+                setNickCheck(null);
+                return;
+            }
+            fetch(`/api/user/nickCheck?userNick=${encodeURIComponent(newNick)}`)
+                .then(res => res.text())
+                .then(text => setNickCheck(text === "true"))
+                .catch(() => setNickCheck(null));
+        }, 500), [newNick, userNick]
+    );
+
+    //닉네임 변경시 동작
+    const handleNickCheck = (e) => {
+        const value = e.target.value;
+        setNewNick(value);
+        checkUserNick();
+    }
+
+    //전화번호 정규식
+    const checkPhonenumber =  /^01(?:0|1|[6-9])-(?:\d{3}|\d{4})-\d{4}$/
+
+    const checkPhonenumber2 = /^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/
+
+    //전화번호 유효성 검사
+    const handlePhone = useCallback(
+        debounce((userPhone) => {
+            if (!userPhone) {
+                setUserPhone(null);
+                return;
+            }
+            if (!checkPhonenumber.test(userPhone) && !checkPhonenumber2.test(userPhone)) {
+                //console.log('잘못 입력했을때 : ', userPhone)
+                setPhoneCheck(true);
+            } else {
+                //console.log('전화번호 : ', userPhone)
+                setPhoneCheck(false);
+            }
+        }, 500), []
+    );
+
+    const handleImgUpload = () => {
+        const [uploadImgUrl, setUploadImgUrl] = useState("");
+    }
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal">
+                {/* 제목 위 하트 아이콘 */}
+                <p className="modal-header-heart"><img src="/img/symbol_heart.png" alt="heart"/> </p>
+                {/* 창 제목 */}
+                <h2 className="modal-title">Modifying User Information</h2>
+                <div className="modal-inner-box">
+                    {/*이메일*/}
+                    <div className="modal-inner-label">
+                        Email <p className="modal-inner-star">*</p>
+                    </div>
+                    <input className="modal-inner-input" value={newEmail}
+                           onChange={e => setNewEmail(e.target.value)}
+                           ref={userEmailRef}
+                           onBlur={handleEmailChange}></input>
+                    {emailCheck === true && <span style={{ color: '#ee2349' }}>Email is not available</span>}
+                    {emailCheck === false && <span style={{ color: '#97b82d' }}>Available Email</span>}
+
+                    {/*닉네임*/}
+                    <div className="modal-inner-label">
+                        Nickname <p className="modal-inner-star">*</p>
+                    </div>
+                    <input className="modal-inner-input" value={newNick}
+                           ref={userNickRef}
+                           onChange={handleNickCheck}></input>
+                    {nickCheck === true && <span style={{ color: '#ee2349' }}>Nickname is not available</span>}
+                    {nickCheck === false && <span style={{ color: '#97b82d' }}>Available Nickname</span>}
+
+                    {/*전화번호*/}
+                    <div className="modal-inner-label">
+                        Phone <p className="modal-inner-star">*</p>
+                    </div>
+                    <input className="modal-inner-input" value={userPhone}
+                           ref={userPhoneRef}
+                           onChange={e => setUserPhone(e.target.value)}
+                           onBlur={(e) => handlePhone(e.target.value)}></input>
+                    {phoneCheck === true && <span style={{ color: '#ee2349' }}>Please write in 11 digits number</span>}
+                    {phoneCheck === false && <span style={{ color: '#97b82d' }}></span>}
+                    {/*상태메시지*/}
+                    <div className="modal-inner-label">
+                        Status Message <p className="modal-inner-star"></p>
+                    </div>
+                    <input className="modal-inner-input" value={userMsg}
+                           onChange={e => setUserMsg(e.target.value)}></input>
+                    {/*프로필 이미지*/}
+                    <div className="modal-inner-label">
+                        Profile Image <p className="modal-inner-star"></p>
+                    </div>
+                    <input  type="file" accept="/image/*"
+                            onChange={handleImgUpload}></input>
+                </div>
+                {/*수정 버튼*/}
+                <button className="modal-btn" onClick={handleSave}>
+                    Modify
+                </button>
+                {/*닫기 버튼*/}
+                <button className="modal-btn-close" onClick={onClose}>
+                    Close
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default MyAccountModifyModal;

@@ -1,21 +1,67 @@
 /* 사용자 정보 조회 페이지 */
 
-/*1. 헤더, 좌측메뉴 제외한 흰 부분*/
-.myAccount-background {
-    margin-top: 50px;
-    margin-left: 350px; /*헤더 제외*/
+.box{
+    overflow: hidden;
+}
 
+/* 좌측 회색 메뉴*/
+.menu {
+    background: #e1e0e1;
+    width: 200px;
+    height: 600px;
+    float: left;
+}
+
+/*메뉴 User Settings*/
+.menu-title {
+    width: 100%;
+    color: #6b7280;
+    font-size: 12px;
+    text-align: left;
+    margin: 10px 20px;
+    margin-top: 50px;
+}
+
+/*메뉴 My Account*/
+.menu-content{
+    width: 100%;
+    font-size: 16px;
+    text-align: left;
+    margin: 10px 20px;
+}
+
+.menu-logout{
+    width: 100%;
+    color: #ee2349;
+    font-size: 16px;
+    border-bottom: 1px solid #3f4147;
+    border-bottom: 1px solid #3f4147;
+    margin: 10px 20px;
+}
+
+.menu-logout > img{
+    float: right;
+    margin-right: 10px;
+}
+
+/* 헤더, 좌측메뉴 제외한 흰 부분*/
+.myAccount-background {
+    float: left;
+    margin-left: 100px;
 }
 
 /* 맨 위 헤드라인 부분 */
 .myAccount-headline {
     width: 60%;
+    min-width: 400px;
     margin-top: 50px;
     overflow: hidden;
     flex-direction: row;
     vertical-align: middle;
     align-items: center;
     justify-content: center;
+    border-bottom: #777777;
+
 }
 
 /* 제목 - my account */
@@ -44,6 +90,7 @@
 .myAccount-container {
     background: #23272a;
     width: 60%;
+    min-width: 400px;
     border-radius: 18px;
     padding: 40px 30px;
     text-align: center;
@@ -73,8 +120,8 @@
     color: #fff;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
-    margin-top: 10px;
+    font-size: 14px;
+    margin-top: 30px;
     margin-right: 50px;
     cursor: pointer;
     float: right;
