@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import './chattingView.css';
+import styles from './../components/Section/Section.module.css';
+import { useLocation } from "react-router-dom";
 
 function ChattingView() {
     // 채팅 메시지 목록을 저장할 state (화면에 표시되는 메시지들)
@@ -14,16 +16,37 @@ function ChattingView() {
     const fileInputRef = useRef(null);
     // 채널명 (방 이름) - 여기서는 예시로 'general' 사용
     const channel = "general";
-
-    //파라미터 변수넘기기..
-    const params = new URLSearchParams(window.location.search);
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
     const projectId = params.get("projectId");
     const channelNum = params.get("channelNum");
 
-    //console.log("projectId:", projectId);
-    //console.log("channelNum:", channelNum);
+    // 오늘 날짜를 'YYYY-MM-DD' 형식으로 반환
+    function getToday() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    // 날짜 라벨 포맷 함수 예시
+    function formatDateLabel(dateStr) {
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        if (dateStr === today) return "오늘";
+        if (dateStr === yesterday) return "어제";
+        // 원하는 형식으로 변환 (예: '6월 5일 목요일')
+        const dateObj = new Date(dateStr);
+        return dateObj.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "long" });
+    }
 
     useEffect(() => {
+        // 파라미터는 항상 location.search에서 추출
+        const params = new URLSearchParams(location.search);
+        const projectId = params.get("projectId");
+        const channelNum = params.get("channelNum");
+
+        console.log("채팅방 파라미터 변경:", projectId, channelNum);
+
+        setMessages([]); // 서버/채널이 바뀔 때마다 메시지 초기화
+
         // 1. WebSocket 연결 (프로젝트 단위)
         const client = new Client({
             webSocketFactory: () => new SockJS(`http://localhost:8089/ws`),
@@ -52,10 +75,7 @@ function ChattingView() {
         return () => {
             client.deactivate();
         };
-
-
-
-    }, [projectId, channelNum]);
+    }, [location]);
 
 
     // 메시지 전송 함수
@@ -148,6 +168,8 @@ function ChattingView() {
     }
 
     return (
+
+        <div className={styles.section_content}>
         <div className="channel-chat-wrap">
             {/* 채팅방 헤더 */}
             <div className="channel-header">
@@ -209,6 +231,7 @@ function ChattingView() {
                 />
 
             </div>
+        </div>
         </div>
             );
 }

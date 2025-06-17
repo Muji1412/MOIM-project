@@ -2,9 +2,11 @@ import {useRef, useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     // 기존 상태들
     const [servers, setServers] = useState([]);
@@ -34,6 +36,7 @@ export default function Header() {
 
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
+
         const fetchServers = async () => {
             try {
                 const response = await fetch('/api/groups');
@@ -120,8 +123,19 @@ export default function Header() {
         reader.readAsDataURL(file);
     };
 
+    //서버클릭시 /chat으로 넘어갈때 파라미터싣고 넘어가게..
+    // 서버(홈/일반) 클릭 핸들러
     const handleServerClick = (serverId) => {
         setSelectedServerId(serverId);
+        if (serverId === "default") {
+            navigate("/main");
+        } else {
+            const selectedServer = servers.find(s => s.id === serverId);
+            if (selectedServer) {
+                // 예시로 channelNum=1(일반채팅) 고정, 실제로는 서버의 채널 리스트에서 선택할 것
+                navigate(`/chat?projectId=${encodeURIComponent(selectedServer.name)}&channelNum=일반채팅`);
+            }
+        }
     };
 
     const openModal = () => setIsModalOpen(true);
