@@ -50,15 +50,15 @@ public class FriendshipController {
         }
     }
 
-//    @PostMapping("/accept")
-//    public ResponseEntity<?> acceptFriendship(@RequestBody FriendRequestDTO request) {
-//        try {
-//            friendshipService.acceptFriendRequest(request.getRequesterId(), request.getReceiverId());
-//            return ResponseEntity.ok().body("친구 요청을 수락했습니다!");
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
+    @PostMapping("/accept")
+    public ResponseEntity<?> acceptFriendship(@RequestBody UserIdDTO request) {
+        try {
+            friendshipService.acceptFriendRequest(request.getUserA(), request.getUserB());
+            return ResponseEntity.ok().body("친구 요청을 수락했습니다!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 //
 //    @PostMapping("/delete")
 //    public ResponseEntity<?> deleteFriendship(@RequestBody FriendRequestDTO request) {
