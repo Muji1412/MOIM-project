@@ -1,10 +1,7 @@
 package com.example.moim.service.user;
 
 
-import com.example.moim.command.LoginDTO;
-import com.example.moim.command.PWChangeDTO;
-import com.example.moim.command.TokenResponseVO;
-import com.example.moim.command.UserVO;
+import com.example.moim.command.*;
 import com.example.moim.entity.Users;
 
 public interface UserService {
@@ -18,5 +15,5 @@ public interface UserService {
     public void updatePw(String tmpPw, String email);
     public boolean updatePwToken(String username, String email);
     public boolean deleteAccount(String password);
-
+    public MyAccountDTO getMyAccount(long userNo);
 }

@@ -9,31 +9,45 @@
 
 /* 맨 위 헤드라인 부분 */
 .myAccount-headline {
+    width: 60%;
     margin-top: 50px;
     overflow: hidden;
+    flex-direction: row;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 제목 - my account */
 .myAccount-headline > h2 {
+    display: inline-block;
     float: left;
     margin-left: 60px;
+    margin-bottom: 30px;
 }
 
 /* my account 우측 닫기 버튼*/
 .myAccount-headline > a {
+    border: #ee2349;
+    max-width: 40px;
+    height: 100%;
     text-decoration: none;
     float: right;
-    margin-left: 857px;
-    max-width: 100%;
+    margin-top: 20px;
+    flex-direction: row;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 회원정보 박스 컨테이너 */
 .myAccount-container {
     background: #23272a;
-    width: 845px;
+    width: 60%;
     border-radius: 18px;
     padding: 40px 30px;
     text-align: center;
+    margin-bottom: 15px;
 }
 
 /* 회원정보 박스 상단 프로필사진, modify 버튼 든 박스 */
@@ -50,7 +64,7 @@
     height: 100px;
     width: 100px;
     border-radius: 100%;
-
+    background: white;
 }
 
 /* modify 버튼*/
@@ -61,23 +75,31 @@
     border-radius: 8px;
     font-size: 16px;
     margin-top: 10px;
+    margin-right: 50px;
     cursor: pointer;
+    float: right;
 }
 
 /* 회원정보 표시되는 흰 박스*/
 .myAccount-container-under {
-    width: 100%;
+    width: 95%;
     border-radius: 18px;
+    background: white;
+    margin-top: 15px;
+    padding: 5px 10px;
 }
 
 .inner-title {
     font-size: 16px;
     font-weight: bold;
+    text-align: left;
+
 }
 
 .inner-content {
     font-size: 16px;
     margin-bottom: 15px;
+    text-align: left;
 }
 
 /* 비밀번호 바꾸기 및 회원탈퇴 박스 */
@@ -87,23 +109,24 @@
 
 /*비밀번호 바꾸기*/
 .pw-change-btn{
-    width: 100%;
+    width: 20%;
     background: #8aa82b;
     color: white;
-    padding: 12px 0;
+    padding: 6px 0;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     margin-top: 10px;
+    margin-bottom: 10px;
     cursor: pointer;
 }
 
 /*회원 탈퇴 버튼*/
 .account-delete-btn {
-    width: 100%;
+    width: 10%;
     background: #ee2349;
     color: white;
-    padding: 12px 0;
+    padding: 6px 0;
     border: none;
     border-radius: 8px;
     font-size: 16px;
