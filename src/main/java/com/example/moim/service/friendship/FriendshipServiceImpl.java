@@ -49,6 +49,18 @@ public class FriendshipServiceImpl implements FriendshipService{
         }
     }
 
+    @Override
+    public void rejectFriendRequest(Long accepterId, Long requesterId) {
+        FriendshipId friendshipId = new FriendshipId(accepterId, requesterId);
+        Friendship friendship = friendshipRepository.findById(friendshipId).isPresent() ? friendshipRepository.findById(friendshipId).get() : null;
+
+        if (friendship != null) {
+            friendshipRepository.delete(friendship);
+        } else {
+            throw new IllegalStateException("잘못된 요청입니다.");
+        }
+    }
+
     // 친구삭제 메서드
     @Override
     public void removeFriendship(Long accepterId, Long requesterId) {

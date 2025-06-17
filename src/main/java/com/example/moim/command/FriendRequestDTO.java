@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FriendRequestDTO {
 
-    private Long requesterId;
-    private Long receiverId;
+    private String requesterUsername;
+    private String receiverUsername;
 }

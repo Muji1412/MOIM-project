@@ -55,7 +55,7 @@ export default function Login() {
       {/* 21. 로그인 박스 컨테이너 */}
       <div className="login-container">
         {/* 22. 상단 로고 이미지 */}
-        <img src="/img/logo_login.png" alt="logo_login" className="login-logo" />
+        <img src="/bundle/img/logo_login.png" alt="logo_login" className="login-logo" />
         {/* 23. 로그인 타이틀 */}
         <h2></h2>
         {/* 24~33. 아이디 입력 */}

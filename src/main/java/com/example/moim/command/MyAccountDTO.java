@@ -5,5 +5,6 @@ public record MyAccountDTO(Long userNo
                             , String userEmail
                             , String userNick
                             , String userPhone
-                            , String userImg) {
+                            , String userImg
+                            , String userMsg) {
 }
