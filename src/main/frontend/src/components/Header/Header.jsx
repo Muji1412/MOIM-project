@@ -2,11 +2,15 @@ import {useRef, useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
     const location = useLocation();
+    const navigate = useNavigate();
+
     const [selectedMenuItem, setSelectedMenuItem] = useState("friend");
     const [selectedChannel, setSelectedChannel] = useState("general"); // 채널 선택 상태 추가
+
 
     // 기존 상태들
     const [servers, setServers] = useState([]);
@@ -36,6 +40,7 @@ export default function Header() {
 
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
+
         const fetchServers = async () => {
             try {
                 const response = await fetch('/api/groups');
@@ -120,16 +125,20 @@ export default function Header() {
         reader.readAsDataURL(file);
     };
 
-    // 서버 클릭 시 채널 초기화 추가
+
+    //서버클릭시 /chat으로 넘어갈때 파라미터싣고 넘어가게..
+    // 서버(홈/일반) 클릭 핸들러
     const handleServerClick = (serverId) => {
         setSelectedServerId(serverId);
-        // 서버 선택 시 메뉴 및 채널 초기화
         if (serverId === "default") {
-            setSelectedMenuItem("friend");
-            setSelectedChannel(null); // 홈에서는 채널 없음
+            navigate("/main");
         } else {
-            setSelectedMenuItem("calendar"); // 서버 선택 시 기본 메뉴
-            setSelectedChannel("general"); // 기본적으로 일반채팅 선택
+            const selectedServer = servers.find(s => s.id === serverId);
+            if (selectedServer) {
+                // 예시로 channelNum=1(일반채팅) 고정, 실제로는 서버의 채널 리스트에서 선택할 것
+                navigate(`/chat?projectId=${encodeURIComponent(selectedServer.name)}&channelNum=일반채팅`);
+            }
+
         }
     };
 
