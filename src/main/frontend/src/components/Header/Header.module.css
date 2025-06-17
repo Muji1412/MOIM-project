@@ -19,6 +19,7 @@
 /* 서버 선택 시 header에 해당 서버의 이름과 img가 보이도록 수정 */
 .hr_box img{max-width: 20px; max-height: 20px; width: 100%;height: 100%;border-radius: 5px;}
 .server_icon_placeholder{height: 50%;width: 25%; border: 1px solid #fff;display: flex; justify-content: center; align-items: center;border-radius: 5px;}
+.server_icon_placeholder p {width: 150px;}
 
 /* aside */
 .aside {

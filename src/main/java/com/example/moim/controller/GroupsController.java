@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 @RestController
@@ -29,8 +28,9 @@ public class GroupsController {
 
         // 이미지 처리 로직 (필요시 추가)
         if (image != null && !image.isEmpty()) {
-            // 이미지 저장 로직 구현
             System.out.println("이미지 파일: " + image.getOriginalFilename());
+            // 이미지 저장 후 URL 설정
+            // groups.setGroupImage(savedImageUrl);
         }
 
         Groups savedGroup = groupsService.createGroup(groups);
