@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './SearchPassword.css';
 import SearchPasswordSuccessModal from "./SearchPasswordSuccessModal";
-import SignupSuccessModal from "../signup/SignupSuccessModal";
+import SignupSuccessModal from "../signup/signupSuccessModal";
 
 export default function SearchPassword() {
     const [username, setUsername] = useState('');

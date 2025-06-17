@@ -1,0 +1,97 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #23272a;
+    border-radius: 12px;
+    padding: 32px;
+    width: 450px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.modal-header-heart {
+    max-width: 60px;
+    margin-left: 45%;
+}
+
+.modal-header-heart > img {
+    width: 100%;
+}
+
+.modal-title {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.modal-inner-box {
+
+}
+
+.modal-inner-label {
+    text-align: left;
+}
+
+.modal-inner-star {
+    display: inline-block;
+    color: #ee2349;
+}
+
+.span {
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+
+.modal-inner-input {
+    width: 100%;
+    border: 1px solid #3f4147;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    margin-top: 2px;
+    outline: none;
+    box-sizing: border-box;
+    background: #3f4147;   /* 입력창 배경색 */
+    transition: border-color 0.18s;
+    color: white;
+}
+
+.modal-btn {
+    background-color: #97b82d;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.modal-btn:hover {
+    background-color: #8aa82b;
+}
+
+.modal-btn-close {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-top: 20px;
+    cursor: pointer;
+    margin-left: 20px;
+}

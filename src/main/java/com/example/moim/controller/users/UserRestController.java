@@ -105,9 +105,9 @@ public class UserRestController {
 
     //사용자 정보 수정(비밀번호 제외)
     @PostMapping("/myAccount/modifyInfo")
-    public ResponseEntity<?> modifyInfo(@Valid @RequestBody UserVO userVO) {
+    public ResponseEntity<?> modifyInfo(@Valid @RequestBody MyAccountDTO myAccountDTO) {
         try {
-            Users savedUser = userService.modifyInfo(userVO);
+            Users savedUser = userService.modifyInfo(myAccountDTO);
             return ResponseEntity.ok(Map.of(    "msg", "정보가 수정되었습니다.",
                                             "userNick", savedUser.getUserNick()));
         } catch (IllegalArgumentException e) {

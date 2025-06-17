@@ -9,7 +9,7 @@ public interface UserService {
     public Users signUp(UserVO userVO);
     public TokenResponseVO login(LoginDTO loginDTO);
     public TokenResponseVO refresh(String refreshToken);
-    public Users modifyInfo(UserVO userVO);
+    public Users modifyInfo(MyAccountDTO myAccountDTO);
     public Users modifyPw(PWChangeDTO pwChangeDTO);
     public String getTmpPw();
     public void updatePw(String tmpPw, String email);
