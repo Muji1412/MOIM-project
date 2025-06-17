@@ -222,6 +222,7 @@
   align-items: center;
   flex-direction: column;
   justify-content: center;
+  cursor: pointer;
 }
 .menu_box .menu_item {
   width: 100%;
@@ -374,13 +375,21 @@
 
 .chat_box{display: flex; align-items: center; width: 100%;justify-content: flex-start; gap:10px;cursor: pointer;}
 .chat_box img{width: 10px;height: 5px;}
-.chat_box p{font-weight: 500;color: #777;letter-spacing: 1px;}
+.chat_box p{font-weight: 500;color: #777;letter-spacing: 1;}
+.chat_box:hover p{color: #d9d9d9;}
+.chat_box:hover img {
+  filter: opacity(0.5);}
 .channel_item{width: 100%; cursor: pointer;}
 
-.channel_item_box{width: 90%; display: flex; align-items: center; margin: 0 auto;  transition: max-height 0.3s;border-radius: 0 0 8px 8px;margin-bottom: 8px;}
-.channel_item_box img{width: 18px; margin-right: 6px;}
+.channel_item_box{width: 90%; height: 40px; display: flex; align-items: center; margin: 10px auto;  transition: max-height 0.3s;border-radius: 10px; margin-bottom: 8px;}
+.channel_item_box:hover{background: #d9d9d9;}
+.channel_item_box img{width: 18px; margin: 0 6px;}
 .channel_item_box span{color: #777; font-weight: 500;}
+.channel_item_box span:hover{color: #fff;}
+/* .channel_item_box span:hover{} */
 .acodion_box{width: 100%;margin-bottom: 10px;}
+
+.aco_con_title{width: 90%;height: 30px;display: flex;flex-direction: row;align-items: center;justify-content: space-between;margin: 0 auto;}
 
 .aco_con_title{width: 90%;height: 30px;display: flex;flex-direction: row;align-items: center;justify-content: space-between;margin: 0 auto;}
 

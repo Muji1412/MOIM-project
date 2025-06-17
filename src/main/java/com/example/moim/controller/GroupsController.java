@@ -80,9 +80,43 @@ public class GroupsController {
     }
 
     @PutMapping("/{groupNo}")
-    public ResponseEntity<Groups> updateGroup(@PathVariable Long groupNo, @RequestBody Groups groups) {
-        return ResponseEntity.ok(groupsService.updateGroup(groupNo, groups));
+    public ResponseEntity<Groups> updateGroup(
+            @PathVariable Long groupNo,
+            @RequestParam("name") String groupName,
+            @RequestParam(value = "image", required = false) MultipartFile image
+    ) {
+        System.out.println("서버 수정 요청 - ID: " + groupNo + ", 이름: " + groupName);
+
+        Groups existingGroup = groupsService.getGroup(groupNo);
+        existingGroup.setGroupName(groupName);
+
+        if (image != null && !image.isEmpty()) {
+            try {
+                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/bundle/img/servers/";
+                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                String filePath = uploadDir + fileName;
+
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+
+                File destinationFile = new File(filePath);
+                image.transferTo(destinationFile);
+
+                String webPath = "/bundle/img/servers/" + fileName;
+                existingGroup.setGroupImage(webPath);
+
+                System.out.println("이미지 수정 완료: " + webPath);
+            } catch (IOException e) {
+                System.err.println("이미지 저장 실패: " + e.getMessage());
+            }
+        }
+
+        Groups updatedGroup = groupsService.updateGroup(groupNo, existingGroup);
+        return ResponseEntity.ok(updatedGroup);
     }
+
 
     @DeleteMapping("/{groupNo}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long groupNo) {
