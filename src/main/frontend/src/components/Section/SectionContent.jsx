@@ -149,6 +149,34 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
     }
   };
 
+  const handleAcceptRequest = async (request) => {
+    const token = sessionStorage.getItem('accessToken');
+
+    try {
+      const response = await fetch(`/api/friendship/accept`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userA: request.id.userA,
+          userB: request.id.userB
+        })
+      });
+
+      if (response.ok) {
+        alert('수락되었습니다.');
+        fetchPendingRequests();
+      } else {
+        alert('요청을 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('친구 수락 중 오류:', error);
+      alert('요청 수락 중 오류가 발생했습니다.');
+    }
+  };
+
   if (showAddFriend) {
     return (
         <div className={styles.section_content}>
@@ -208,9 +236,15 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
                           <div className={styles.pending_actions}>
                             <button
                                 className={styles.cancel_btn}
+                                onClick={() => handleAcceptRequest(request)}
+                            >
+                              수락
+                            </button>
+                            <button
+                                className={styles.cancel_btn}
                                 onClick={() => handleCancelRequest(request)}
                             >
-                              취소
+                              거절
                             </button>
                           </div>
                         </div>
