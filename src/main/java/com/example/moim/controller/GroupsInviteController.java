@@ -49,6 +49,8 @@ public class GroupsInviteController {
         try {
             Users currentUser = usersRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
+//            Users testUser = usersRepository.findByUserNo(1L)
+//                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
 
             groupsInviteService.addUserToGroup(inviteCode, currentUser);
 
