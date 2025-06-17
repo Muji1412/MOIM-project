@@ -42,7 +42,7 @@ POST http://localhost:8089/api/send-user/test2
 Content-Type: application/json
 
 {
-  "title": "1",
-  "body": "테스트중"
+  "title": "집에 간다",
+  "body": "5분뒤에"
 }
 
