@@ -9,6 +9,8 @@ import Section from "../components/Section/Section";
 import NotificationComponent from "../components/Notifications";
 import FriendPage from "../components/Page/FriendPage";
 import TestApp from "../popupTest/TestApp";
+import ChattingView from "../chatting/ChattingView";
+
 
 // --- 페이지별 컴포넌트 정의 ---
 
@@ -50,7 +52,7 @@ export default function App() {
 
                  */}
 
-                <Header />
+                <Header/>
 
                 {/* URL 경로에 따라 이 부분만 교체됩니다 */}
                 <Routes>
@@ -58,12 +60,16 @@ export default function App() {
                     <Route path="/servers" element={<ServerPage />} />
                     <Route path="/popup" element={<TestApp />} />
                     <Route path="/main" element={<PopupMain />} />
+                    <Route path="/chat" element={<ChattingView />} />
+
                     {/* 예시: /servers/123 같은 동적 경로도 가능 */}
                     {/* <Route path="/servers/:serverId" element={<ServerPage />} /> */}
 
                     {/* 기본 경로는 친구 페이지로 설정 */}
                     <Route path="/" element={<FriendPage />} />
                 </Routes>
+
+
             </div>
         </BrowserRouter>
     );

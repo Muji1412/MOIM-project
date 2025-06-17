@@ -17,3 +17,4 @@ if (rootElement) {
         <PopupMain /> // 새로 만든 PopupMain 컴포넌트를 렌더링합니다.
     );
 }
+
