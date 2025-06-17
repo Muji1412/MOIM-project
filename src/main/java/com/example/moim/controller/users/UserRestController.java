@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -139,6 +140,29 @@ public class UserRestController {
         }
 
         return ResponseEntity.ok("탈퇴가 완료되었습니다.");
+    }
+
+    @GetMapping("/my-info")
+    public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        // userDetails가 null이면 인증되지 않은 사용자이므로, SecurityConfig에서 접근을 막아주는 것이 좋습니다.
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        // CustomUserDetails에서 직접 사용자 정보를 가져옵니다.
+        Long userNo = userDetails.getUserNo();
+        String username = userDetails.getUsername();
+
+        // 가져온 정보로 비즈니스 로직을 처리합니다.
+        // ...
+
+        // 클라이언트에 반환할 데이터를 만듭니다.
+        Map<String, Object> userInfo = Map.of(
+                "userNo", userNo,
+                "username", username
+        );
+
+        return ResponseEntity.ok(userInfo);
     }
 
 

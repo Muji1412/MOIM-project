@@ -169,7 +169,7 @@ export default function Signup() {
     return (
     <div className="signup-background">
       <div className="signup-container">
-        <img src="/img/logo_signup.png" alt="logo_signup" className="signup-logo" />
+        <img src="/bundle/img/logo_signup.png" alt="logo_signup" className="signup-logo" />
         {/* 아이디 */}
         <div className="signup-input-group">
           <label>

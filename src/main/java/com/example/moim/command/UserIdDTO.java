@@ -13,4 +13,6 @@ import lombok.Setter;
 public class UserIdDTO {
 
     private Long userId;
+    private Long userA;
+    private Long userB;
 }

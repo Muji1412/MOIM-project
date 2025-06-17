@@ -59,7 +59,7 @@ export default function SearchPassword() {
             {/* 21. 아이디, 이메일 입력 박스 컨테이너 */}
             <div className="search-container">
                 {/* 22. 상단 로고 이미지 */}
-                <img src="/img/logo_login.png" alt="logo_login" className="login-logo" />
+                <img src="/bundle/img/logo_login.png" alt="logo_login" className="login-logo" />
                 {/* 23. 비밀번호 찾기 타이틀 */}
                 <h2>	Forgot your password? <br /> You can reset it here.</h2>
                 {/* 아이디 입력 */}
