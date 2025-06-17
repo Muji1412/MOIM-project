@@ -69,6 +69,9 @@ dependencies {
     implementation 'org.bouncycastle:bcpkix-jdk18on:1.78.1'
     implementation 'org.json:json:20240303'
 
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
 
 }
 
