@@ -20,7 +20,8 @@ public class ViewController {
             "/home",
             "/servers",
             "/servers/{serverId}", // 동적 경로도 포함
-            "/popup"
+            "/popup",
+            "/chat"
     })
     public String mainAppEntry(Model model) {
         // 모든 경로는 'main' 번들을 사용하도록 pageName을 설정합니다.

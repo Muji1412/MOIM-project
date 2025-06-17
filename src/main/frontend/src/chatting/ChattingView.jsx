@@ -60,7 +60,7 @@ function ChattingView() {
 
     // 메시지 전송 함수
     const handleSend = () => {
-        if (!inputValue.trim() || !stompClient.current) return;
+        if (!inputValue.trim() || !stompClient.current || !stompClient.current.connected) return;
         const newMsg = {
             date: new Date().toISOString(),
             user: '박종범',
@@ -90,10 +90,10 @@ function ChattingView() {
             color: 'purple',
             text: '',
             imageUrl: imageUrl,
-            channel: channel
+            channel: channelNum
         };
         stompClient.current.publish({
-            destination: `/app/chat/${channel}`,
+            destination: `/app/chat/${projectId}`,
             body: JSON.stringify(newMsg)
         });
     };
@@ -163,14 +163,21 @@ function ChattingView() {
                         {/* 해당 날짜의 메시지들 */}
                         {msgs.map((msg, idx) => (
                             <div className="chat-message-row" key={idx}>
-                                {/* ...메시지 렌더링... */}
-                                <div className="chat-avatar avatar-{msg.color}"></div>
+                                <div className={`chat-avatar avatar-${msg.color}`}></div>
                                 <div className="chat-message-bubble">
                                     <div className="chat-message-user">{msg.user}</div>
-                                    <div className="chat-message-text">{msg.text}</div>
+                                    {/* 텍스트 메시지 */}
+                                    {msg.text && <div className="chat-message-text">{msg.text}</div>}
+                                    {/* 이미지 메시지 */}
+                                    {msg.imageUrl && (
+                                        <div className="chat-message-image">
+                                            <img src={msg.imageUrl} alt="uploaded" style={{ maxWidth: '200px', maxHeight: '200px' }} />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
+
                     </div>
                 ))}
             </div>
@@ -200,9 +207,10 @@ function ChattingView() {
                     onChange={e => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                 />
+
             </div>
         </div>
-    );
+            );
 }
 
 export default ChattingView;
