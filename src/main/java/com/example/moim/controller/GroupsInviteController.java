@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/groupsInvite")
 @RequiredArgsConstructor
-@Tag(name = "그룹 초대", description = "그룹 초대 관련 API")
+@Tag(name = "그룹 초대", description = "그룹 초대 관련 API입니다")
 public class GroupsInviteController {
 
     private final GroupsInviteService groupsInviteService;
