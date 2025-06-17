@@ -1,25 +1,177 @@
-import styles from "./Section.module.css";
+// src/main/frontend/src/components/Section/SectionContent.jsx
 
-export default function SectionContent({ showAddFriend }) {
+import styles from "./Section.module.css";
+import { useState, useEffect } from 'react';
+
+export default function SectionContent({ showAddFriend, onBackToList }) {
+  const [friendId, setFriendId] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  // 7. pending 친구 요청 리스트를 저장할 state 추가
+  const [pendingRequests, setPendingRequests] = useState([]);
+
+  useEffect(() => {
+    const fetchMyInfo = async () => {
+      const token = sessionStorage.getItem('accessToken');
+      if (!token) {
+        console.log('로그인이 필요합니다.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/user/my-info', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUser(data);
+          console.log('로그인한 사용자 정보:', data);
+        } else {
+          console.error('사용자 정보 로딩 실패');
+        }
+      } catch (error) {
+        console.error('사용자 정보 로딩 중 오류:', error);
+      }
+    };
+
+    fetchMyInfo();
+  }, []);
+
+  useEffect(() => {
+    if (showAddFriend && currentUser) {
+      fetchPendingRequests();
+    }
+  }, [showAddFriend, currentUser]);
+
+  const fetchPendingRequests = async () => {
+    const token = sessionStorage.getItem('accessToken');
+    if (!token || !currentUser) return;
+
+    try {
+      console.log('요청 보내는 userId:', currentUser.userNo); // userNo로 변경
+
+      const response = await fetch('/api/friendship/pending', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: currentUser.userNo // userId 대신 userNo 사용
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('받은 데이터:', data);
+        setPendingRequests(data);
+      } else {
+        const errorText = await response.text();
+        console.error('에러 응답:', errorText);
+      }
+    } catch (error) {
+      console.error('요청 중 오류:', error);
+    }
+  };
+
+  const handleRequestSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!currentUser) {
+      alert("사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    if (!friendId.trim()) {
+      alert("친구의 ID를 입력해주세요.");
+      return;
+    }
+
+    const requesterUsername = currentUser.username;
+    const receiverUsername = friendId.trim();
+    const token = sessionStorage.getItem('accessToken');
+
+    try {
+      const response = await fetch('/api/friendship/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ requesterUsername, receiverUsername })
+      });
+
+      const responseBody = await response.text();
+      if (response.ok) {
+        alert(responseBody);
+        // 9. 친구 요청 성공 후 pending 리스트 새로고침
+        fetchPendingRequests();
+      } else {
+        alert(`요청 실패: ${responseBody}`);
+      }
+    } catch (error) {
+      console.error('친구 요청 중 오류 발생:', error);
+      alert('친구 요청 중 오류가 발생했습니다.');
+    } finally {
+      setFriendId('');
+    }
+  };
+
+  // 10. pending 요청 취소하는 함수
+  const handleCancelRequest = async (requestId) => {
+    const token = sessionStorage.getItem('accessToken');
+
+    try {
+      const response = await fetch(`/api/friendship/cancel/${requestId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert('친구 요청이 취소되었습니다.');
+        fetchPendingRequests(); // 리스트 새로고침
+      } else {
+        alert('요청 취소에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('요청 취소 중 오류:', error);
+      alert('요청 취소 중 오류가 발생했습니다.');
+    }
+  };
+
   if (showAddFriend) {
-    // 친구 추가 화면 (예시)
     return (
         <div className={styles.section_content}>
+          {/* 친구 추가 영역 */}
           <div className={styles.add_friend_area}>
             <div className={styles.add_friend_container}>
               <div className={styles.add_friend_title}>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                  <p className={styles.add_friend_main_title}>Add Friends</p>
+                  {/* 3. 이 버튼을 누르면 부모로부터 받은 onBackToList 함수가 실행됩니다. */}
+                  <button onClick={onBackToList} className={styles.back_btn}>
+                    &lt; Back
+                  </button>
+                </div>
                 <p className={styles.add_friend_main_title}>Add Friends</p>
                 <p className={styles.add_friend_sub_title}>
-                  You can send a friend request by entering the other person's ID
+                  You can send a friend request by entering the other person's User ID (숫자)
                 </p>
               </div>
               <div className={styles.add_friend_search_box}>
                 <div className={styles.add_friend_search_bar}>
-                  <form action="#">
+                  <form onSubmit={handleRequestSubmit}>
                     <input
                         className={styles.afs_bar}
-                        placeholder="Search.."
+                        placeholder="Search by User ID (e.g. 2)"
                         type="text"
+                        value={friendId}
+                        onChange={(e) => setFriendId(e.target.value)}
                     />
                     <button className={styles.afs_btn} type="submit">
                       Send
@@ -29,11 +181,54 @@ export default function SectionContent({ showAddFriend }) {
               </div>
             </div>
           </div>
-          {/* <h2>친구 추가</h2>
-        <form>
-          <input type="text" placeholder="친구 이름 또는 이메일 입력" />
-          <button type="submit">추가</button>
-        </form> */}
+
+          {/* 11. Pending 요청 리스트 영역 추가 */}
+          <div className={styles.pending_requests_area}>
+            <div className={styles.pending_requests_container}>
+              <div className={styles.pending_requests_title}>
+                <p className={styles.pending_main_title}>Pending Requests</p>
+                <p className={styles.pending_sub_title}>
+                  친구 요청을 받은 목록입니다. ({pendingRequests.length}개)
+                </p>
+              </div>
+
+              <div className={styles.pending_list_container}>
+                {pendingRequests.length === 0 ? (
+                    <div className={styles.no_pending_message}>
+                      <p>받은 친구 요청이 없습니다.</p>
+                    </div>
+                ) : (
+                    pendingRequests.map((request) => (
+                        <div key={request.id} className={styles.pending_item}>
+                          <div className={styles.pending_user_info}>
+                            <div className={styles.pending_profile_area}>
+                              <img
+                                  src={request.receiverProfileImage || "/bundle/img/default_profile.png"}
+                                  alt="profile"
+                                  className={styles.pending_profile_img}
+                              />
+                              <div className={styles.pending_user_details}>
+                                <p className={styles.pending_username}>{request.receiverUsername}</p>
+                                <p className={styles.pending_date}>
+                                  {new Date(request.requestDate).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={styles.pending_actions}>
+                            <button
+                                className={styles.cancel_btn}
+                                onClick={() => handleCancelRequest(request.id)}
+                            >
+                              취소
+                            </button>
+                          </div>
+                        </div>
+                    ))
+                )}
+              </div>
+            </div>
+          </div>
         </div>
     );
   }
