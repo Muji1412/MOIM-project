@@ -33,7 +33,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
 
     const handleSave = () => {
         // 저장 요청 보내기
-        fetch("/api/user/myAccount/modifyPw", {
+        fetch("/api/user/myAccount/modifyInfo", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
@@ -181,8 +181,11 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                     <div className="modal-inner-label">
                         Profile Image <p className="modal-inner-star"></p>
                     </div>
-                    <input  type="file" accept="/image/*"
-                            onChange={handleImgUpload}></input>
+                    <input  id="fileUpload" type="file" accept="/image/*"
+                            style={{display:"none"}} onChange={handleImgUpload}></input>
+                    <label htmlFor="fileUpload" className="custom-file-label">
+                        <img src="/bundle/img/add_plus_ic.png" alt="addImage"/>
+                    </label>
                 </div>
                 {/*수정 버튼*/}
                 <button className="modal-btn" onClick={handleSave}>

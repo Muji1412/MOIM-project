@@ -3,6 +3,7 @@ import './MyAccount.css';
 import MyAccountModifyModal from "./MyAccountModifyModal";
 import ChangePasswordModal from "./ChangePassword/ChangePasswordModal";
 import AccountDeleteModal from "./AccountDelete/AccountDeleteModal";
+import LogoutModal from "./Logout/LogoutModal";
 
 export default function MyAccount ({isOpen, onClose}) {
     const [userInfo, setUserInfo] = useState({
@@ -100,7 +101,7 @@ export default function MyAccount ({isOpen, onClose}) {
                 <div className="menu-content"> My Account </div>
                 <div className="menu-logout"
                     onClick={handleLogout}>Log out
-                    <img src="/img/logout_ic_1.png" alt="logout_icon"/>
+                    <img src="/bundle/img/logout_ic_1.png" alt="logout_icon"/>
                 </div>
             </div>
             {/* 헤더 제외 회원정보 나오는 부분*/}
@@ -108,7 +109,7 @@ export default function MyAccount ({isOpen, onClose}) {
                 {/* 맨 위 헤드라인 부분 */}
                 <div className="myAccount-headline">
                     <h2> My Account </h2>
-                    <a><img src='/img/btn_close.png'  alt="close button" onClick={handleClose}/></a>
+                    <a><img src='/bundle/img/btn_close.png'  alt="close button" onClick={handleClose}/></a>
                 </div>
                 {/*회원정보 박스 컨테이너*/}
                 <div className="myAccount-container">
@@ -147,6 +148,8 @@ export default function MyAccount ({isOpen, onClose}) {
                 <div className="inner-title">Remove Account</div>
                 <button className="account-delete-btn" onClick={handleDeleteAccount}> Delete </button>
 
+                {/*로그아웃 모달창*/}
+                <LogoutModal isOpen={showLogoutModal} onClose={handleCloseLogout}/>
                 {/*회원정보 수정 모달창*/}
                 {userInfo && showModifyModal && (<MyAccountModifyModal isOpen={showModifyModal}
                                       userInfo={userInfo}
