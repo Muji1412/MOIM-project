@@ -10,11 +10,17 @@ export default function Header() {
     const [servers, setServers] = useState([]);
     const [selectedServerId, setSelectedServerId] = useState("default");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModifyModalOpen, setIsModifyModalOpen] = useState(false); // 수정 모달 상태 추가
     const [newServer, setNewServer] = useState({name: "", image: ""});
+    const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""}); // 수정할 서버 정보
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState("");
+    const [modifyImageFile, setModifyImageFile] = useState(null); // 수정용 이미지 파일
+    const [modifyImagePreview, setModifyImagePreview] = useState(""); // 수정용 이미지 미리보기
     const inputRef = useRef();
+    const modifyInputRef = useRef(); // 수정용 파일 input ref
     const serverNameInputRef = useRef();
+    const modifyServerNameInputRef = useRef(); // 수정용 서버명 input ref
 
     const [contextMenu, setContextMenu] = useState({
         visible: false,
@@ -101,6 +107,19 @@ export default function Header() {
         reader.readAsDataURL(file);
     };
 
+    // 수정용 파일 변경 핸들러 추가
+    const handleModifyFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setModifyImageFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setModifyImagePreview(reader.result);
+            setModifyServer((prev) => ({...prev, image: reader.result}));
+        };
+        reader.readAsDataURL(file);
+    };
+
     const handleServerClick = (serverId) => {
         setSelectedServerId(serverId);
     };
@@ -111,6 +130,28 @@ export default function Header() {
         setNewServer({name: "", image: ""});
         setImageFile(null);
         setImagePreview("");
+    };
+
+    // 수정 모달 관련 함수들 추가
+    const openModifyModal = (serverId) => {
+        const serverToModify = servers.find(s => s.id === serverId);
+        if (serverToModify) {
+            setModifyServer({
+                id: serverToModify.id,
+                name: serverToModify.name,
+                image: serverToModify.image
+            });
+            setModifyImagePreview(serverToModify.image);
+            setIsModifyModalOpen(true);
+        }
+        setContextMenu((prev) => ({...prev, visible: false}));
+    };
+
+    const closeModifyModal = () => {
+        setIsModifyModalOpen(false);
+        setModifyServer({id: "", name: "", image: ""});
+        setModifyImageFile(null);
+        setModifyImagePreview("");
     };
 
     // 서버 생성 - 백엔드 API 연동
@@ -159,6 +200,62 @@ export default function Header() {
         } catch (error) {
             console.error('서버 생성 중 오류:', error);
             alert('서버 생성 중 오류가 발생했습니다.' + error.message);
+        }
+    };
+
+    // 서버 정보 수정 함수 추가
+    const handleModifyServer = async (e) => {
+        e.preventDefault();
+        if (!modifyServer.name.trim()) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('name', modifyServer.name);
+            if (modifyImageFile) {
+                formData.append('image', modifyImageFile);
+            }
+
+            console.log('서버 수정 요청 시작:', modifyServer.name);
+
+            const response = await fetch(`/api/groups/${modifyServer.id}`, {
+                method: 'PUT',
+                body: formData,
+            });
+
+            console.log('수정 응답 상태:', response.status, response.statusText);
+
+            if (response.ok) {
+                const updatedGroup = await response.json();
+                console.log('백엔드 수정 응답:', updatedGroup);
+
+                const updatedServer = {
+                    id: updatedGroup.groupNo.toString(),
+                    name: updatedGroup.groupName,
+                    image: updatedGroup.groupImage || ""
+                };
+
+                // 서버 목록 업데이트
+                setServers((prev) =>
+                    prev.map(server =>
+                        server.id === modifyServer.id ? updatedServer : server
+                    )
+                );
+                closeModifyModal();
+                console.log('서버 수정 성공:', updatedServer);
+            } else {
+                let errorMessage = '서버 수정에 실패했습니다.';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    console.error('응답 파싱 실패:', e);
+                }
+                console.error('서버 수정 실패 - 상태:', response.status);
+                alert(`${errorMessage} (${response.status})`);
+            }
+        } catch (error) {
+            console.error('서버 수정 중 오류:', error);
+            alert('서버 수정 중 오류가 발생했습니다: ' + error.message);
         }
     };
 
@@ -304,7 +401,7 @@ export default function Header() {
                                     </div>
                                 ))}
 
-                                {/* 컨텍스트 메뉴 렌더링 추가 */}
+                                {/* 컨텍스트 메뉴 렌더링 - 수정 기능 추가 */}
                                 {contextMenu.visible && (
                                     <ul
                                         className={styles.server_context_menu}
@@ -315,8 +412,14 @@ export default function Header() {
                                         onClick={() => setContextMenu((prev) => ({...prev, visible: false}))}
                                     >
                                         <li className={styles.context_menu_list}>
-                                            <div className={styles.context_box}>
-                                                <span>서버 이름 변경</span>
+                                            <div
+                                                className={styles.context_box}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openModifyModal(contextMenu.serverId);
+                                                }}
+                                            >
+                                                <span>서버 정보 변경</span>
                                             </div>
                                         </li>
                                         <li className={styles.context_menu_list}>
@@ -584,7 +687,7 @@ export default function Header() {
                                     </div>
                                 ))}
 
-                                {/* 컨텍스트 메뉴 */}
+                                {/* 컨텍스트 메뉴 - 수정 기능 추가 */}
                                 {contextMenu.visible && (
                                     <ul
                                         className={styles.server_context_menu}
@@ -595,8 +698,14 @@ export default function Header() {
                                         onClick={() => setContextMenu((prev) => ({...prev, visible: false}))}
                                     >
                                         <li className={styles.context_menu_list}>
-                                            <div className={styles.context_box}>
-                                                <span>서버 이름 변경</span>
+                                            <div
+                                                className={styles.context_box}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openModifyModal(contextMenu.serverId);
+                                                }}
+                                            >
+                                                <span>서버 정보 변경</span>
                                             </div>
                                         </li>
                                         <li className={styles.context_menu_list}>
@@ -862,6 +971,7 @@ export default function Header() {
                 </div>
             </aside>
 
+            {/* 서버 생성 모달 */}
             {isModalOpen && (
                 <div
                     className={modalStyles.modalOverlay}
@@ -939,6 +1049,92 @@ export default function Header() {
                                     </button>
                                     <button type="submit" className={modalStyles.createBtn}>
                                         Create
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* 서버 수정 모달 추가 */}
+            {isModifyModalOpen && (
+                <div
+                    className={modalStyles.modalOverlay}
+                    onClick={closeModifyModal}
+                    tabIndex={-1}
+                    aria-modal="true"
+                    role="dialog"
+                >
+                    <div
+                        className={modalStyles.modal_box}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={modalStyles.modal_title_area}>
+                            <span className={modalStyles.modal_title}>Modify Server</span>
+                            <p>Update your server information!</p>
+                            <button
+                                className={modalStyles.close_btn}
+                                onClick={closeModifyModal}
+                                aria-label="Close"
+                                type="button"
+                            >
+                                <img src="/bundle/img/close_ic.png" alt="close_ic"/>
+                            </button>
+                        </div>
+                        <form onSubmit={handleModifyServer} className={modalStyles.modal_form}>
+                            <div className={modalStyles.modal_upload_area}>
+                                <label className={modalStyles.upload_label}>
+                                    <img
+                                        src={modifyImagePreview ? modifyImagePreview : "/bundle/img/upload_ic.png"}
+                                        alt="upload_icon"
+                                        className={modalStyles.upload_img}
+                                    />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={modifyInputRef}
+                                        style={{display: "none"}}
+                                        onChange={handleModifyFileChange}
+                                    />
+                                </label>
+                            </div>
+                            <div className={modalStyles.modal_input_area}>
+                                <label
+                                    className={modalStyles.modal_title_label}
+                                    htmlFor="modifyServerName"
+                                >
+                                    Server Name
+                                </label>
+                                <div className={modalStyles.modal_input_box}>
+                                    <input
+                                        id="modifyServerName"
+                                        type="text"
+                                        className={modalStyles.modal_input}
+                                        placeholder="Server Name"
+                                        value={modifyServer.name}
+                                        onChange={(e) =>
+                                            setModifyServer({...modifyServer, name: e.target.value})
+                                        }
+                                        required
+                                        ref={modifyServerNameInputRef}
+                                    />
+                                </div>
+                                <span className={modalStyles.guide}>
+                  Update your server information!
+                </span>
+                            </div>
+                            <div className={modalStyles.modal_btn_area}>
+                                <div className={modalStyles.buttonRow}>
+                                    <button
+                                        type="button"
+                                        className={modalStyles.backBtn}
+                                        onClick={closeModifyModal}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className={modalStyles.createBtn}>
+                                        Update
                                     </button>
                                 </div>
                             </div>

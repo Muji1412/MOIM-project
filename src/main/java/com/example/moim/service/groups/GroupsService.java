@@ -27,10 +27,10 @@ public class GroupsService {
         return groupsRepository.findAll();
     }
 
-    public Groups updateGroup(Long groupNo, Groups updated) {
-        Groups groups = getGroup(groupNo);
-        groups.setGroupName(updated.getGroupName());
-        groups.setGroupOwnerId(updated.getGroupOwnerId());
+    public Groups updateGroup(Long groupNo, Groups groups) {
+//        Groups groups = getGroup(groupNo);
+//        groups.setGroupName(updated.getGroupName());
+//        groups.setGroupOwnerId(updated.getGroupOwnerId());
         return groupsRepository.save(groups);
     }
 
