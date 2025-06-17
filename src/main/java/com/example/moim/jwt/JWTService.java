@@ -37,8 +37,6 @@ public class JWTService {
         Claims claims = Jwts.claims();
         claims.put("userNo", vo.getUserNo());
         claims.put("username", vo.getUsername());
-        claims.put("userEmail", vo.getUserEmail());
-        claims.put("userNick", vo.getUserNick());
         claims.put("userLastLoggedDate", vo.getUserLastLoggedDate());
         claims.put("tokenType", TokenType.ACCESS.name());
 

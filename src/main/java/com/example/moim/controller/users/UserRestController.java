@@ -77,6 +77,7 @@ public class UserRestController {
     public ResponseEntity<?> getMemberProfile(
             @Valid @RequestBody LoginDTO loginDTO
     ) {
+//        log.info(String.valueOf(loginDTO));
         try {
             TokenResponseVO tokenResponseVO = this.userService.login(loginDTO);
             return ResponseEntity.status(HttpStatus.OK).body(tokenResponseVO);
@@ -93,12 +94,14 @@ public class UserRestController {
     public ResponseEntity<?> refresh(@RequestBody TokenResponseVO tokenResponseVO) {
         String refreshToken = tokenResponseVO.getRefreshToken();
         TokenResponseVO vo = userService.refresh(refreshToken);
-        if(vo.getToken() == null) {
+        if(vo.getAccessToken() == null) {
             return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("재로그인하세요");
         }
 
         return ResponseEntity.ok(vo);
     }
+
+
 
     //사용자 정보 수정(비밀번호 제외)
     @PostMapping("/myAccount/modifyInfo")

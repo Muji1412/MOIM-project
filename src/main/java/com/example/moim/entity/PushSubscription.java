@@ -1,13 +1,11 @@
 package com.example.moim.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PushSubscription {
 
@@ -24,10 +22,18 @@ public class PushSubscription {
     @Column(nullable = false)
     private String auth;
 
+    // ✅ 사용자 정보를 저장하기 위해 추가합니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no") // Users 테이블의 기본 키(PK)와 연결
+    private Users user;
+
+
     @Builder
-    public PushSubscription(String endpoint, String p256dh, String auth) {
+    // ✅ 빌더에 user 파라미터를 추가합니다.
+    public PushSubscription(String endpoint, String p256dh, String auth, Users user) {
         this.endpoint = endpoint;
         this.p256dh = p256dh;
         this.auth = auth;
+        this.user = user; // ✅ user 필드 초기화
     }
 }

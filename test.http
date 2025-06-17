@@ -10,6 +10,15 @@ Content-Type: application/json
   "body": "HTTP Client로 보낸 푸시 알림입니다!"
 }
 
+### 2. 올바른 푸시 알림 발송 (body 포함)
+POST http://localhost:8089/api/send-all
+Content-Type: application/json
+
+{
+  "title": "고태원",
+  "body": "집갈때까지 100분남았습니다!"
+}
+
 ### 3. 다른 메시지로 테스트
 POST http://localhost:8089/api/send-all
 Content-Type: application/json
@@ -18,3 +27,31 @@ Content-Type: application/json
   "title": "긴급 알림!",
   "body": "바탕화면에 알림이 뜨는지 확인해주세요!"
 }
+
+### 4. 올바른 푸시 알림 발송 (body 포함)
+POST http://moim.o-r.kr/api/send-all
+Content-Type: application/json
+
+{
+  "title": "고태원",
+  "body": "집갈때까지 100분남았습니다!"
+}
+
+### 5. 특정 유저 푸시알람 전송
+POST http://localhost:8089/api/send-user/test2
+Content-Type: application/json
+
+{
+  "title": "집에 간다",
+  "body": "5분뒤에"
+}
+
+### 6. 특정 유저 푸시알람 전송 - 사이트
+POST http://moim.o-r.kr/api/send-user/test2
+Content-Type: application/json
+
+{
+  "title": "1",
+  "body": "테스트중"
+}
+

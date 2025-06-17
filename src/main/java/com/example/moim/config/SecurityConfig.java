@@ -22,7 +22,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -66,29 +65,61 @@ public class SecurityConfig {
         return source;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                // ✅ 이 부분을 수정합니다.
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/ws").permitAll()
+                        // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
                         .anyRequest().permitAll()
-
                 );
-        //spring login form 기반 인증 메커니즘 비활성화
+
         http.formLogin(AbstractHttpConfigurer::disable);
 
-        //CustomLoginFilter를 UsernameAuthenticationFilter 앞에 추가
+        // CustomLoginFilter는 토큰이 있을 때만 동작하므로 그대로 두어도 괜찮습니다.
         http.addFilterBefore(new CustomLoginFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
-        //인증 실패 시 발생하는 Exception에 대한 핸들러
+
         http.exceptionHandling((exceptionhandler) -> exceptionhandler
                 .authenticationEntryPoint(authenticationEntryPoint));
 
         return http.build();
     }
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(authorize -> authorize
+//                        // ✅ 이 부분을 추가/수정합니다.
+//                        .requestMatchers(
+//                                // 정적 리소스들은 누구나 접근 가능
+//                                "/bundle/**", "/img/**", "/css/**", "/js/**", "/favicon.ico",
+//                                "/*.js", "/*.css", "/sw.js",
+//                                // 로그인/회원가입 등 인증 없이 접근해야 하는 API
+//                                "/api/user/login", "/api/user/signUp",
+//                                "/api/user/usernameCheck", "/api/user/emailCheck", "/api/user/nickCheck",
+//                                "/api/mail/searchPw",
+//                                // 웹소켓 경로
+//                                "/ws/**",
+//                                // 메인 페이지 및 라우팅 경로
+//                                "/", "/home", "/main", "/servers/**", "/*.do"
+//                        ).permitAll()
+//                        // 그 외 모든 요청은 인증 필요
+//                        .anyRequest().authenticated()
+//                );
+//
+//        http.formLogin(AbstractHttpConfigurer::disable);
+//
+//        http.addFilterBefore(new CustomLoginFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
+//
+//        http.exceptionHandling((exceptionhandler) -> exceptionhandler
+//                .authenticationEntryPoint(authenticationEntryPoint));
+//
+//        return http.build();
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
