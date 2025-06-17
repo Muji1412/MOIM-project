@@ -47,12 +47,13 @@ public class GroupsInviteController {
                                         @AuthenticationPrincipal UserDetails userDetails) {
 
         try {
-            Users currentUser = usersRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
-//            Users testUser = usersRepository.findByUserNo(1L)
+//            Users currentUser = usersRepository.findByUsername(userDetails.getUsername())
 //                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
+            Users testUser = usersRepository.findByUserNo(1L)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
 
-            groupsInviteService.addUserToGroup(inviteCode, currentUser);
+//            groupsInviteService.addUserToGroup(inviteCode, currentUser);
+            groupsInviteService.addUserToGroup(inviteCode, testUser);
 
             return ResponseEntity.ok().body("그룹 참여가 완료됐습니다.");
 
