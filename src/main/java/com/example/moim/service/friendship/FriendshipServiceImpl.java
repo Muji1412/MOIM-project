@@ -3,7 +3,6 @@ package com.example.moim.service.friendship;
 import com.example.moim.entity.Friendship;
 import com.example.moim.repository.FriendshipRepository;
 import com.example.moim.util.FriendshipId;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class FriendshipImpl implements FriendshipService{
+public class FriendshipServiceImpl implements FriendshipService{
 
     private final FriendshipRepository friendshipRepository;
 
