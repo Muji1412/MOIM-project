@@ -1,6 +1,8 @@
 package com.example.moim.controller.users;
 
+import com.example.moim.command.MyAccountDTO;
 import com.example.moim.service.user.CustomUserDetails;
+import com.example.moim.service.user.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/user")
 public class UserController {
+
+    private final UserServiceImpl userService;
+
+    public UserController(UserServiceImpl userService) {
+        this.userService = userService;
+    }
 
     //회원가입 페이지 진입
     @GetMapping("/signup")
@@ -29,12 +37,13 @@ public class UserController {
 
     //사용자 정보 확인 페이지
     @GetMapping("/myAccount")
-    public ResponseEntity<?> getMyAccount(@RequestParam long userNo) {
+    public ResponseEntity<?> getMyAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        log.info("userDetails: " + userDetails);
-
-        return ResponseEntity.ok(userDetails);
+        //log.info("userDetails: " + userDetails);
+        long userNo = userDetails.getUserNo();
+        MyAccountDTO dto = userService.getMyAccount(userNo);
+        return ResponseEntity.ok(dto);
     }
 
     //@사용자 정보 수정 페이지

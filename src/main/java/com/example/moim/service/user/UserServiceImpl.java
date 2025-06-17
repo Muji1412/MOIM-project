@@ -263,6 +263,20 @@ public class UserServiceImpl implements UserService {
 
         return true;
     }
+
+    @Override
+    public MyAccountDTO getMyAccount(long userNo) {
+        Users user = usersRepository.findByUserNo(userNo)
+                .filter(u -> !u.isUserIsDeleted()).orElseThrow(() -> new EntityNotFoundException("유저가 없습니다."));
+
+        MyAccountDTO dto = new MyAccountDTO(user.getUserNo()
+                                            , user.getUsername()
+                                            , user.getUserEmail()
+                                            , user.getUserNick()
+                                            , user.getUserPhone()
+                                            , user.getUserImg());
+        return dto;
+    }
 }
 
 //토큰에서 사용자 아이디 가져옴. 이 아이디로 DB에서 refresh token을 확인함

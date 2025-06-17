@@ -7,6 +7,7 @@ import java.util.Collection;
 public interface UserDetails {
     String getUsername();
     String getPassword();
+    long getUserNo();
     Collection<? extends GrantedAuthority> getAuthorities();
     boolean isAccountNonExpired();
     boolean isAccountNonLocked();
