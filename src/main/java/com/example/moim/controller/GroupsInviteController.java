@@ -6,6 +6,7 @@ import com.example.moim.entity.Users;
 import com.example.moim.repository.GroupsRepository;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.GroupsInvite.GroupsInviteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/groupsInvite")
 @RequiredArgsConstructor
+@Tag(name = "그룹 초대", description = "그룹 초대 관련 API")
 public class GroupsInviteController {
 
     private final GroupsInviteService groupsInviteService;
