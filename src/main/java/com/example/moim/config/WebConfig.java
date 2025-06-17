@@ -19,5 +19,16 @@ public class WebConfig implements WebMvcConfigurer {
 //                .addResourceLocations("classpath:/static/bundle/")
 //                .setCachePeriod(0)
 //                .resourceChain(false); // 리소스 체인 비활성화
+
+        // 서버 이미지 업로드 디렉토리 매핑 추가
+        registry.addResourceHandler("/bundle/img/servers/**")
+                .addResourceLocations("classpath:/static/bundle/img/servers/")
+                .setCachePeriod(0); // 개발 중에는 캐시 비활성화
+
+        // 업로드된 파일을 위한 외부 디렉토리 매핑 (선택사항)
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/")
+                .setCachePeriod(0);
     }
+
 }
