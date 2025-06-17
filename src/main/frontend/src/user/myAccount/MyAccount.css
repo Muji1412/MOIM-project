@@ -7,36 +7,41 @@
 /* 좌측 회색 메뉴*/
 .menu {
     background: #e1e0e1;
-    width: 200px;
-    height: 600px;
+    width: 20%;
+    min-width: 220px;
+    height: 800px;
     float: left;
 }
 
 /*메뉴 User Settings*/
 .menu-title {
-    width: 100%;
+    width: 85%;
     color: #6b7280;
     font-size: 12px;
     text-align: left;
     margin: 10px 20px;
-    margin-top: 50px;
 }
 
 /*메뉴 My Account*/
 .menu-content{
-    width: 100%;
+    background: #cccccc;
+    width: 85%;
     font-size: 16px;
+    height: 28px;
     text-align: left;
     margin: 10px 20px;
+    border-radius: 5px;
 }
 
 .menu-logout{
-    width: 100%;
-    color: #ee2349;
+    width: 85%;
+    color: #A4232C;
     font-size: 16px;
-    border-bottom: 1px solid #3f4147;
-    border-bottom: 1px solid #3f4147;
+    border-bottom: 1px solid #a7a7a7;
+    border-top: 1px solid #a7a7a7;
+    padding: 6px 0;
     margin: 10px 20px;
+    cursor: pointer;
 }
 
 .menu-logout > img{
@@ -46,29 +51,29 @@
 
 /* 헤더, 좌측메뉴 제외한 흰 부분*/
 .myAccount-background {
+    width: 60%;
+    min-width: 500px;
     float: left;
-    margin-left: 100px;
+    margin-left: 50px;
 }
 
 /* 맨 위 헤드라인 부분 */
 .myAccount-headline {
     width: 60%;
     min-width: 400px;
-    margin-top: 50px;
     overflow: hidden;
     flex-direction: row;
     vertical-align: middle;
     align-items: center;
     justify-content: center;
     border-bottom: #777777;
-
+    padding: 10px 30px;
 }
 
 /* 제목 - my account */
 .myAccount-headline > h2 {
     display: inline-block;
     float: left;
-    margin-left: 60px;
     margin-bottom: 30px;
 }
 
@@ -84,6 +89,7 @@
     vertical-align: middle;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 /* 회원정보 박스 컨테이너 */
@@ -119,10 +125,11 @@
     background: #97b82d;
     color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
+    height: 20px;
     font-size: 14px;
     margin-top: 30px;
-    margin-right: 50px;
+    margin-right: 20px;
     cursor: pointer;
     float: right;
 }
@@ -156,7 +163,7 @@
 
 /*비밀번호 바꾸기*/
 .pw-change-btn{
-    width: 20%;
+    width: 30%;
     background: #8aa82b;
     color: white;
     padding: 6px 0;
@@ -170,7 +177,7 @@
 
 /*회원 탈퇴 버튼*/
 .account-delete-btn {
-    width: 10%;
+    width: 15%;
     background: #ee2349;
     color: white;
     padding: 6px 0;
