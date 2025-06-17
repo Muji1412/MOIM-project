@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Login.css';
+import './login.css';
 
 export default function Login() {
   const [id, setId] = useState('');
@@ -21,6 +21,7 @@ export default function Login() {
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('refreshToken', data.refreshToken);
         //window.location.href = "/main.html";
+        window.location.href = "/popupTest.do";
       } else {
         // 실패: 에러 메시지 추출
         const data = await res.json();
@@ -104,7 +105,7 @@ export default function Login() {
   );
 }
 
-// // frontend/login/Login.jsx
+// // frontend/login/login.jsx
 // import React, { useState } from 'react';
 
 // export default function Login() {

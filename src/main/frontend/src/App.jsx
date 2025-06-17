@@ -4,10 +4,17 @@ import Header from './components/Header/Header';
 import FriendPage from './components/Page/FriendPage';
 import Section from './components/Section/Section'; // Section도 라우팅 대상이 될 수 있습니다.
 import styles from './components/Default.module.css';
+import TestApp from "./popupTest/TestApp";
+import NotificationComponent from "./components/Notifications";
 
 // 서버 페이지 (예시)
 function ServerPage() {
-    return <Section />;
+    return <Section/>;
+}
+
+function PopupMain() {
+
+    return <NotificationComponent userId={"user1234"} />;
 }
 
 export default function App() {
@@ -21,7 +28,10 @@ export default function App() {
                 <Routes>
                     <Route path="/home" element={<FriendPage />} />
                     {/* 예시: /servers/123 같은 동적 경로도 가능합니다. */}
-                    <Route path="/servers/:serverId" element={<ServerPage />} />
+                    <Route path="/servers" element={<ServerPage />} />
+                    <Route path="/popup" element={<TestApp />} />
+                    <Route path="/main" element={<PopupMain />} />
+                    {/*<Route path="/servers/:serverId" element={<ServerPage />} />*/}
                     {/* 기타 다른 페이지들 */}
                     {/* <Route path="/todos" element={<TodoPage />} /> */}
 
