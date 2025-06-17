@@ -5,12 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 import java.sql.Timestamp;
 
-
 @Entity
 @Table(name = "groups")
 @Getter
 @Setter
 public class Groups {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GROUP_NO")
@@ -25,7 +25,7 @@ public class Groups {
     @Column(name = "GROUP_OWNER_ID", length = 20)
     private String groupOwnerId;
 
-    //이미지 필드 추가
+    // 이미지 필드 추가
     @Column(name = "GROUP_IMAGE")
     private String groupImage;
 }

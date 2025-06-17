@@ -1,10 +1,10 @@
 import {useRef, useState, useEffect} from "react";
-import {useLocation} from "react-router-dom"; // 추가
+import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
 
 export default function Header() {
-    const location = useLocation(); // 현재 경로 감지
+    const location = useLocation();
 
     // 기존 상태들
     const [servers, setServers] = useState([]);
@@ -33,7 +33,14 @@ export default function Header() {
                 const response = await fetch('/api/groups');
                 if (response.ok) {
                     const serverList = await response.json();
-                    setServers(serverList);
+                    // 백엔드 응답을 프론트엔드 형식으로 매핑
+                    const mappedServers = serverList.map(group => ({
+                        id: group.groupNo.toString(),
+                        name: group.groupName,
+                        image: group.groupImage || ""
+                    }));
+                    setServers(mappedServers);
+                    console.log('매핑된 서버 목록:', mappedServers);
                 } else {
                     console.error('서버 목록 불러오기 실패');
                 }
@@ -50,11 +57,11 @@ export default function Header() {
         switch (location.pathname) {
             case '/':
             case '/home':
-                return 'friend'; // 친구목록
+                return 'friend';
             case '/groups':
-                return 'group';  // 그룹메뉴 (서버)
+                return 'group';
             case '/settings':
-                return 'settings'; // 설정
+                return 'settings';
             default:
                 return 'friend';
         }
@@ -112,7 +119,6 @@ export default function Header() {
         if (!newServer.name.trim()) return;
 
         try {
-            // FormData로 이미지와 함께 전송
             const formData = new FormData();
             formData.append('name', newServer.name);
             if (imageFile) {
@@ -121,7 +127,6 @@ export default function Header() {
 
             console.log('서버 생성 요청 시작:', newServer.name);
 
-            // 백엔드 API 호출
             const response = await fetch('/api/groups', {
                 method: 'POST',
                 body: formData,
@@ -130,7 +135,13 @@ export default function Header() {
             console.log('응답 상태:', response.status, response.statusText);
 
             if (response.ok) {
-                const createdServer = await response.json();
+                const createdGroup = await response.json();
+                console.log('백엔드 응답:', createdGroup);
+                const createdServer = {
+                    id: createdGroup.groupNo.toString(),
+                    name: createdGroup.groupName,
+                    image: createdGroup.groupImage || ""
+                };
                 setServers((prev) => [...prev, createdServer]);
                 closeModal();
                 console.log('서버 생성 성공:', createdServer);
@@ -140,7 +151,6 @@ export default function Header() {
                     const errorData = await response.json();
                     errorMessage = errorData.message || errorMessage;
                 } catch (e) {
-                    // JSON 파싱 실패 시 기본 메시지 사용
                     console.error('응답 파싱 실패:', e);
                 }
                 console.error('서버 생성 실패 - 상태:', response.status);
@@ -148,7 +158,7 @@ export default function Header() {
             }
         } catch (error) {
             console.error('서버 생성 중 오류:', error);
-            alert('서버 생성 중 오류가 발생했습니다.');
+            alert('서버 생성 중 오류가 발생했습니다.' + error.message);
         }
     };
 
@@ -157,10 +167,30 @@ export default function Header() {
     const selectedServer = servers.find((s) => s.id === selectedServerId);
     const selectedServerName = selectedServer ? selectedServer.name : "";
 
-    // Header 내용 렌더링
+    // Header 내용 렌더링 (수정됨)
     const renderHeaderContent = () => {
         switch (asideType) {
             case 'friend':
+                // ✅ 서버가 선택되었을 때 헤더 변경
+                if (selectedServerId !== "default") {
+                    return (
+                        <>
+                            {selectedServer && selectedServer.image ? (
+                                <img
+                                    src={selectedServer.image}
+                                    alt="server_icon"
+                                    className={styles.server_icon}
+                                />
+                            ) : (
+                                <div className={styles.server_icon_placeholder}>
+                                    <span>{selectedServerName && selectedServerName[0]}</span>
+                                </div>
+                            )}
+                            <p>{selectedServerName}</p>
+                        </>
+                    );
+                }
+                // 기본 상태 (홈)
                 return (
                     <>
                         <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
@@ -215,18 +245,61 @@ export default function Header() {
             case 'friend':
                 return (
                     <>
-                        {/* 친구목록용 서버 리스트 (홈 버튼 + 서버 추가 버튼) */}
                         <div className={styles.server_list}>
                             <div className={styles.server_box}>
                                 <div
-                                    className={`${styles.list_item} ${styles.default_server} ${styles.add_server} ${styles.selected}`}>
-                                    <div className={`${styles.fill} ${styles.active_fill}`}></div>
-                                    <div className={`${styles.server_ic} ${styles.home_ic} ${styles.active_ic}`}>
-                                        <img src="/bundle/img/home_ic.png" alt="Home" className={styles.active_ic}/>
+                                    className={`${styles.list_item} ${styles.default_server} ${styles.add_server} ${selectedServerId === "default" ? styles.selected : ""}`}
+                                    onClick={() => handleServerClick("default")}
+                                    title="Home"
+                                >
+                                    <div className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
+                                    <div className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
+                                        <img src="/bundle/img/home_ic.png" alt="Home" className={selectedServerId === "default" ? styles.active_ic : ""}/>
                                     </div>
                                 </div>
 
-                                {/* 서버 추가 버튼 추가 */}
+                                {/* 생성된 서버들 */}
+                                {servers.map((server) => (
+                                    <div
+                                        key={server.id}
+                                        className={`${styles.list_item} ${selectedServerId === server.id ? styles.selected : ""}`}
+                                        onClick={() => handleServerClick(server.id)}
+                                        title={server.name}
+                                    >
+                                        <div
+                                            className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
+                                        <div
+                                            className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
+                                            style={{
+                                                background: !server.image
+                                                    ? selectedServerId === server.id ? "#c3ee41" : "#d9d9d9"
+                                                    : "transparent",
+                                                overflow: "hidden",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "#333",
+                                                fontWeight: "bold"
+                                            }}
+                                        >
+                                            {server.image ? (
+                                                <img
+                                                    src={server.image}
+                                                    alt={server.name}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        objectFit: "cover",
+                                                        display: "block",
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span>{server.name && server.name[0]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+
                                 <div
                                     className={`${styles.list_item} ${styles.add_server}`}
                                     onClick={openModal}
@@ -283,7 +356,6 @@ export default function Header() {
             case 'group':
                 return (
                     <>
-                        {/* 기존 서버 리스트 */}
                         <div className={styles.server_list}>
                             <div className={styles.server_box}>
                                 <div
@@ -323,9 +395,14 @@ export default function Header() {
                                                     ? selectedServerId === server.id ? "#c3ee41" : "#d9d9d9"
                                                     : "transparent",
                                                 overflow: "hidden",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "#333",
+                                                fontWeight: "bold"
                                             }}
                                         >
-                                            {server.image && (
+                                            {server.image ? (
                                                 <img
                                                     src={server.image}
                                                     alt={server.name}
@@ -336,6 +413,8 @@ export default function Header() {
                                                         display: "block",
                                                     }}
                                                 />
+                                            ) : (
+                                                <span>{server.name && server.name[0]}</span>
                                             )}
                                         </div>
                                     </div>
@@ -551,7 +630,6 @@ export default function Header() {
             case 'settings':
                 return (
                     <>
-                        {/* 설정용 간단한 메뉴 */}
                         <div className={styles.server_menu}>
                             <div className={styles.server_menu_top}>
                                 <div className={styles.change_shild}>
@@ -589,21 +667,18 @@ export default function Header() {
 
     return (
         <div className={styles.wrap}>
-            {/* Header - 경로에 따라 변경 */}
             <header className={styles.header}>
                 <div className={styles.hr_box}>
                     {renderHeaderContent()}
                 </div>
             </header>
 
-            {/* Aside - 3가지 타입으로 완전히 다른 내용 */}
             <aside className={styles.aside}>
                 <div className={styles.aside_container}>
                     <div className={styles.aside_box}>
                         {renderAsideContent()}
                     </div>
 
-                    {/* 하단 유저 프로필은 공통 */}
                     <div className={styles.aside_user_box}>
                         <div className={styles.user_box_area}>
                             <div className={styles.user_lbox}>
@@ -623,7 +698,6 @@ export default function Header() {
                 </div>
             </aside>
 
-            {/* 모달은 그대로 */}
             {isModalOpen && (
                 <div
                     className={modalStyles.modalOverlay}
