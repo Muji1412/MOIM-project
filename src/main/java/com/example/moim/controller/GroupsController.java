@@ -7,6 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -22,6 +25,7 @@ public class GroupsController {
             @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         System.out.println("받은 그룹 이름: " + groupName);
+        System.out.println("받은 이미지: " + (image != null ? image.getOriginalFilename() : "null"));
 
         Groups groups = new Groups();
         groups.setGroupName(groupName);
@@ -29,8 +33,33 @@ public class GroupsController {
         // 이미지 처리 로직 (필요시 추가)
         if (image != null && !image.isEmpty()) {
             System.out.println("이미지 파일: " + image.getOriginalFilename());
-            // 이미지 저장 후 URL 설정
-            // groups.setGroupImage(savedImageUrl);
+            try {
+                // 파일 저장 경로 설정
+                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/bundle/img/servers/";
+                String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+                String filePath = uploadDir + fileName;
+
+                // 디렉토리 생성
+                File directory = new File(uploadDir);
+                if (!directory.exists()) {
+                    boolean created = directory.mkdirs();
+                    System.out.println("디렉토리 생성: " + created + " - " + uploadDir);
+                }
+
+                // 파일 저장
+                File destinationFile = new File(filePath);
+                image.transferTo(destinationFile);
+
+                // 웹 경로 설정
+                String webPath = "/bundle/img/servers/" + fileName;
+                groups.setGroupImage(webPath);
+
+                System.out.println("이미지 저장 완료: " + webPath);
+                System.out.println("실제 파일 경로: " + filePath);
+            } catch (IOException e) {
+                System.err.println("이미지 저장 실패: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         Groups savedGroup = groupsService.createGroup(groups);

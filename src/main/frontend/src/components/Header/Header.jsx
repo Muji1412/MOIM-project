@@ -252,9 +252,12 @@ export default function Header() {
                                     onClick={() => handleServerClick("default")}
                                     title="Home"
                                 >
-                                    <div className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
-                                    <div className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
-                                        <img src="/bundle/img/home_ic.png" alt="Home" className={selectedServerId === "default" ? styles.active_ic : ""}/>
+                                    <div
+                                        className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
+                                    <div
+                                        className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
+                                        <img src="/bundle/img/home_ic.png" alt="Home"
+                                             className={selectedServerId === "default" ? styles.active_ic : ""}/>
                                     </div>
                                 </div>
 
@@ -262,6 +265,7 @@ export default function Header() {
                                 {servers.map((server) => (
                                     <div
                                         key={server.id}
+                                        onContextMenu={(e) => handleServerContextMenu(e, server.id)}
                                         className={`${styles.list_item} ${selectedServerId === server.id ? styles.selected : ""}`}
                                         onClick={() => handleServerClick(server.id)}
                                         title={server.name}
@@ -300,6 +304,29 @@ export default function Header() {
                                     </div>
                                 ))}
 
+                                {/* 컨텍스트 메뉴 렌더링 추가 */}
+                                {contextMenu.visible && (
+                                    <ul
+                                        className={styles.server_context_menu}
+                                        style={{
+                                            top: contextMenu.y,
+                                            left: contextMenu.x,
+                                        }}
+                                        onClick={() => setContextMenu((prev) => ({...prev, visible: false}))}
+                                    >
+                                        <li className={styles.context_menu_list}>
+                                            <div className={styles.context_box}>
+                                                <span>서버 이름 변경</span>
+                                            </div>
+                                        </li>
+                                        <li className={styles.context_menu_list}>
+                                            <div className={`${styles.context_box} ${styles.context_quit}`}>
+                                                <span>서버 나가기</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                )}
+
                                 <div
                                     className={`${styles.list_item} ${styles.add_server}`}
                                     onClick={openModal}
@@ -312,41 +339,178 @@ export default function Header() {
                             </div>
                         </div>
 
-                        {/* 친구목록용 메뉴 */}
+                        {/* 서버 메뉴 - 동적으로 변경 */}
                         <div className={styles.server_menu}>
                             <div className={styles.server_menu_top}>
-                                <button className={styles.default_menu_btn}>
-                                    Search or Start Talk
-                                </button>
-                            </div>
-                            <div className={styles.server_menu_list}>
-                                <div className={styles.menu_box}>
-                                    <div className={styles.menu_item}>
-                                        <img src="/bundle/img/friend_ic.png" alt="friend_ic"/>
-                                        <p>Friend</p>
+                                {selectedServerId === "default" ? (
+                                    <button className={styles.default_menu_btn}>
+                                        Search or Start Talk
+                                    </button>
+                                ) : (
+                                    <div className={styles.change_shild}>
+                                        <p className={styles.server_name}>{selectedServerName}</p>
                                     </div>
-                                </div>
+                                )}
                             </div>
+
+                            <div className={styles.server_menu_list}>
+                                {selectedServerId === "default" ? (
+                                    // 홈 선택 시 - 친구 메뉴
+                                    <div className={styles.menu_box}>
+                                        <div className={styles.menu_item}>
+                                            <img src="/bundle/img/friend_ic.png" alt="friend_ic"/>
+                                            <p>Friend</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    // 서버 선택 시 - 서버 메뉴들
+                                    <>
+                                        <div className={styles.menu_box}>
+                                            <div className={styles.menu_item}>
+                                                <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
+                                                <p>Calendar</p>
+                                            </div>
+                                        </div>
+                                        <div className={styles.menu_box}>
+                                            <div className={styles.menu_item}>
+                                                <img src="/bundle/img/todo_ic.png" alt="todo_ic"/>
+                                                <p>Todo List</p>
+                                            </div>
+                                        </div>
+                                        <div className={styles.menu_box}>
+                                            <div className={styles.menu_item}>
+                                                <img src="/bundle/img/board_ic.png" alt="board_ic"/>
+                                                <p>White Board</p>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
                             <div className={styles.server_menu_con}>
                                 <div className={styles.menu_con_container}>
-                                    <div className={styles.menu_con_title}>
-                                        <p>Direct Message</p>
-                                        <img src="/bundle/img/add_plus_ic.png" alt="add_something"/>
-                                    </div>
-                                    <div className={styles.server_menu_user_area}>
-                                        <div className={styles.menu_user_box}>
-                                            <div className={styles.menu_user_list}>
-                                                <img src="#" alt="#"/>
-                                                <p>User</p>
+                                    {selectedServerId === "default" ? (
+                                        // 홈 선택 시 - Direct Message
+                                        <>
+                                            <div className={styles.menu_con_title}>
+                                                <p>Direct Message</p>
+                                                <img src="/bundle/img/add_plus_ic.png" alt="add_something"/>
                                             </div>
-                                        </div>
-                                        <div className={styles.menu_user_box}>
-                                            <div className={styles.menu_user_list}>
-                                                <img src="#" alt="#"/>
-                                                <p>User</p>
+                                            <div className={styles.server_menu_user_area}>
+                                                <div className={styles.menu_user_box}>
+                                                    <div className={styles.menu_user_list}>
+                                                        <img src="#" alt="#"/>
+                                                        <p>User</p>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.menu_user_box}>
+                                                    <div className={styles.menu_user_list}>
+                                                        <img src="#" alt="#"/>
+                                                        <p>User</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        </>
+                                    ) : (
+                                        // 서버 선택 시 - 채팅/음성 채널
+                                        <>
+                                            <div className="acodion_box">
+                                                <div
+                                                    className={styles.aco_con_title}
+                                                    style={{
+                                                        background: openChat ? "" : "transparent",
+                                                        transition: "background 0.2s",
+                                                    }}
+                                                >
+                                                    <div
+                                                        className={styles.chat_box}
+                                                        onClick={() => setOpenChat((prev) => !prev)}
+                                                        style={{
+                                                            cursor: "pointer",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                        }}
+                                                    >
+                                                        <p>chat</p>
+                                                        <img
+                                                            src="/bundle/img/arrow_ic.png"
+                                                            alt="arrow_ic"
+                                                            style={{
+                                                                marginRight: 8,
+                                                                transform: openChat ? "rotate(0deg)" : "rotate(-90deg)",
+                                                                transition: "transform 0.2s",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <img
+                                                        src="/bundle/img/add_plus_ic.png"
+                                                        alt="add_ic"
+                                                        style={{cursor: "pointer"}}
+                                                    />
+                                                </div>
+                                                <div
+                                                    className={styles.channel_list}
+                                                    style={{
+                                                        maxHeight: openChat ? "500px" : "0",
+                                                    }}
+                                                >
+                                                    {openChat && (
+                                                        <ul style={{listStyle: "none", margin: 0, padding: 0}}>
+                                                            <li className={styles.channel_item}>
+                                                                <div className={styles.channel_item_box}>
+                                                                    <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
+                                                                    <span>일반채팅</span>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="acodion_box">
+                                                <div
+                                                    className={styles.aco_con_title}
+                                                    style={{
+                                                        background: openVoice ? "" : "transparent",
+                                                        transition: "background 0.2s",
+                                                    }}
+                                                >
+                                                    <div
+                                                        className={styles.chat_box}
+                                                        onClick={() => setOpenVoice((prev) => !prev)}
+                                                    >
+                                                        <p>voice</p>
+                                                        <img
+                                                            src="/bundle/img/arrow_ic.png"
+                                                            alt="arrow_ic"
+                                                            style={{
+                                                                marginRight: 8,
+                                                                transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)",
+                                                                transition: "transform 0.2s",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className={styles.channel_list}
+                                                    style={{
+                                                        maxHeight: openVoice ? "500px" : "0",
+                                                    }}
+                                                >
+                                                    {openVoice && (
+                                                        <ul style={{listStyle: "none", margin: 0, padding: 0}}>
+                                                            <li className={styles.channel_item}>
+                                                                <div className={styles.channel_item_box}>
+                                                                    <img src="/bundle/img/voice_ic.png" alt="voice"/>
+                                                                    <span>음성채팅</span>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -26,6 +26,6 @@ public class Groups {
     private String groupOwnerId;
 
     // 이미지 필드 추가
-    @Column(name = "GROUP_IMAGE")
-    private String groupImage;
+    @Column(name = "GROUP_IMAGE", length = 500)// 경로 저장을 위한 길이
+    private String groupImage; //이미지 파일 경로 저장
 }
