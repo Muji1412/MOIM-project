@@ -5,22 +5,24 @@ import modalStyles from "./Modal.module.css";
 
 export default function Header() {
     const location = useLocation();
+    const [selectedMenuItem, setSelectedMenuItem] = useState("friend");
+    const [selectedChannel, setSelectedChannel] = useState("general"); // 채널 선택 상태 추가
 
     // 기존 상태들
     const [servers, setServers] = useState([]);
     const [selectedServerId, setSelectedServerId] = useState("default");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isModifyModalOpen, setIsModifyModalOpen] = useState(false); // 수정 모달 상태 추가
+    const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
     const [newServer, setNewServer] = useState({name: "", image: ""});
-    const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""}); // 수정할 서버 정보
+    const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""});
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState("");
-    const [modifyImageFile, setModifyImageFile] = useState(null); // 수정용 이미지 파일
-    const [modifyImagePreview, setModifyImagePreview] = useState(""); // 수정용 이미지 미리보기
+    const [modifyImageFile, setModifyImageFile] = useState(null);
+    const [modifyImagePreview, setModifyImagePreview] = useState("");
     const inputRef = useRef();
-    const modifyInputRef = useRef(); // 수정용 파일 input ref
+    const modifyInputRef = useRef();
     const serverNameInputRef = useRef();
-    const modifyServerNameInputRef = useRef(); // 수정용 서버명 input ref
+    const modifyServerNameInputRef = useRef();
 
     const [contextMenu, setContextMenu] = useState({
         visible: false,
@@ -39,7 +41,6 @@ export default function Header() {
                 const response = await fetch('/api/groups');
                 if (response.ok) {
                     const serverList = await response.json();
-                    // 백엔드 응답을 프론트엔드 형식으로 매핑
                     const mappedServers = serverList.map(group => ({
                         id: group.groupNo.toString(),
                         name: group.groupName,
@@ -107,7 +108,6 @@ export default function Header() {
         reader.readAsDataURL(file);
     };
 
-    // 수정용 파일 변경 핸들러 추가
     const handleModifyFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -120,8 +120,17 @@ export default function Header() {
         reader.readAsDataURL(file);
     };
 
+    // 서버 클릭 시 채널 초기화 추가
     const handleServerClick = (serverId) => {
         setSelectedServerId(serverId);
+        // 서버 선택 시 메뉴 및 채널 초기화
+        if (serverId === "default") {
+            setSelectedMenuItem("friend");
+            setSelectedChannel(null); // 홈에서는 채널 없음
+        } else {
+            setSelectedMenuItem("calendar"); // 서버 선택 시 기본 메뉴
+            setSelectedChannel("general"); // 기본적으로 일반채팅 선택
+        }
     };
 
     const openModal = () => setIsModalOpen(true);
@@ -132,7 +141,6 @@ export default function Header() {
         setImagePreview("");
     };
 
-    // 수정 모달 관련 함수들 추가
     const openModifyModal = (serverId) => {
         const serverToModify = servers.find(s => s.id === serverId);
         if (serverToModify) {
@@ -203,7 +211,7 @@ export default function Header() {
         }
     };
 
-    // 서버 정보 수정 함수 추가
+    // 서버 정보 수정 함수
     const handleModifyServer = async (e) => {
         e.preventDefault();
         if (!modifyServer.name.trim()) return;
@@ -234,7 +242,6 @@ export default function Header() {
                     image: updatedGroup.groupImage || ""
                 };
 
-                // 서버 목록 업데이트
                 setServers((prev) =>
                     prev.map(server =>
                         server.id === modifyServer.id ? updatedServer : server
@@ -264,11 +271,10 @@ export default function Header() {
     const selectedServer = servers.find((s) => s.id === selectedServerId);
     const selectedServerName = selectedServer ? selectedServer.name : "";
 
-    // Header 내용 렌더링 (수정됨)
+    // Header 내용 렌더링
     const renderHeaderContent = () => {
         switch (asideType) {
             case 'friend':
-                // ✅ 서버가 선택되었을 때 헤더 변경
                 if (selectedServerId !== "default") {
                     return (
                         <>
@@ -287,7 +293,6 @@ export default function Header() {
                         </>
                     );
                 }
-                // 기본 상태 (홈)
                 return (
                     <>
                         <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
@@ -349,15 +354,14 @@ export default function Header() {
                                     onClick={() => handleServerClick("default")}
                                     title="Home"
                                 >
-                                    <div
-                                        className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
-                                    <div
-                                        className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
+                                    <div className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
+                                    <div className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
                                         <img src="/bundle/img/home_ic.png" alt="Home"
                                              className={selectedServerId === "default" ? styles.active_ic : ""}/>
                                     </div>
                                 </div>
-
+                                {/*<div className={styles.line}></div>*/}
+                                <div className={styles.server_divider}></div>
                                 {/* 생성된 서버들 */}
                                 {servers.map((server) => (
                                     <div
@@ -367,8 +371,7 @@ export default function Header() {
                                         onClick={() => handleServerClick(server.id)}
                                         title={server.name}
                                     >
-                                        <div
-                                            className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
+                                        <div className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
                                         <div
                                             className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                             style={{
@@ -401,7 +404,7 @@ export default function Header() {
                                     </div>
                                 ))}
 
-                                {/* 컨텍스트 메뉴 렌더링 - 수정 기능 추가 */}
+                                {/* 컨텍스트 메뉴 렌더링 */}
                                 {contextMenu.visible && (
                                     <ul
                                         className={styles.server_context_menu}
@@ -458,30 +461,44 @@ export default function Header() {
 
                             <div className={styles.server_menu_list}>
                                 {selectedServerId === "default" ? (
-                                    // 홈 선택 시 - 친구 메뉴
-                                    <div className={styles.menu_box}>
-                                        <div className={styles.menu_item}>
+                                    <div className={`${styles.menu_box} ${styles.selected_menu}`}>
+                                        <div
+                                            className={`${styles.menu_item} ${selectedMenuItem === "friend" ? styles.active_menu_item : ""}`}
+                                            onClick={() => setSelectedMenuItem("friend")}
+                                            style={{ cursor: "pointer" }}
+                                        >
                                             <img src="/bundle/img/friend_ic.png" alt="friend_ic"/>
                                             <p>Friend</p>
                                         </div>
                                     </div>
                                 ) : (
-                                    // 서버 선택 시 - 서버 메뉴들
                                     <>
                                         <div className={styles.menu_box}>
-                                            <div className={styles.menu_item}>
+                                            <div
+                                                className={`${styles.menu_item} ${selectedMenuItem === "calendar" ? styles.active_menu_item : ""}`}
+                                                onClick={() => setSelectedMenuItem("calendar")}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
                                                 <p>Calendar</p>
                                             </div>
                                         </div>
                                         <div className={styles.menu_box}>
-                                            <div className={styles.menu_item}>
+                                            <div
+                                                className={`${styles.menu_item} ${selectedMenuItem === "todo" ? styles.active_menu_item : ""}`}
+                                                onClick={() => setSelectedMenuItem("todo")}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <img src="/bundle/img/todo_ic.png" alt="todo_ic"/>
                                                 <p>Todo List</p>
                                             </div>
                                         </div>
                                         <div className={styles.menu_box}>
-                                            <div className={styles.menu_item}>
+                                            <div
+                                                className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
+                                                onClick={() => setSelectedMenuItem("board")}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <img src="/bundle/img/board_ic.png" alt="board_ic"/>
                                                 <p>White Board</p>
                                             </div>
@@ -493,7 +510,6 @@ export default function Header() {
                             <div className={styles.server_menu_con}>
                                 <div className={styles.menu_con_container}>
                                     {selectedServerId === "default" ? (
-                                        // 홈 선택 시 - Direct Message
                                         <>
                                             <div className={styles.menu_con_title}>
                                                 <p>Direct Message</p>
@@ -515,7 +531,6 @@ export default function Header() {
                                             </div>
                                         </>
                                     ) : (
-                                        // 서버 선택 시 - 채팅/음성 채널
                                         <>
                                             <div className="acodion_box">
                                                 <div
@@ -560,7 +575,11 @@ export default function Header() {
                                                     {openChat && (
                                                         <ul style={{listStyle: "none", margin: 0, padding: 0}}>
                                                             <li className={styles.channel_item}>
-                                                                <div className={styles.channel_item_box}>
+                                                                <div
+                                                                    className={`${styles.channel_item_box} ${selectedChannel === "general" ? styles.active_channel : ""}`}
+                                                                    onClick={() => setSelectedChannel("general")}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
                                                                     <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
                                                                     <span>일반채팅</span>
                                                                 </div>
@@ -603,7 +622,11 @@ export default function Header() {
                                                     {openVoice && (
                                                         <ul style={{listStyle: "none", margin: 0, padding: 0}}>
                                                             <li className={styles.channel_item}>
-                                                                <div className={styles.channel_item_box}>
+                                                                <div
+                                                                    className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
+                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
                                                                     <span>음성채팅</span>
                                                                 </div>
@@ -632,10 +655,8 @@ export default function Header() {
                                     onClick={() => handleServerClick("default")}
                                     title="Home"
                                 >
-                                    <div
-                                        className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
-                                    <div
-                                        className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
+                                    <div className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
+                                    <div className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
                                         <img
                                             src="/bundle/img/home_ic.png"
                                             alt="Home"
@@ -643,7 +664,8 @@ export default function Header() {
                                         />
                                     </div>
                                 </div>
-                                <div className={styles.line}></div>
+                                {/*<div className={styles.line}></div>*/}
+                                <div className={styles.server_divider}></div>
 
                                 {servers.map((server) => (
                                     <div
@@ -653,8 +675,7 @@ export default function Header() {
                                         onClick={() => handleServerClick(server.id)}
                                         title={server.name}
                                     >
-                                        <div
-                                            className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
+                                        <div className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
                                         <div
                                             className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                             style={{
@@ -687,7 +708,7 @@ export default function Header() {
                                     </div>
                                 ))}
 
-                                {/* 컨텍스트 메뉴 - 수정 기능 추가 */}
+                                {/* 컨텍스트 메뉴 */}
                                 {contextMenu.visible && (
                                     <ul
                                         className={styles.server_context_menu}
@@ -752,19 +773,31 @@ export default function Header() {
                                 ) : (
                                     <>
                                         <div className={styles.menu_box}>
-                                            <div className={styles.menu_item}>
+                                            <div
+                                                className={`${styles.menu_item} ${selectedMenuItem === "calendar" ? styles.active_menu_item : ""}`}
+                                                onClick={() => setSelectedMenuItem("calendar")}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
                                                 <p>Calendar</p>
                                             </div>
                                         </div>
                                         <div className={styles.menu_box}>
-                                            <div className={styles.menu_item}>
+                                            <div
+                                                className={`${styles.menu_item} ${selectedMenuItem === "todo" ? styles.active_menu_item : ""}`}
+                                                onClick={() => setSelectedMenuItem("todo")}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <img src="/bundle/img/todo_ic.png" alt="cal_ic"/>
                                                 <p>Todo List</p>
                                             </div>
                                         </div>
                                         <div className={styles.menu_box}>
-                                            <div className={styles.menu_item}>
+                                            <div
+                                                className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
+                                                onClick={() => setSelectedMenuItem("board")}
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
                                                 <p>White Board</p>
                                             </div>
@@ -840,7 +873,11 @@ export default function Header() {
                                                     {openChat && (
                                                         <ul style={{listStyle: "none", margin: 0, padding: 0}}>
                                                             <li className={styles.channel_item}>
-                                                                <div className={styles.channel_item_box}>
+                                                                <div
+                                                                    className={`${styles.channel_item_box} ${selectedChannel === "general" ? styles.active_channel : ""}`}
+                                                                    onClick={() => setSelectedChannel("general")}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
                                                                     <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
                                                                     <span>일반채팅</span>
                                                                 </div>
@@ -883,7 +920,11 @@ export default function Header() {
                                                     {openVoice && (
                                                         <ul style={{listStyle: "none", margin: 0, padding: 0}}>
                                                             <li className={styles.channel_item}>
-                                                                <div className={styles.channel_item_box}>
+                                                                <div
+                                                                    className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
+                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
                                                                     <span>음성채팅</span>
                                                                 </div>
@@ -963,7 +1004,7 @@ export default function Header() {
                             </div>
                             <div className={styles.user_rbox}>
                                 <img src="/bundle/img/close_mic.png" alt="mic"/>
-                                <img src="/bundle/img/open_head.png" alt="head"/>
+                                <img src="/bundle/img/open_head.png" alt="  head"/>
                                 <img src="/bundle/img/setting_ic.png" alt="set"/>
                             </div>
                         </div>
@@ -1057,7 +1098,7 @@ export default function Header() {
                 </div>
             )}
 
-            {/* 서버 수정 모달 추가 */}
+            {/* 서버 수정 모달 */}
             {isModifyModalOpen && (
                 <div
                     className={modalStyles.modalOverlay}

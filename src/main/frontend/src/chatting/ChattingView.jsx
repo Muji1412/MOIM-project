@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import {useEffect, useState, useRef} from "react";
 import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import {Client} from "@stomp/stompjs";
 import './chattingView.css';
+import styles from "../components/Section/Section.module.css";
 
 function ChattingView() {
     // 채팅 메시지 목록을 저장할 state (화면에 표시되는 메시지들)
@@ -52,7 +53,6 @@ function ChattingView() {
         return () => {
             client.deactivate();
         };
-
 
 
     }, [projectId, channelNum]);
@@ -144,73 +144,76 @@ function ChattingView() {
         if (dateStr === yesterday) return "어제";
         // 원하는 형식으로 변환 (예: '6월 5일 목요일')
         const dateObj = new Date(dateStr);
-        return dateObj.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "long" });
+        return dateObj.toLocaleDateString("ko-KR", {month: "long", day: "numeric", weekday: "long"});
     }
 
     return (
-        <div className="channel-chat-wrap">
-            {/* 채팅방 헤더 */}
-            <div className="channel-header">
-                <div className="channel-title"># Channel</div>
-                <div className="channel-desc">#Channel's start point.</div>
-            </div>
-            {/* 날짜별로 메시지 구분해서 렌더링 */}
-            <div>
-                {Object.entries(groupByDate).map(([date, msgs]) => (
-                    <div key={date}>
-                        {/* 날짜 구분선/라벨 */}
-                        <div className="chat-date-divider">{formatDateLabel(date)}</div>
-                        {/* 해당 날짜의 메시지들 */}
-                        {msgs.map((msg, idx) => (
-                            <div className="chat-message-row" key={idx}>
-                                <div className={`chat-avatar avatar-${msg.color}`}></div>
-                                <div className="chat-message-bubble">
-                                    <div className="chat-message-user">{msg.user}</div>
-                                    {/* 텍스트 메시지 */}
-                                    {msg.text && <div className="chat-message-text">{msg.text}</div>}
-                                    {/* 이미지 메시지 */}
-                                    {msg.imageUrl && (
-                                        <div className="chat-message-image">
-                                            <img src={msg.imageUrl} alt="uploaded" style={{ maxWidth: '200px', maxHeight: '200px' }} />
-                                        </div>
-                                    )}
+        <div className={styles.section_content}>
+            <div className="channel-chat-wrap">
+                {/* 채팅방 헤더 */}
+                <div className="channel-header">
+                    <div className="channel-title"># Channel</div>
+                    <div className="channel-desc">#Channel's start point.</div>
+                </div>
+                {/* 날짜별로 메시지 구분해서 렌더링 */}
+                <div>
+                    {Object.entries(groupByDate).map(([date, msgs]) => (
+                        <div key={date}>
+                            {/* 날짜 구분선/라벨 */}
+                            <div className="chat-date-divider">{formatDateLabel(date)}</div>
+                            {/* 해당 날짜의 메시지들 */}
+                            {msgs.map((msg, idx) => (
+                                <div className="chat-message-row" key={idx}>
+                                    <div className={`chat-avatar avatar-${msg.color}`}></div>
+                                    <div className="chat-message-bubble">
+                                        <div className="chat-message-user">{msg.user}</div>
+                                        {/* 텍스트 메시지 */}
+                                        {msg.text && <div className="chat-message-text">{msg.text}</div>}
+                                        {/* 이미지 메시지 */}
+                                        {msg.imageUrl && (
+                                            <div className="chat-message-image">
+                                                <img src={msg.imageUrl} alt="uploaded"
+                                                     style={{maxWidth: '200px', maxHeight: '200px'}}/>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
 
-                    </div>
-                ))}
-            </div>
+                        </div>
+                    ))}
+                </div>
 
-            {/* 입력창 + 이미지 업로드 (+ 버튼) */}
-            <div className="chat-input-row">
-                <button
-                    type="button"
-                    className="chat-plus-icon"
-                    onClick={handlePlusClick}
-                    tabIndex={0}
-                    aria-label="이미지 업로드"
-                >
-                    <span style={{ fontSize: 18, color: "#6b7280" }}>＋</span>
-                </button>
-                <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    onChange={onFileChange}
-                />
-                <input
-                    className="chat-input"
-                    placeholder="Send Message to #Channel"
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                />
+                {/* 입력창 + 이미지 업로드 (+ 버튼) */}
+                <div className="chat-input-row">
+                    <button
+                        type="button"
+                        className="chat-plus-icon"
+                        onClick={handlePlusClick}
+                        tabIndex={0}
+                        aria-label="이미지 업로드"
+                    >
+                        <span style={{fontSize: 18, color: "#6b7280"}}>＋</span>
+                    </button>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        style={{display: "none"}}
+                        onChange={onFileChange}
+                    />
+                    <input
+                        className="chat-input"
+                        placeholder="Send Message to #Channel"
+                        value={inputValue}
+                        onChange={e => setInputValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                    />
 
+                </div>
             </div>
         </div>
-            );
+    );
 }
 
 export default ChattingView;
