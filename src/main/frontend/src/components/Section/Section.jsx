@@ -25,11 +25,19 @@ export default function Section() {
               <div className={styles.section_title_wrap}>
                 <div className={styles.section_title_area}>
                   <img src="/bundle/img/friend_ic.png" alt="#" />
-                  <p>Friend</p>
+                  {/* '친구 추가' 화면일 때 'Friend' 텍스트를 누르면 뒤로 가도록 버튼으로 변경합니다. */}
+                  {showAddFriend ? (
+                      <button
+                          onClick={handleShowFriendList}
+                          className={styles.friend_title_button}
+                      >
+                        Friend
+                      </button>
+                  ) : (
+                      <p>Friend</p>
+                  )}
                 </div>
-                {/* '친구 추가' 화면이 아닐 때만 버튼이 보이도록 조건부 렌더링
-                  이렇게 하면 UI가 더 깔끔해집니다.
-                */}
+                {/* '친구 추가' 화면이 아닐 때만 버튼이 보이도록 조건부 렌더링 */}
                 {!showAddFriend && (
                     <button
                         className={styles.add_friend_btn}

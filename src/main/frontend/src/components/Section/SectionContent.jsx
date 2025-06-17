@@ -51,7 +51,7 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
     if (!token || !currentUser) return;
 
     try {
-      console.log('요청 보내는 userId:', currentUser.userNo); // userNo로 변경
+      console.log('요청 보냄 userId:', currentUser.userNo); // userNo로 변경
 
       const response = await fetch('/api/friendship/pending', {
         method: 'POST',
@@ -121,20 +121,25 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
   };
 
   // 10. pending 요청 취소하는 함수
-  const handleCancelRequest = async (requestId) => {
+  const handleCancelRequest = async (request) => {
     const token = sessionStorage.getItem('accessToken');
 
     try {
-      const response = await fetch(`/api/friendship/cancel/${requestId}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/friendship/reject`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({
+          userA: request.id.userA,
+          userB: request.id.userB
+        })
       });
 
       if (response.ok) {
         alert('친구 요청이 취소되었습니다.');
-        fetchPendingRequests(); // 리스트 새로고침
+        fetchPendingRequests();
       } else {
         alert('요청 취소에 실패했습니다.');
       }
@@ -150,19 +155,7 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           {/* 친구 추가 영역 */}
           <div className={styles.add_friend_area}>
             <div className={styles.add_friend_container}>
-              <div className={styles.add_friend_title}>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <p className={styles.add_friend_main_title}>Add Friends</p>
-                  {/* 3. 이 버튼을 누르면 부모로부터 받은 onBackToList 함수가 실행됩니다. */}
-                  <button onClick={onBackToList} className={styles.back_btn}>
-                    &lt; Back
-                  </button>
-                </div>
-                <p className={styles.add_friend_main_title}>Add Friends</p>
-                <p className={styles.add_friend_sub_title}>
-                  You can send a friend request by entering the other person's User ID (숫자)
-                </p>
-              </div>
+              {/* 이 제목 영역은 Section.jsx에서 처리하므로 삭제합니다. */}
               <div className={styles.add_friend_search_box}>
                 <div className={styles.add_friend_search_bar}>
                   <form onSubmit={handleRequestSubmit}>
@@ -186,7 +179,7 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           <div className={styles.pending_requests_area}>
             <div className={styles.pending_requests_container}>
               <div className={styles.pending_requests_title}>
-                <p className={styles.pending_main_title}>Pending Requests</p>
+                <p className={styles.pending_main_title}>친구추가 요청</p>
                 <p className={styles.pending_sub_title}>
                   친구 요청을 받은 목록입니다. ({pendingRequests.length}개)
                 </p>
@@ -209,16 +202,13 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
                               />
                               <div className={styles.pending_user_details}>
                                 <p className={styles.pending_username}>{request.receiverUsername}</p>
-                                <p className={styles.pending_date}>
-                                  {new Date(request.requestDate).toLocaleDateString()}
-                                </p>
                               </div>
                             </div>
                           </div>
                           <div className={styles.pending_actions}>
                             <button
                                 className={styles.cancel_btn}
-                                onClick={() => handleCancelRequest(request.id)}
+                                onClick={() => handleCancelRequest(request)}
                             >
                               취소
                             </button>

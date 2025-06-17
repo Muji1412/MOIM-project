@@ -90,4 +90,16 @@ public class FriendshipController {
         }
     }
 
-}
+    @PostMapping("/reject")
+    public ResponseEntity<?> cancelRequest(@RequestBody UserIdDTO request) {
+
+        try {
+            friendshipService.removeFriendship(request.getUserA(), request.getUserB());
+            return ResponseEntity.ok().body("");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("dd");
+        }
+    }
+
+    }
+
