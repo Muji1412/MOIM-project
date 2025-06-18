@@ -1,5 +1,5 @@
 import React from 'react';
-import './SearchPasswordSuccessModal.css'; // 스타일 분리
+import './searchPasswordSuccessModal.css'; // 스타일 분리
 
 const SearchPasswordSuccessModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;

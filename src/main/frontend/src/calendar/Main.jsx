@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import './searchPassword.css';
-import SearchPassword from "./searchPassword";
-
+import MyCalendar from "./MyCalendar";
 
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
-        <SearchPassword />
+        <MyCalendar />
     );
 }

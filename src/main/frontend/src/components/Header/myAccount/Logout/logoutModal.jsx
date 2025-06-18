@@ -1,5 +1,5 @@
 import React from 'react';
-import './LogoutModal.css'; // 스타일 분리
+import './logoutModal.css'; // 스타일 분리
 
 const LogoutModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;

@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import './MyAccount.css';
-import MyAccountModifyModal from "./MyAccountModifyModal";
-import ChangePasswordModal from "./ChangePassword/ChangePasswordModal";
-import AccountDeleteModal from "./AccountDelete/AccountDeleteModal";
-import LogoutModal from "./Logout/LogoutModal";
+import './myAccount.css';
+import MyAccountModifyModal from "./myAccountModifyModal";
+import ChangePasswordModal from "./ChangePassword/changePasswordModal";
+import AccountDeleteModal from "./AccountDelete/accountDeleteModal";
+import LogoutModal from "./Logout/logoutModal";
 
 export default function MyAccount ({isOpen, onClose}) {
     const [userInfo, setUserInfo] = useState({

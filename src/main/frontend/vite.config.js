@@ -26,6 +26,7 @@ export default defineConfig({
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
                 //myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
+                calendar: path.resolve(__dirname, 'src/calendar/Main.jsx')
 
             },
             output: {

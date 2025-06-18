@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import './MyAccountModifyModal.css';
+import './myAccountModifyModal.css';
 import debounce from "lodash/debounce";
 
 const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {

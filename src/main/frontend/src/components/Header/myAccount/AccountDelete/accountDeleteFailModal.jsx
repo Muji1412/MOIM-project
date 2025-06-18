@@ -1,14 +1,14 @@
 import React from 'react';
-import './PwChangeSuccessModal.css'; // 스타일 분리
+import './accountDeleteFailModal.css';
 
-const PwChangeSuccessModal = ({ isOpen, onClose }) => {
+const AccountDeleteFailModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Reset Success!</h2>
-                <p>Your password has been successfully changed.</p>
+                <h2>Account Deletion Failed</h2>
+                <p>Check your password again.</p>
                 <button className="modal-btn" onClick={onClose}>
                     Close
                 </button>
@@ -17,4 +17,4 @@ const PwChangeSuccessModal = ({ isOpen, onClose }) => {
     );
 };
 
-export default PwChangeSuccessModal;
+export default AccountDeleteFailModal;
