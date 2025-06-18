@@ -1,6 +1,3 @@
-/*.section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);float: left;}*/
-/* 표시 안되는 문제 디버깅중입니다 */
-/* section부분 밀려 올라가는 현상 position:absolute과 margin-top로 현상 해결 */
 .section {width: calc(100vw - 350px);min-height: 785px;height: calc(100vh - 50px);margin-left: 350px;margin-top: 50px;position: absolute;}
 .section_cotainer {width: 100%;height: 100%;background: #fff;}
 
@@ -30,9 +27,26 @@
 
 .friend_list_box {width: 100%;height: 60px;border-bottom: 1px solid #e1e0e1;display: flex;justify-content: space-between;align-items: center;}
 .friend_list_box:hover {background: #e1e0e1;border-radius: 10px;}
-.friend_profile_area {width: 100px;height: 100%;display: flex;align-items: center;gap: 10px;margin-left: 15px;}
+.friend_profile_area {
+    /* 기존 width 대신 flex-grow를 사용하여 남은 공간을 채우도록 변경 */
+    flex-grow: 1;
+    /* max-width를 설정하여 너무 넓어지지 않게 조절 가능 (선택 사항) */
+    max-width: calc(100% - 100px); /* friend_setting_area의 폭 등을 고려하여 조정 */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+    overflow: hidden; /* 텍스트가 넘치면 숨김 */
+}
+.friend_profile_area > p {
+    font-size: 17px;
+    white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 설정 */
+    overflow: hidden;     /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트를 ...으로 표시 */
+}
 .friend_profile_area > img {width: 35px;height: 35px;border-radius: 100%;border: 1px solid black;}
-.friend_profile_area > p {font-size: 17px;}
+.friend_profile_area > p {font-size: 17px;} /* 기존 폰트 사이즈 유지 */
 .friend_setting_area {width: 60px;display: flex;align-items: center;gap: 30px;margin-right: 15px;}
 .friend_setting_area img {cursor: pointer;}
 
@@ -58,7 +72,7 @@
 
 
 .pending_requests_area{
-  width: 90%;
+    width: 90%;
     margin-top: 30px;
     padding: 20px;
     background-color: #f8f9fa;
@@ -175,4 +189,3 @@
 .friend_title_button:hover {
     text-decoration: underline;
 }
-

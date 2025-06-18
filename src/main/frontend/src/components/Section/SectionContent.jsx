@@ -6,8 +6,10 @@ import { useState, useEffect } from 'react';
 export default function SectionContent({ showAddFriend, onBackToList }) {
   const [friendId, setFriendId] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
-  // 7. pending 친구 요청 리스트를 저장할 state 추가
+  // pending 친구 요청 리스트를 저장할 state
   const [pendingRequests, setPendingRequests] = useState([]);
+  // 친구 목록을 저장할 새로운 state
+  const [friendsList, setFriendsList] = useState([]);
 
   useEffect(() => {
     const fetchMyInfo = async () => {
@@ -40,18 +42,30 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
     fetchMyInfo();
   }, []);
 
+  // 친구 추가 화면일 때 pending 요청을 가져옵니다.
   useEffect(() => {
     if (showAddFriend && currentUser) {
       fetchPendingRequests();
     }
   }, [showAddFriend, currentUser]);
 
+  // 친구 목록 화면일 때 친구 리스트를 가져옵니다.
+  useEffect(() => {
+    if (!showAddFriend && currentUser) {
+      fetchFriends();
+    }
+  }, [showAddFriend, currentUser]); // showAddFriend 상태에 따라 친구 목록을 다시 가져오도록 설정
+
+  /**
+   * 보류 중인 친구 요청 목록을 가져옵니다.
+   * 이제 이 함수는 `FriendDTO`를 반환합니다.
+   */
   const fetchPendingRequests = async () => {
     const token = sessionStorage.getItem('accessToken');
     if (!token || !currentUser) return;
 
     try {
-      console.log('요청 보냄 userId:', currentUser.userNo); // userNo로 변경
+      console.log('받은 친구 요청 목록을 userId:', currentUser.userNo, '로 가져옵니다.');
 
       const response = await fetch('/api/friendship/pending', {
         method: 'POST',
@@ -60,23 +74,66 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          userId: currentUser.userNo // userId 대신 userNo 사용
+          userId: currentUser.userNo
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('받은 데이터:', data);
+        console.log('받은 친구 요청 데이터:', data);
+        // Friendship 엔티티 대신 FriendDTO로 받았으므로, 바로 사용 가능
         setPendingRequests(data);
       } else {
         const errorText = await response.text();
-        console.error('에러 응답:', errorText);
+        console.error('친구 요청 에러 응답:', errorText);
+        setPendingRequests([]); // 오류 발생 시 목록 초기화
       }
     } catch (error) {
-      console.error('요청 중 오류:', error);
+      console.error('친구 요청 중 오류:', error);
+      setPendingRequests([]); // 오류 발생 시 목록 초기화
     }
   };
 
+  /**
+   * 현재 사용자의 친구 목록을 가져옵니다.
+   */
+  const fetchFriends = async () => {
+    const token = sessionStorage.getItem('accessToken');
+    if (!token || !currentUser) return;
+
+    try {
+      console.log('친구 목록을 userId:', currentUser.userNo, '로 가져옵니다.');
+
+      const response = await fetch('/api/friendship/list', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: currentUser.userNo
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('받은 친구 목록 데이터:', data);
+        setFriendsList(data);
+      } else {
+        const errorText = await response.text();
+        console.error('친구 목록 에러 응답:', errorText);
+        setFriendsList([]); // 오류 발생 시 목록 초기화
+      }
+    } catch (error) {
+      console.error('친구 목록 로딩 중 오류:', error);
+      setFriendsList([]); // 오류 발생 시 목록 초기화
+    }
+  };
+
+  /**
+   * 친구 요청 전송을 처리합니다.
+   * @param {Event} event 폼 제출 이벤트
+   */
   const handleRequestSubmit = async (event) => {
     event.preventDefault();
 
@@ -107,8 +164,7 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
       const responseBody = await response.text();
       if (response.ok) {
         alert(responseBody);
-        // 9. 친구 요청 성공 후 pending 리스트 새로고침
-        fetchPendingRequests();
+        fetchPendingRequests(); // 친구 요청 성공 후 pending 리스트 새로고침
       } else {
         alert(`요청 실패: ${responseBody}`);
       }
@@ -120,7 +176,11 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
     }
   };
 
-  // 10. pending 요청 취소하는 함수
+  /**
+   * 보류 중인 친구 요청을 취소합니다.
+   * 이제 `request`는 `FriendDTO` 형태입니다.
+   * @param {object} request 취소할 친구 요청 객체 (FriendDTO 형태)
+   */
   const handleCancelRequest = async (request) => {
     const token = sessionStorage.getItem('accessToken');
 
@@ -132,14 +192,14 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          userA: request.id.userA,
-          userB: request.id.userB
+          userA: request.friendshipUserA, // FriendDTO에 추가된 Friendship의 userA ID 사용
+          userB: request.friendshipUserB  // FriendDTO에 추가된 Friendship의 userB ID 사용
         })
       });
 
       if (response.ok) {
         alert('친구 요청이 취소되었습니다.');
-        fetchPendingRequests();
+        fetchPendingRequests(); // pending 요청 리스트 새로고침
       } else {
         alert('요청 취소에 실패했습니다.');
       }
@@ -149,6 +209,11 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
     }
   };
 
+  /**
+   * 친구 요청을 수락합니다.
+   * 이제 `request`는 `FriendDTO` 형태입니다.
+   * @param {object} request 수락할 친구 요청 객체 (FriendDTO 형태)
+   */
   const handleAcceptRequest = async (request) => {
     const token = sessionStorage.getItem('accessToken');
 
@@ -160,20 +225,21 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          userA: request.id.userA,
-          userB: request.id.userB
+          userA: request.friendshipUserA, // FriendDTO에 추가된 Friendship의 userA ID 사용
+          userB: request.friendshipUserB  // FriendDTO에 추가된 Friendship의 userB ID 사용
         })
       });
 
       if (response.ok) {
-        alert('수락되었습니다.');
-        fetchPendingRequests();
+        alert('친구 요청이 수락되었습니다.');
+        fetchPendingRequests(); // pending 요청 리스트 새로고침
+        fetchFriends(); // 친구 목록 리스트도 새로고침
       } else {
-        alert('요청을 실패했습니다.');
+        alert('친구 요청 수락에 실패했습니다.');
       }
     } catch (error) {
       console.error('친구 수락 중 오류:', error);
-      alert('요청 수락 중 오류가 발생했습니다.');
+      alert('친구 수락 중 오류가 발생했습니다.');
     }
   };
 
@@ -183,7 +249,6 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           {/* 친구 추가 영역 */}
           <div className={styles.add_friend_area}>
             <div className={styles.add_friend_container}>
-              {/* 이 제목 영역은 Section.jsx에서 처리하므로 삭제합니다. */}
               <div className={styles.add_friend_search_box}>
                 <div className={styles.add_friend_search_bar}>
                   <form onSubmit={handleRequestSubmit}>
@@ -203,7 +268,7 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
             </div>
           </div>
 
-          {/* 11. Pending 요청 리스트 영역 추가 */}
+          {/* Pending 요청 리스트 영역 */}
           <div className={styles.pending_requests_area}>
             <div className={styles.pending_requests_container}>
               <div className={styles.pending_requests_title}>
@@ -219,17 +284,25 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
                       <p>받은 친구 요청이 없습니다.</p>
                     </div>
                 ) : (
+                    // 이제 request는 FriendDTO 형태입니다.
                     pendingRequests.map((request) => (
-                        <div key={request.id} className={styles.pending_item}>
+                        // FriendDTO의 userNo를 key로 사용
+                        <div key={request.userNo} className={styles.pending_item}>
                           <div className={styles.pending_user_info}>
                             <div className={styles.pending_profile_area}>
                               <img
-                                  src={request.receiverProfileImage || "/bundle/img/default_profile.png"}
+                                  // FriendDTO의 userImg 사용
+                                  src={request.userImg || "/bundle/img/default_profile.png"}
                                   alt="profile"
                                   className={styles.pending_profile_img}
                               />
                               <div className={styles.pending_user_details}>
-                                <p className={styles.pending_username}>{request.receiverUsername}</p>
+                                {/* FriendDTO의 userNick 사용 */}
+                                <p className={styles.pending_username}>{request.userNick}</p>
+                                {/* FriendDTO에 요청 날짜 필드가 있다면 사용 */}
+                                {/* <p className={styles.pending_date}>
+                                  {request.requestDate ? new Date(request.requestDate).toLocaleDateString() : '날짜 없음'}
+                                </p> */}
                               </div>
                             </div>
                           </div>
@@ -271,16 +344,26 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
           </div>
         </div>
         <div className={styles.section_friend_container}>
-          <div className={styles.friend_list_box}>
-            <div className={styles.friend_profile_area}>
-              <img src="#" alt="#" />
-              <p>User</p>
-            </div>
-            <div className={styles.friend_setting_area}>
-              <img src="/bundle/img/talk_ic.png" alt="talk_ic" />
-              <img src="/bundle/img/pt3_ic.png" alt="pt3_ic" />
-            </div>
-          </div>
+          {friendsList.length === 0 ? (
+              <div className={styles.no_pending_message}>
+                <p>친구 목록이 비어있습니다. 친구를 추가해보세요!</p>
+              </div>
+          ) : (
+              friendsList.map((friend) => (
+                  // FriendDTO를 사용하므로 friend.userNo를 key로 사용
+                  <div key={friend.userNo} className={styles.friend_list_box}>
+                    <div className={styles.friend_profile_area}>
+                      {/* FriendDTO에서 직접 친구의 프로필 이미지와 닉네임 사용 */}
+                      <img src={friend.userImg || "/bundle/img/default_profile.png"} alt="profile" />
+                      <p>{friend.userNick}</p>
+                    </div>
+                    <div className={styles.friend_setting_area}>
+                      <img src="/bundle/img/talk_ic.png" alt="talk_ic" />
+                      <img src="/bundle/img/pt3_ic.png" alt="pt3_ic" />
+                    </div>
+                  </div>
+              ))
+          )}
         </div>
       </div>
   );
