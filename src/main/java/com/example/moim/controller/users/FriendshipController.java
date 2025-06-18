@@ -28,7 +28,6 @@ public class FriendshipController {
     private final UsersRepository usersRepository;
 
     // 친구추가
-
     @PostMapping("/request")
     public ResponseEntity<?> sendFriendRequest(@RequestBody FriendRequestDTO request){
 
@@ -36,9 +35,9 @@ public class FriendshipController {
         log.info("request: {}", request);
 
         Users userA = usersRepository.findByUsername(request.getRequesterUsername())
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalStateException("요청자를 찾을 수 없습니다."));
         Users userB = usersRepository.findByUsername(request.getReceiverUsername())
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalStateException("수신자를 찾을 수 없습니다."));
 
         Long A = userA.getUserNo();
         Long B = userB.getUserNo();
@@ -54,27 +53,17 @@ public class FriendshipController {
     @PostMapping("/accept")
     public ResponseEntity<?> acceptFriendship(@RequestBody UserIdDTO request) {
         try {
+            // requesterId(userA)와 accepterId(userB)를 서비스에 전달
             friendshipService.acceptFriendRequest(request.getUserA(), request.getUserB());
             return ResponseEntity.ok().body("친구 요청을 수락했습니다!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-//
-//    @PostMapping("/delete")
-//    public ResponseEntity<?> deleteFriendship(@RequestBody FriendRequestDTO request) {
-//        try {
-//            friendshipService.removeFriendship(request.getRequesterId(), request.getReceiverId());
-//            return ResponseEntity.ok().body("친구가 삭제됐습니다.");
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        }
-//    }
 
     @PostMapping("/list")
     public ResponseEntity<?> getFriends(@RequestBody UserIdDTO request){
         try {
-            // 서비스에서 FriendDTO 리스트를 반환하도록 변경했으므로, 그대로 반환
             List<FriendDTO> friends = friendshipService.getFriends(request.getUserId());
             return ResponseEntity.ok(friends);
         } catch (Exception e) {
@@ -93,15 +82,23 @@ public class FriendshipController {
     }
 
     @PostMapping("/reject")
-    public ResponseEntity<?> cancelRequest(@RequestBody UserIdDTO request) {
-
+    public ResponseEntity<?> rejectRequest(@RequestBody UserIdDTO request) {
         try {
-            friendshipService.removeFriendship(request.getUserA(), request.getUserB());
-            return ResponseEntity.ok().body("");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("dd");
+            // 요청 거절을 위한 rejectFriendRequest 메소드 호출
+            friendshipService.rejectFriendRequest(request.getUserA(), request.getUserB());
+            return ResponseEntity.ok().body("친구 요청을 거절했습니다.");
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteFriendship(@RequestBody UserIdDTO request) {
+        try {
+            friendshipService.removeFriendship(request.getUserA(), request.getUserB());
+            return ResponseEntity.ok().body("친구가 삭제됐습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-
+}
