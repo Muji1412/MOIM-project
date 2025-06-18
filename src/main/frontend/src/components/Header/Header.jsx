@@ -545,6 +545,53 @@ export default function Header() {
                                                 <div
                                                     className={styles.aco_con_title}
                                                     style={{
+                                                        background: openVoice ? "" : "transparent",
+                                                        transition: "background 0.2s",
+                                                    }}
+                                                >
+                                                    <div
+                                                        className={styles.chat_box}
+                                                        onClick={() => setOpenVoice((prev) => !prev)}
+                                                    >
+                                                        <p>voice</p>
+                                                        <img
+                                                            src="/bundle/img/arrow_ic.png"
+                                                            alt="arrow_ic"
+                                                            style={{
+                                                                marginRight: 8,
+                                                                transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)",
+                                                                transition: "transform 0.2s",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className={styles.channel_list}
+                                                    style={{
+                                                        maxHeight: openVoice ? "500px" : "0",
+                                                    }}
+                                                >
+                                                    {openVoice && (
+                                                        <ul style={{listStyle: "none", margin: 0, padding: 0}}>
+                                                            <li className={styles.channel_item}>
+                                                                <div
+                                                                    className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
+                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
+                                                                    <img src="/bundle/img/voice_ic.png" alt="voice"/>
+                                                                    <span>음성채팅</span>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="acodion_box">
+                                                <div
+                                                    className={styles.aco_con_title}
+                                                    style={{
                                                         background: openChat ? "" : "transparent",
                                                         transition: "background 0.2s",
                                                     }}
@@ -591,53 +638,6 @@ export default function Header() {
                                                                 >
                                                                     <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
                                                                     <span>일반채팅</span>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="acodion_box">
-                                                <div
-                                                    className={styles.aco_con_title}
-                                                    style={{
-                                                        background: openVoice ? "" : "transparent",
-                                                        transition: "background 0.2s",
-                                                    }}
-                                                >
-                                                    <div
-                                                        className={styles.chat_box}
-                                                        onClick={() => setOpenVoice((prev) => !prev)}
-                                                    >
-                                                        <p>voice</p>
-                                                        <img
-                                                            src="/bundle/img/arrow_ic.png"
-                                                            alt="arrow_ic"
-                                                            style={{
-                                                                marginRight: 8,
-                                                                transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)",
-                                                                transition: "transform 0.2s",
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div
-                                                    className={styles.channel_list}
-                                                    style={{
-                                                        maxHeight: openVoice ? "500px" : "0",
-                                                    }}
-                                                >
-                                                    {openVoice && (
-                                                        <ul style={{listStyle: "none", margin: 0, padding: 0}}>
-                                                            <li className={styles.channel_item}>
-                                                                <div
-                                                                    className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("voice")}
-                                                                    style={{ cursor: "pointer" }}
-                                                                >
-                                                                    <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -843,6 +843,53 @@ export default function Header() {
                                                 <div
                                                     className={styles.aco_con_title}
                                                     style={{
+                                                        background: openVoice ? "" : "transparent",
+                                                        transition: "background 0.2s",
+                                                    }}
+                                                >
+                                                    <div
+                                                        className={styles.chat_box}
+                                                        onClick={() => setOpenVoice((prev) => !prev)}
+                                                    >
+                                                        <p>voice</p>
+                                                        <img
+                                                            src="/bundle/img/arrow_ic.png"
+                                                            alt="arrow_ic"
+                                                            style={{
+                                                                marginRight: 8,
+                                                                transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)",
+                                                                transition: "transform 0.2s",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className={styles.channel_list}
+                                                    style={{
+                                                        maxHeight: openVoice ? "500px" : "0",
+                                                    }}
+                                                >
+                                                    {openVoice && (
+                                                        <ul style={{listStyle: "none", margin: 0, padding: 0}}>
+                                                            <li className={styles.channel_item}>
+                                                                <div
+                                                                    className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
+                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    style={{ cursor: "pointer" }}
+                                                                >
+                                                                    <img src="/bundle/img/voice_ic.png" alt="voice"/>
+                                                                    <span>음성채팅</span>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="acodion_box">
+                                                <div
+                                                    className={styles.aco_con_title}
+                                                    style={{
                                                         background: openChat ? "" : "transparent",
                                                         transition: "background 0.2s",
                                                     }}
@@ -889,53 +936,6 @@ export default function Header() {
                                                                 >
                                                                     <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
                                                                     <span>일반채팅</span>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="acodion_box">
-                                                <div
-                                                    className={styles.aco_con_title}
-                                                    style={{
-                                                        background: openVoice ? "" : "transparent",
-                                                        transition: "background 0.2s",
-                                                    }}
-                                                >
-                                                    <div
-                                                        className={styles.chat_box}
-                                                        onClick={() => setOpenVoice((prev) => !prev)}
-                                                    >
-                                                        <p>voice</p>
-                                                        <img
-                                                            src="/bundle/img/arrow_ic.png"
-                                                            alt="arrow_ic"
-                                                            style={{
-                                                                marginRight: 8,
-                                                                transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)",
-                                                                transition: "transform 0.2s",
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div
-                                                    className={styles.channel_list}
-                                                    style={{
-                                                        maxHeight: openVoice ? "500px" : "0",
-                                                    }}
-                                                >
-                                                    {openVoice && (
-                                                        <ul style={{listStyle: "none", margin: 0, padding: 0}}>
-                                                            <li className={styles.channel_item}>
-                                                                <div
-                                                                    className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("voice")}
-                                                                    style={{ cursor: "pointer" }}
-                                                                >
-                                                                    <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
