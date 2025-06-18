@@ -171,29 +171,30 @@ function ChattingView() {
 
     return (
         <div className={styles.section_content}>
-            <div className="channel-chat-wrap">
+            <div className={styles.channel_chat_wrap}>
                 {/* 채팅방 헤더 */}
-                <div className="channel-header">
-                    <div className="channel-title"># Channel</div>
-                    <div className="channel-desc">#Channel's start point.</div>
+                <div className={styles.channel_header}>
+                    <div className={styles.channel_title}># Channel</div>
+                    <div className={styles.channel_desc}>#Channel's start point.</div>
                 </div>
                 {/* 날짜별로 메시지 구분해서 렌더링 */}
                 <div>
                     {Object.entries(groupByDate).map(([date, msgs]) => (
                         <div key={date}>
                             {/* 날짜 구분선/라벨 */}
-                            <div className="chat-date-divider">{formatDateLabel(date)}</div>
+                            <div className={styles.chat_date_divider}>{formatDateLabel(date)}</div>
                             {/* 해당 날짜의 메시지들 */}
                             {msgs.map((msg, idx) => (
-                                <div className="chat-message-row" key={idx}>
-                                    <div className={`chat-avatar avatar-${msg.color}`}></div>
-                                    <div className="chat-message-bubble">
-                                        <div className="chat-message-user">{msg.user}</div>
+                                <div className={styles.chat_message_row} key={idx}>
+                                    {/*<div className={`chat-avatar avatar-${msg.color}`}></div>*/}
+                                    <div className={`${styles.chat_avatar} ${styles['avatar_' + msg.color]}`}></div>
+                                    <div className={styles.chat_message_bubble}>
+                                        <div className={styles.chat_message_user}>{msg.user}</div>
                                         {/* 텍스트 메시지 */}
-                                        {msg.text && <div className="chat-message-text">{msg.text}</div>}
+                                        {msg.text && <div className={styles.chat_message_text}>{msg.text}</div>}
                                         {/* 이미지 메시지 */}
                                         {msg.imageUrl && (
-                                            <div className="chat-message-image">
+                                            <div className={styles.chat_message_image}>
                                                 <img src={msg.imageUrl} alt="uploaded"
                                                      style={{maxWidth: '200px', maxHeight: '200px'}}/>
                                             </div>
@@ -207,10 +208,10 @@ function ChattingView() {
                 </div>
 
                 {/* 입력창 + 이미지 업로드 (+ 버튼) */}
-                <div className="chat-input-row">
+                <div className={styles.chat_input_row}>
                     <button
                         type="button"
-                        className="chat-plus-icon"
+                        className={styles.chat_plus_icon}
                         onClick={handlePlusClick}
                         tabIndex={0}
                         aria-label="이미지 업로드"
@@ -225,7 +226,7 @@ function ChattingView() {
                         onChange={onFileChange}
                     />
                     <input
-                        className="chat-input"
+                        className={styles.chat_input}
                         placeholder="Send Message to #Channel"
                         value={inputValue}
                         onChange={e => setInputValue(e.target.value)}
