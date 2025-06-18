@@ -4,7 +4,7 @@ import {Client} from "@stomp/stompjs";
 import './chattingView.css';
 
 import styles from './../components/Section/Section.module.css';
-import { useLocation } from "react-router-dom";
+import {useLocation} from "react-router-dom";
 
 
 function ChattingView() {
@@ -36,7 +36,7 @@ function ChattingView() {
         if (dateStr === yesterday) return "어제";
         // 원하는 형식으로 변환 (예: '6월 5일 목요일')
         const dateObj = new Date(dateStr);
-        return dateObj.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "long" });
+        return dateObj.toLocaleDateString("ko-KR", {month: "long", day: "numeric", weekday: "long"});
     }
 
     useEffect(() => {
@@ -78,7 +78,6 @@ function ChattingView() {
             client.deactivate();
         };
     }, [location]);
-
 
 
     // 메시지 전송 함수
@@ -171,36 +170,35 @@ function ChattingView() {
     }
 
     return (
-
-
         <div className={styles.section_content}>
-        <div className="channel-chat-wrap">
-            {/* 채팅방 헤더 */}
-            <div className="channel-header">
-                <div className="channel-title"># Channel</div>
-                <div className="channel-desc">#Channel's start point.</div>
-            </div>
-            {/* 날짜별로 메시지 구분해서 렌더링 */}
-            <div>
-                {Object.entries(groupByDate).map(([date, msgs]) => (
-                    <div key={date}>
-                        {/* 날짜 구분선/라벨 */}
-                        <div className="chat-date-divider">{formatDateLabel(date)}</div>
-                        {/* 해당 날짜의 메시지들 */}
-                        {msgs.map((msg, idx) => (
-                            <div className="chat-message-row" key={idx}>
-                                <div className={`chat-avatar avatar-${msg.color}`}></div>
-                                <div className="chat-message-bubble">
-                                    <div className="chat-message-user">{msg.user}</div>
-                                    {/* 텍스트 메시지 */}
-                                    {msg.text && <div className="chat-message-text">{msg.text}</div>}
-                                    {/* 이미지 메시지 */}
-                                    {msg.imageUrl && (
-                                        <div className="chat-message-image">
-                                            <img src={msg.imageUrl} alt="uploaded" style={{ maxWidth: '200px', maxHeight: '200px' }} />
-                                        </div>
-                                    )}
-
+            <div className="channel-chat-wrap">
+                {/* 채팅방 헤더 */}
+                <div className="channel-header">
+                    <div className="channel-title"># Channel</div>
+                    <div className="channel-desc">#Channel's start point.</div>
+                </div>
+                {/* 날짜별로 메시지 구분해서 렌더링 */}
+                <div>
+                    {Object.entries(groupByDate).map(([date, msgs]) => (
+                        <div key={date}>
+                            {/* 날짜 구분선/라벨 */}
+                            <div className="chat-date-divider">{formatDateLabel(date)}</div>
+                            {/* 해당 날짜의 메시지들 */}
+                            {msgs.map((msg, idx) => (
+                                <div className="chat-message-row" key={idx}>
+                                    <div className={`chat-avatar avatar-${msg.color}`}></div>
+                                    <div className="chat-message-bubble">
+                                        <div className="chat-message-user">{msg.user}</div>
+                                        {/* 텍스트 메시지 */}
+                                        {msg.text && <div className="chat-message-text">{msg.text}</div>}
+                                        {/* 이미지 메시지 */}
+                                        {msg.imageUrl && (
+                                            <div className="chat-message-image">
+                                                <img src={msg.imageUrl} alt="uploaded"
+                                                     style={{maxWidth: '200px', maxHeight: '200px'}}/>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
 
@@ -237,10 +235,7 @@ function ChattingView() {
                 </div>
             </div>
         </div>
-
-        </div>
-            );
-
+    );
 }
 
 export default ChattingView;

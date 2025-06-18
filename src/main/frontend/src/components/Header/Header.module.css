@@ -47,11 +47,14 @@
 
 .server_list {
   flex: 1;
-  /*overflow-y: auto ;*/
+  overflow-y: auto ;
   width: 20%;
-  /*max-height: calc(100vh - 120px);*/
-  overflow: hidden;
+  max-height: calc(100vh - 120px);
+  /*overflow: hidden;*/
   min-height: 0;
+
+  -ms-overflow-style: none;  /* Internet Explorer, Edge */
+  scrollbar-width: none;     /* Firefox */
 }
 .server_box {
   display: flex;
@@ -78,28 +81,11 @@
   background: #c3ee41;
 }
 
-/*.line {*/
-/*  width: 50px;*/
-/*  height: 1px;*/
-/*  border-bottom: 1px solid #d9d9d9;*/
-/*  margin: 8px 0; !* 위아래 여백 *!*/
-/*  flex-shrink: 0; !* Flexbox에서 축소 방지 *!*/
-/*}*/
-
-/*.line {*/
-/*  width: 100% !important;*/
-/*  height: 1px !important;*/
-/*  background-color: #d9d9d9 !important;*/
-/*  margin: 8px 0 !important;*/
-/*  flex-shrink: 0 !important;*/
-/*  align-self: stretch !important;*/
-/*}*/
-
 .server_divider {
-  width: 80%;
-  height: 200px;
-  background-color: #4f545c;
-  margin: 12px auto;
+  width: 70%;
+  height: 1px;
+  background-color: #d9d9d9;
+  margin: 0 auto;
   border-radius: 1px;
   flex-shrink: 0;
   align-self: center;
@@ -115,9 +101,6 @@
   flex-shrink: 0;
   align-self: center;
 }
-
-
-
 
 .list_item {
   width: 100%;
