@@ -22,14 +22,19 @@ public class FriendshipId implements Serializable {
     @Column(name = "USER_B")
     private Long userB;
 
-    public FriendshipId(Long userA, Long userB) {
-        // 1 -> 2 친구 요청이 왔을때, 2->1은 친구가 아니라고 저장할수 있으므로 항상 A<B로 보장하여 주입
-        if (userA < userB) {
-            this.userA = userA;
-            this.userB = userB;
-        } else {
-            this.userA = userB;
-            this.userB = userA;
-        }
+    public FriendshipId(Long userA, Long userB){
+        this.userA = userA;
+        this.userB = userB;
     }
+
+//    public FriendshipId(Long userA, Long userB) {
+//        // 1 -> 2 친구 요청이 왔을때, 2->1은 친구가 아니라고 저장할수 있으므로 항상 A<B로 보장하여 주입
+//        if (userA < userB) {
+//            this.userA = userA;
+//            this.userB = userB;
+//        } else {
+//            this.userA = userB;
+//            this.userB = userA;
+//        }
+//    }
 }

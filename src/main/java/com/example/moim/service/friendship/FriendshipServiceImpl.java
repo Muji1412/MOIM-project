@@ -26,7 +26,8 @@ public class FriendshipServiceImpl implements FriendshipService{
     // 이미 요청을 보냈거나 친구인 상태라면 익셉션 throw
     @Override
     public void sendFriendRequest(Long requesterId, Long receiverId) {
-        FriendshipId friendshipId = new FriendshipId(requesterId, receiverId);
+        FriendshipId friendshipId =
+                new FriendshipId(requesterId, receiverId);
         if (friendshipRepository.findById(friendshipId).isPresent()) {
             throw new IllegalStateException("이미 요청을 보냈습니다.");
         }
