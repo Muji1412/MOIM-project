@@ -1,7 +1,25 @@
 /* 사용자 정보 조회 페이지 */
 
+.modal-overlay{
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: initial;
+    z-index: 500;
+}
+
 .box{
     overflow: hidden;
+    border-radius: 12px;
+    width: 770px;
+    text-align: center;
+    background: #eeeeee;;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* 좌측 회색 메뉴*/
@@ -24,13 +42,14 @@
 
 /*메뉴 My Account*/
 .menu-content{
-    background: #cccccc;
+    background: #a7a7a7;
     width: 85%;
     font-size: 16px;
     height: 28px;
     text-align: left;
     margin: 10px 20px;
     border-radius: 5px;
+    padding: 4px;
 }
 
 .menu-logout{
@@ -39,9 +58,10 @@
     font-size: 16px;
     border-bottom: 1px solid #a7a7a7;
     border-top: 1px solid #a7a7a7;
-    padding: 6px 0;
+    padding: 4px;
     margin: 10px 20px;
     cursor: pointer;
+    text-align: left;
 }
 
 .menu-logout > img{
@@ -55,6 +75,7 @@
     min-width: 500px;
     float: left;
     margin-left: 50px;
+    background: #eeeeee;
 }
 
 /* 맨 위 헤드라인 부분 */
@@ -112,6 +133,16 @@
 
 /* 프로필사진*/
 .profile-image {
+    display: inline-block;
+    float: left;
+    height: 100px;
+    width: 100px;
+    border-radius: 100%;
+    background: white;
+}
+
+/* 프로필사진*/
+.profile-image-img {
     display: inline-block;
     float: left;
     height: 100px;
