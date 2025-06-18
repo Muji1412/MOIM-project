@@ -1,0 +1,12 @@
+/* 캘린더 페이지 */
+
+/* 1. 전체 배경 -  중앙 정렬 */
+.login-background {
+    min-height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import './PwChangeFailModal.css'; // 스타일 분리
+import './pwChangeFailModal.css'; // 스타일 분리
 
 const PwChangeFailModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;

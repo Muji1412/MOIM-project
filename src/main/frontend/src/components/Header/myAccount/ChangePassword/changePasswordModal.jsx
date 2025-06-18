@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import './ChangePasswordModal.css';
-import PwChangeSuccessModal from "./PwChangeSuccessModal";
-import PwChangeFailModal from "./PwChangeFailModal";
+import './changePasswordModal.css';
+import PwChangeSuccessModal from "./pwChangeSuccessModal";
+import PwChangeFailModal from "./pwChangeFailModal";
 
 const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
 

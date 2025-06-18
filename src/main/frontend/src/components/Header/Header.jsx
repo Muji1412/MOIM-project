@@ -3,7 +3,7 @@ import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
 import {useNavigate} from "react-router-dom";
-import MyAccount from "./myAccount/MyAccount.jsx";
+import MyAccount from "./myAccount/myAccount.jsx";
 
 export default function Header() {
     const location = useLocation();

@@ -81,6 +81,10 @@ public class JWTService {
         return parseClaims(token).get("username", String.class);
     }
 
+    public String getUserNo(String token) {
+        return parseClaims(token).get("userNo", String.class);
+    }
+
     /**
      * JWT Claims 추출
      * @param accessToken

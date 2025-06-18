@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState} from 'react';
-import './AccountDeleteModal.css';
-import AccountDeleteFailModal from "./AccountDeleteFailModal";
-import AccountDeleteSuccessModal from "./AccountDeleteSuccessModal";
+import './accountDeleteModal.css';
+import AccountDeleteFailModal from "./accountDeleteFailModal";
+import AccountDeleteSuccessModal from "./accountDeleteSuccessModal";
 
 
 const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {

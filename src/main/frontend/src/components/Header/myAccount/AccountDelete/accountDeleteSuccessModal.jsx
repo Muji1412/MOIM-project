@@ -1,5 +1,5 @@
 import React from 'react';
-import './AccountDeleteSuccessModal.css';
+import './accountDeleteSuccessModal.css';
 
 const AccountDeleteSuccessModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
