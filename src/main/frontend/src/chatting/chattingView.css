@@ -1,4 +1,4 @@
-.channel-chat-wrap {
+.channel_chat_wrap {
   width: 550px;
   margin: 32px auto;
   background: #fff;
@@ -8,24 +8,24 @@
   font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
 }
 
-.channel-header {
+.channel_header {
   margin-bottom: 10px;
 }
 
-.channel-title {
+.channel_title {
   font-size: 28px;
   font-weight: 700;
   color: #222;
   margin-bottom: 2px;
 }
 
-.channel-desc {
+.channel_desc {
   font-size: 15px;
   color: #444;
   margin-bottom: 8px;
 }
 
-.chat-date-divider {
+.chat_date_divider {
   text-align: center;
   color: #888;
   font-size: 13px;
@@ -35,13 +35,13 @@
   padding-bottom: 2px;
 }
 
-.chat-message-row {
+.chat_message_row {
   display: flex;
   align-items: flex-start;
   margin-bottom: 10px;
 }
 
-.chat-avatar {
+.chat_avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -49,12 +49,12 @@
   margin-top: 2px;
   flex-shrink: 0;
 }
-.avatar-purple { background: #b92ff7; }
-.avatar-blue   { background: #1cc9e2; }
-.avatar-green  { background: #b6e63e; }
-.avatar-yellow { background: #ffe14a; }
+.avatar_purple { background: #b92ff7; }
+.avatar_blue   { background: #1cc9e2; }
+.avatar_green  { background: #b6e63e; }
+.avatar_yellow { background: #ffe14a; }
 
-.chat-message-bubble {
+.chat_message_bubble {
   background: #f7f7f7;
   border-radius: 10px;
   padding: 10px 16px 8px 16px;
@@ -63,21 +63,21 @@
   box-shadow: 0 1px 2px #eee;
 }
 
-.chat-message-user {
+.chat_message_user {
   font-size: 14px;
   font-weight: 600;
   color: #555;
   margin-bottom: 3px;
 }
 
-.chat-message-text {
+.chat_message_text {
   font-size: 15px;
   color: #222;
   line-height: 1.6;
   word-break: break-all;
 }
 
-.chat-input-row {
+.chat_input_row {
   display: flex;
   align-items: center;
   background: #fff;
@@ -87,13 +87,13 @@
   margin: 28px 0 24px 0;   /* 바깥쪽 공간(위 28px, 아래 24px) */
 }
 
-.chat-plus-icon {
+.chat_plus_icon {
   color: #6b7280; /* 회색 */
   font-size: 18px;
   margin-right: 8px;
 }
 
-.chat-input {
+.chat_input {
   border: none;
   outline: none;
   font-size: 16px;
