@@ -36,6 +36,51 @@ export default function Header() {
         });
     };
 
+    //채팅방 수정
+    const [isChannelModifyModalOpen, setIsChannelModifyModalOpen] = useState(false);
+    const [modifyChannelData, setModifyChannelData] = useState({id: "", name: ""});
+// 채팅방 수정 모달 열기
+    const handleOpenChannelModifyModal = (channelId) => {
+        const channelToModify = chatChannels.find(ch => ch.id === channelId);
+        if (channelToModify) {
+            setModifyChannelData({
+                id: channelToModify.id,
+                name: channelToModify.name
+            });
+            setIsChannelModifyModalOpen(true);
+        }
+        setChannelContextMenu(prev => ({...prev, visible: false}));
+    };
+
+    // 채팅방 수정 모달 닫기
+    const handleCloseChannelModifyModal = () => {
+        setIsChannelModifyModalOpen(false);
+        setModifyChannelData({id: "", name: ""});
+    };
+
+    // 채팅방 이름 수정 실행
+    const handleModifyChannel = (e) => {
+        e.preventDefault();
+        if (!modifyChannelData.name.trim()) return;
+
+        // 채팅방 목록에서 해당 채팅방 업데이트
+        setChatChannels(prev =>
+            prev.map(channel =>
+                channel.id === modifyChannelData.id
+                    ? {...channel, name: modifyChannelData.name.trim()}
+                    : channel
+            )
+        );
+
+        // 현재 선택된 채널이 수정된 채널인 경우 선택 상태도 업데이트
+        if (selectedChannel === chatChannels.find(ch => ch.id === modifyChannelData.id)?.name) {
+            setSelectedChannel(modifyChannelData.name.trim());
+        }
+
+        handleCloseChannelModifyModal();
+    };
+
+
     // 채팅방 삭제
     const handleDeleteChannel = (channelId) => {
         const channel = chatChannels.find(ch => ch.id === channelId);
@@ -752,13 +797,29 @@ export default function Header() {
                                                     }))}
                                                 >
                                                     <li className={styles.channel_context_box}>
-                                                        <div className={`${styles.channel_context_item} ${styles.channel_context_delete}`}
-                                                             onClick={(e) => {
-                                                                 e.stopPropagation();
-                                                                 handleDeleteChannel(channelContextMenu.channelId);
-                                                             }}
+                                                        <div
+                                                            className={styles.channel_context_item}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenChannelModifyModal(channelContextMenu.channelId);
+                                                            }}
                                                         >
-                                                            <span>채팅방 삭제</span>
+                                                            <span>채팅방 이름 변경</span>
+                                                        </div>
+                                                    </li>
+
+                                                    {/* 구분선 (선택사항) */}
+                                                    <li className={styles.context_divider}></li>
+
+                                                    <li className={styles.channel_context_box}>
+                                                        <div
+                                                            className={`${styles.channel_context_item} ${styles.channel_context_delete}`}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteChannel(channelContextMenu.channelId);
+                                                            }}
+                                                        >
+                                                            <span className={styles.context_del}>채팅방 삭제</span>
                                                         </div>
                                                     </li>
                                                 </ul>
@@ -1083,13 +1144,28 @@ export default function Header() {
                                                     }))}
                                                 >
                                                     <li className={styles.channel_context_box}>
+                                                        <div
+                                                            className={styles.channel_context_item}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenChannelModifyModal(channelContextMenu.channelId);
+                                                            }}
+                                                        >
+                                                            <span>채팅방 이름 변경</span>
+                                                        </div>
+                                                    </li>
+
+                                                    {/* 구분선 (선택사항) */}
+                                                    <li className={styles.context_divider}></li>
+
+                                                    <li className={styles.channel_context_box}>
                                                         <div className={`${styles.channel_context_item}`}
                                                              onClick={(e) => {
                                                                  e.stopPropagation();
                                                                  handleDeleteChannel(channelContextMenu.channelId);
                                                              }}
                                                         >
-                                                            <span>채팅방 삭제</span>
+                                                            <span className={styles.context_del}>채팅방 삭제</span>
                                                         </div>
                                                     </li>
                                                 </ul>
@@ -1371,7 +1447,7 @@ export default function Header() {
                             </button>
                         </div>
                         <form onSubmit={handleCreateChannel} className={modalStyles.modal_form}>
-                            <div className={modalStyles.modal_input_area}>
+                            <div className={`${modalStyles.modal_input_area} ${modalStyles.modal_input_chat}`}>
                                 <label
                                     className={modalStyles.modal_title_label}
                                     htmlFor="channelName"
@@ -1394,7 +1470,7 @@ export default function Header() {
                         나중에 채팅방 이름을 변경할 수 있습니다!
                     </span>
                             </div>
-                            <div className={modalStyles.modal_btn_area}>
+                            <div className={`${modalStyles.modal_btn_area} ${modalStyles.modal_btn_chat}`}>
                                 <div className={modalStyles.buttonRow}>
                                     <button
                                         type="button"
@@ -1412,6 +1488,78 @@ export default function Header() {
                     </div>
                 </div>
             )}
+
+            {/* 채팅방 수정 모달 */}
+            {isChannelModifyModalOpen && (
+                <div
+                    className={modalStyles.modalOverlay}
+                    onClick={handleCloseChannelModifyModal}
+                    tabIndex={-1}
+                    aria-modal="true"
+                    role="dialog"
+                >
+                    <div
+                        className={modalStyles.modal_box}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={modalStyles.modal_title_area}>
+                            <span className={modalStyles.modal_title}>채팅방 이름 변경</span>
+                            <p>새로운 채팅방 이름을 입력해주세요!</p>
+                            <button
+                                className={modalStyles.close_btn}
+                                onClick={handleCloseChannelModifyModal}
+                                aria-label="Close"
+                                type="button"
+                            >
+                                <img src="/bundle/img/close_ic.png" alt="close_ic"/>
+                            </button>
+                        </div>
+                        <form onSubmit={handleModifyChannel} className={modalStyles.modal_form}>
+                            <div className={`${modalStyles.modal_input_area} ${modalStyles.modal_input_chat}`}>
+                                <label
+                                    className={modalStyles.modal_title_label}
+                                    htmlFor="modifyChannelName"
+                                >
+                                    채팅방 이름
+                                </label>
+                                <div className={modalStyles.modal_input_box}>
+                                    <input
+                                        id="modifyChannelName"
+                                        type="text"
+                                        className={modalStyles.modal_input}
+                                        placeholder="새로운 채팅방 이름을 입력하세요"
+                                        value={modifyChannelData.name}
+                                        onChange={(e) => setModifyChannelData(prev => ({
+                                            ...prev,
+                                            name: e.target.value
+                                        }))}
+                                        required
+                                        autoFocus
+                                    />
+                                </div>
+                                <span className={modalStyles.guide}>
+                        채팅방 이름이 즉시 변경됩니다!
+                    </span>
+                            </div>
+                            <div className={`${modalStyles.modal_btn_area} ${modalStyles.modal_btn_chat}`}>
+                                <div className={modalStyles.buttonRow}>
+                                    <button
+                                        type="button"
+                                        className={modalStyles.backBtn}
+                                        onClick={handleCloseChannelModifyModal}
+                                    >
+                                        취소
+                                    </button>
+                                    <button type="submit" className={modalStyles.createBtn}>
+                                        변경
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
 
         </div>
     );

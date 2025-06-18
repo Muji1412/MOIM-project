@@ -33,6 +33,7 @@
 
 .modal_form{width: 100%;height: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 10px;}
 
+
 /* input_area */
 .modal_input_area{width: 100%; height: 100px;}
 .modal_input_box{width: 100%;border-radius: 10px;border: 2px solid #c3ee41; display: flex; justify-content: center;margin-top: 10px;}
@@ -57,3 +58,8 @@
 .backBtn:hover {background: #777;color: #fff;transition: 0.2s;}
 .createBtn{background: #c3ee41;color: #fff;transition: 0.2s;}
 .createBtn:hover{background: #a9d033;transition: 0.2s;}
+
+
+/* chat modal area  */
+.modal_btn_chat{margin-top: 135px;}
+.modal_input_chat{margin-top: 25px;}
