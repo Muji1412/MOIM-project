@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -149,18 +150,26 @@ public class UserRestController {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
 
-        // CustomUserDetails에서 직접 사용자 정보를 가져옵니다.
-        Long userNo = userDetails.getUserNo();
-        String username = userDetails.getUsername();
+        // CustomUserDetails에서 사용자 정보를 가져옵니다.
+        // CustomUserDetails가 Users 엔티티의 모든 정보를 포함하고 있다고 가정합니다.
+        // 필요에 따라 UsersRepository에서 직접 Users 엔티티를 조회하여 사용할 수도 있습니다.
+        Users user = usersRepository.findByUserNo(userDetails.getUserNo())
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 가져온 정보로 비즈니스 로직을 처리합니다.
-        // ...
-
-        // 클라이언트에 반환할 데이터를 만듭니다.
-        Map<String, Object> userInfo = Map.of(
-                "userNo", userNo,
-                "username", username
-        );
+        // 클라이언트에 반환할 데이터를 Map으로 구성 (비밀번호 제외)
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("userNo", user.getUserNo());
+        userInfo.put("username", user.getUsername());
+        userInfo.put("userEmail", user.getUserEmail());
+        userInfo.put("userPhone", user.getUserPhone());
+        userInfo.put("userNick", user.getUserNick());
+        userInfo.put("userImg", user.getUserImg());
+        userInfo.put("userMsg", user.getUserMsg());
+        userInfo.put("userNId", user.getUserNId());
+        userInfo.put("userKId", user.getUserKId());
+        userInfo.put("userLastLoggedDate", user.getUserLastLoggedDate());
+        userInfo.put("userIsDeleted", user.isUserIsDeleted());
+        // 비밀번호와 비밀번호 토큰은 민감 정보이므로 제외합니다.
 
         return ResponseEntity.ok(userInfo);
     }

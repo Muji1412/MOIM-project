@@ -1,5 +1,6 @@
 package com.example.moim.controller.users;
 
+import com.example.moim.command.FriendDTO;
 import com.example.moim.command.FriendRequestDTO;
 import com.example.moim.command.UserIdDTO;
 import com.example.moim.entity.Friendship;
@@ -73,7 +74,8 @@ public class FriendshipController {
     @PostMapping("/list")
     public ResponseEntity<?> getFriends(@RequestBody UserIdDTO request){
         try {
-            List<Friendship> friends = friendshipService.getFriends(request.getUserId());
+            // 서비스에서 FriendDTO 리스트를 반환하도록 변경했으므로, 그대로 반환
+            List<FriendDTO> friends = friendshipService.getFriends(request.getUserId());
             return ResponseEntity.ok(friends);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -83,7 +85,7 @@ public class FriendshipController {
     @PostMapping("/pending")
     public ResponseEntity<?> getPending(@RequestBody UserIdDTO request){
         try {
-            List<Friendship> pendingList = friendshipService.getPendingRequests(request.getUserId());
+            List<FriendDTO> pendingList = friendshipService.getPendingRequests(request.getUserId());
             return ResponseEntity.ok(pendingList);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
