@@ -25,7 +25,7 @@ export default defineConfig({
                 // 필요에 따른 기타 페이지들
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
-                myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
+                //myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
 
             },
             output: {

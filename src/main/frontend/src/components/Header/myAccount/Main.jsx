@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
-import Login from "../login/Login";
+import Login from "../../../user/login/login";
 
 import MyAccount from "./MyAccount";
 

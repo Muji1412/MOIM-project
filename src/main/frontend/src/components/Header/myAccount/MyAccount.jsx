@@ -110,7 +110,7 @@ export default function MyAccount ({isOpen, onClose}) {
                     {/* 맨 위 헤드라인 부분 */}
                     <div className="myAccount-headline">
                         <h2> My Account </h2>
-                        <a><img src='/bundle/img/btn_close.png'  alt="close button" onClick={handleClose}/></a>
+                        <a><img src='/bundle/img/btn_close.png' alt="close button" onClick={handleClose}/></a>
                     </div>
                     {/*회원정보 박스 컨테이너*/}
                     <div className="myAccount-container">

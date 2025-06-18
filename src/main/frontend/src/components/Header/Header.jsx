@@ -1,8 +1,9 @@
-import {useRef, useState, useEffect} from "react";
+import React, {useRef, useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
 import {useNavigate} from "react-router-dom";
+import MyAccount from "./myAccount/MyAccount.jsx";
 
 export default function Header() {
     const location = useLocation();
@@ -144,6 +145,7 @@ export default function Header() {
     // 모달 팝업
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+    const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
 
     // 새 서버 및 수정
     const [newServer, setNewServer] = useState({name: "", image: ""});
@@ -410,6 +412,17 @@ export default function Header() {
     const isFriendMenu = selectedServerId === "default";
     const selectedServer = servers.find((s) => s.id === selectedServerId);
     const selectedServerName = selectedServer ? selectedServer.name : "";
+
+    //myAccount 모달창 켜기
+    const openAccountModifyModal = () => {
+        setIsAccountModifyModalOpen(true);
+    }
+
+    //myAccount 모달창 끄기
+    const closeAccountModifyModal = () => {
+        setIsAccountModifyModalOpen(false);
+    }
+
 
     // Header 내용 렌더링
     const renderHeaderContent = () => {
@@ -1242,7 +1255,7 @@ export default function Header() {
                             <div className={styles.user_rbox}>
                                 <img src="/bundle/img/close_mic.png" alt="mic"/>
                                 <img src="/bundle/img/open_head.png" alt="  head"/>
-                                <img src="/bundle/img/setting_ic.png" alt="set"/>
+                                <img src="/bundle/img/setting_ic.png" alt="set" onClick={openAccountModifyModal}/>
                             </div>
                         </div>
                     </div>
@@ -1559,7 +1572,11 @@ export default function Header() {
                     </div>
                 </div>
             )}
-
+            {/*회원정보 모달*/}
+            {isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}
+                                                     onClose={() => {
+                                                         closeAccountModifyModal();
+                                                          }} />)}
 
         </div>
     );

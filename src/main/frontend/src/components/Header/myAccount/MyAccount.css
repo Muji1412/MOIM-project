@@ -38,6 +38,7 @@
     font-size: 12px;
     text-align: left;
     margin: 10px 20px;
+    padding-top: 30px;
 }
 
 /*메뉴 My Account*/
@@ -95,7 +96,9 @@
 .myAccount-headline > h2 {
     display: inline-block;
     float: left;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+    height: 90px;
+    line-height: 90px;
 }
 
 /* my account 우측 닫기 버튼*/
