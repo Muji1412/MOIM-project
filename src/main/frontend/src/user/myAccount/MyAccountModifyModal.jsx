@@ -17,6 +17,8 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
     const userEmailRef = useRef(null);
     const userNickRef = useRef(null);
     const userPhoneRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
         if (!userInfo) return;
@@ -31,15 +33,23 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         console.log(userEmail, newEmail);
     }, [userInfo]);
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        //이미지 클라우드 저장 및 url 반환받아 userImg에 넣기
+        const imgUrl = await handleImgUpload(selectedFile); // selectedFile은 따로 저장해둔 파일 객체
+        const finalImg = imgUrl || userImg; // 이미지 업로드 안 했으면 기존 값 유지
         // 저장 요청 보내기
-        fetch("/api/user/myAccount/modifyInfo", {
+        const res = await fetch("/api/user/myAccount/modifyInfo", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({username, userEmail : newEmail, userNick : newNick, userPhone, userImg, userMsg})
+            body: JSON.stringify({username
+                , userEmail : newEmail
+                , userNick : newNick
+                , userPhone
+                , userImg : finalImg
+                , userMsg})
         })
             .then(res => res.json())
             .then(() => {
@@ -126,9 +136,32 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         }, 500), []
     );
 
-    const handleImgUpload = () => {
-        const [uploadImgUrl, setUploadImgUrl] = useState("");
-    }
+   const handleImgUpload = async (selectedFile) => {
+        if (!selectedFile) return null;
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        //클라우드에 formData 이용해 파일업로드
+        const uploadRes = await fetch('api/files', {
+            method: 'POST',
+            body: formData,
+        });
+        //db에 이미지 url 저장
+        const imgUrl = await uploadRes.text();
+        console.log(imgUrl);
+        return imgUrl;
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            setSelectedFile(file);
+            reader.onload = () => {
+                setPreviewUrl(reader.result);
+            }
+            reader.readAsDataURL(file);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -178,14 +211,17 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                     <input className="modal-inner-input" value={userMsg}
                            onChange={e => setUserMsg(e.target.value)}></input>
                     {/*프로필 이미지*/}
-                    <div className="modal-inner-label">
-                        Profile Image <p className="modal-inner-star"></p>
+                    <div className="profile-image-box">
+                        <div className="modal-inner-label">
+                            Profile Image <p className="modal-inner-star"></p>
+                        </div>
+                        <input  id="fileUpload" type="file" accept="image/*"
+                                style={{display:"none"}} onChange={handleFileChange}></input>
+                        <label htmlFor="fileUpload" className="custom-file-label">
+                            {previewUrl ? <img src={previewUrl} alt="previewImg"/>
+                                : <img src="/bundle/img/add_plus_ic.png" alt="addImg"/>}
+                        </label>
                     </div>
-                    <input  id="fileUpload" type="file" accept="/image/*"
-                            style={{display:"none"}} onChange={handleImgUpload}></input>
-                    <label htmlFor="fileUpload" className="custom-file-label">
-                        <img src="/bundle/img/add_plus_ic.png" alt="addImage"/>
-                    </label>
                 </div>
                 {/*수정 버튼*/}
                 <button className="modal-btn" onClick={handleSave}>

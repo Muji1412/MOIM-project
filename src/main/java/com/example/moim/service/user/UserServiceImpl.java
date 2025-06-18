@@ -155,8 +155,8 @@ public class UserServiceImpl implements UserService {
     public Users modifyInfo(MyAccountDTO myAccountDTO) {
         Users user = usersRepository.findByUsername(myAccountDTO.username()).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
-        System.out.println("입력한 이메일"+myAccountDTO.userEmail());
-        System.out.println("가져온 이메일"+user.getUsername());
+//        System.out.println("입력한 이메일"+myAccountDTO.userEmail());
+//        System.out.println("가져온 이메일"+user.getUsername());
         //이메일, 닉네임 중복 체크. 이때 자기자신의 이메일과 닉네임은 체크되지 않게 함
         if(!myAccountDTO.userEmail().equals(user.getUserEmail()) &&
                 usersRepository.existsByUserEmail(myAccountDTO.userEmail())) {
