@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
-import './Signup.css';
+import './signup.css';
 import debounce from 'lodash/debounce';
-import SignupSuccessModal from './SignupSuccessModal';
+import SignupSuccessModal from './signupSuccessModal';
 
 export default function Signup() {
     const [username, setUsername] = useState('');
@@ -44,7 +44,7 @@ export default function Signup() {
         checkUsername(value);
     };
 
-    //비밀번호 중복 체크
+    //비밀번호 동일 여부 체크
     const handlePwChange = (e) => {
         const value = e.target.value;
         setPassword2(value);
@@ -169,7 +169,7 @@ export default function Signup() {
     return (
     <div className="signup-background">
       <div className="signup-container">
-        <img src="/img/logo_signup.png" alt="logo_signup" className="signup-logo" />
+        <img src="/bundle/img/logo_signup.png" alt="logo_signup" className="signup-logo" />
         {/* 아이디 */}
         <div className="signup-input-group">
           <label>
@@ -209,8 +209,8 @@ export default function Signup() {
             onChange={e => setPassword2(e.target.value)}
             onBlur={e => handlePwChange(e)}
           />
-          {pwCheck === true && <span style={{ color: '#ee2349' }}>Password doesn't match</span>}
-            {pwCheck === false && <span style={{ color: '#97b82d' }}>Password matches</span>}
+          {pwCheck === true && <span style={{ color: '#ee2349' }}>Passwords don't match</span>}
+            {pwCheck === false && <span style={{ color: '#97b82d' }}>Passwords match</span>}
         </div>
         {/* 이메일 */}
         <div className="signup-input-group">

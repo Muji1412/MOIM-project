@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -151,23 +152,28 @@ public class UserServiceImpl implements UserService {
     //회원 정보 수정
     @Transactional
     @Override
-    public Users modifyInfo(UserVO uservo) {
-        Users user = usersRepository.findByUsername(uservo.getUsername()).filter(u -> !u.isUserIsDeleted())
+    public Users modifyInfo(MyAccountDTO myAccountDTO) {
+        Users user = usersRepository.findByUsername(myAccountDTO.username()).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
+        System.out.println("입력한 이메일"+myAccountDTO.userEmail());
+        System.out.println("가져온 이메일"+user.getUsername());
         //이메일, 닉네임 중복 체크. 이때 자기자신의 이메일과 닉네임은 체크되지 않게 함
-        if(!uservo.getUserEmail().equals(uservo.getUserEmail()) &&
-                usersRepository.existsByUserEmail(uservo.getUserEmail())) {
+        if(!myAccountDTO.userEmail().equals(user.getUserEmail()) &&
+                usersRepository.existsByUserEmail(myAccountDTO.userEmail())) {
+            System.out.println(111);
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다");
-        } else if (!uservo.getUserNick().equals(user.getUserNick()) &&
-                usersRepository.existsByUserNick(uservo.getUserNick())) {
+        } else if (!myAccountDTO.userNick().equals(user.getUserNick()) &&
+                usersRepository.existsByUserNick(myAccountDTO.userNick())) {
+            System.out.println(222);
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다");
         }
+        System.out.println(333);
         //user엔티티에 값 넣어 repository에 save
-        user.setUserEmail(uservo.getUserEmail());
-        user.setUserNick(uservo.getUserNick());
-        user.setUserPhone(uservo.getUserPhone());
-        user.setUserImg(uservo.getUserImg());
-        user.setUserMsg(uservo.getUserMsg());
+        user.setUserEmail(myAccountDTO.userEmail());
+        user.setUserNick(myAccountDTO.userNick());
+        user.setUserPhone(myAccountDTO.userPhone());
+        user.setUserImg(myAccountDTO.userImg());
+        user.setUserMsg(myAccountDTO.userMsg());
 
         return usersRepository.save(user);
     }
@@ -185,8 +191,8 @@ public class UserServiceImpl implements UserService {
         //비밀번호 변경 후 DB에 저장
         user.setPassword(passwordEncoder.encode(pwChangeDTO.getNewPw()));
         //기존의 액세스 토큰 및 리프레쉬 토큰 삭제
-        Optional<RefreshToken> storedTokenOpt = refreshTokenRepository.findByUserUserNo(user.getUserNo());
-        storedTokenOpt.ifPresent(refreshTokenRepository::delete);
+        //Optional<RefreshToken> storedTokenOpt = refreshTokenRepository.findByUserUserNo(user.getUserNo());
+        //storedTokenOpt.ifPresent(refreshTokenRepository::delete);
 
         return usersRepository.save(user);
     }
@@ -244,18 +250,18 @@ public class UserServiceImpl implements UserService {
 
     //회원 탈퇴 - users 테이블의 user_is_deleted 컬럼을 true로 변경
     @Override
-    public boolean deleteAccount(String password) {
+    public boolean deleteAccount(@RequestParam String password) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails principal = (CustomUserDetails)authentication.getPrincipal();
         String username = principal.getCustomUserInfoVO().getUsername();
         Users user = usersRepository.findByUsername(username).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow( () -> new EntityNotFoundException("유저가 없습니다."));
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            System.out.println("비밀번호 일치 여부: " + passwordEncoder.matches(password, user.getPassword()));
-            System.out.println("입력 비밀번호: " + password);
-            System.out.println("DB 비밀번호: " + user.getPassword());
+//            System.out.println("비밀번호 일치 여부: " + passwordEncoder.matches(password, user.getPassword()));
+//            System.out.println("입력 비밀번호: " + password);
+//            System.out.println("DB 비밀번호: " + user.getPassword());
             boolean isMatch = passwordEncoder.matches(password, user.getPassword());
-            System.out.println("일치 여부: " + isMatch);
+//            System.out.println("일치 여부: " + isMatch);
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
         user.setUserIsDeleted(true);
@@ -274,7 +280,8 @@ public class UserServiceImpl implements UserService {
                                             , user.getUserEmail()
                                             , user.getUserNick()
                                             , user.getUserPhone()
-                                            , user.getUserImg());
+                                            , user.getUserImg()
+                                            , user.getUserMsg());
         return dto;
     }
 }
