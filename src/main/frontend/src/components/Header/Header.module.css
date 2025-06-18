@@ -53,6 +53,7 @@
   /*overflow: hidden;*/
   min-height: 0;
 
+  /* 브라우저별로 스크롤바 UI 숨김 처리 */
   -ms-overflow-style: none;  /* Internet Explorer, Edge */
   scrollbar-width: none;     /* Firefox */
 }
@@ -442,3 +443,23 @@
 .context_box span{margin-left: 7px;}
 
 .context_quit{color: #F24822;}
+
+/*---------- channel contexet modal menu ----------*/
+/* 채팅방 전용 ContextMenu */
+.channel_context_menu{
+  position: fixed;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 9999;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  min-width: 90px;
+}
+
+.channel_context_box{width: 140px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer;}
+.channel_context_box:hover .channel_context_item{background: #d9d9d9; transition: 0.2s;}
+.channel_context_item{width:130px; height: 30px; display: flex; justify-content: center; align-items: center; border-radius: 5px;}
+.channel_context_item span{margin-left: 7px; color: #f24822;}

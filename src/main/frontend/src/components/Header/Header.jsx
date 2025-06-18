@@ -2,23 +2,109 @@ import {useRef, useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 export default function Header() {
     const location = useLocation();
     const navigate = useNavigate();
 
+    //선택한 서버 or 채널
     const [selectedMenuItem, setSelectedMenuItem] = useState("friend");
     const [selectedChannel, setSelectedChannel] = useState("general"); // 채널 선택 상태 추가
 
+    // 채팅방 부분 - 기본 채팅방은 삭제 불가 (최소 1개 이상 남아있어야 함)
+    const [chatChannels, setChatChannels] = useState([{id: 1, name: "일반채팅", type: "chat", isDeletable: false}]);
+    const [channelIdCounter, setChannelIdCounter] = useState(2);
+    const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
+    const [newChannelName, setNewChannelName] = useState("");
+    const [channelContextMenu, setChannelContextMenu] = useState({visible: false, x: 0, y: 0, channelId: null,});
+
+    // 채팅방 ContextMenu
+    const handleChannelContextMenu = (e, channelId) => {
+        e.preventDefault();
+        const channel = chatChannels.find(ch => ch.id === channelId);
+
+        //기본 채팅방이거나 채팅방이 1개뿐일 때 context 메뉴는 표시 안 함
+        if (!channel?.isDeletable || chatChannels.length <= 1) {
+            return;
+        }
+        setChannelContextMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY,
+            channelId,
+        });
+    };
+
+    // 채팅방 삭제
+    const handleDeleteChannel = (channelId) => {
+        const channel = chatChannels.find(ch => ch.id === channelId);
+        //삭제 가능 여부
+        if (!channel?.isDeletable || chatChannels.length <= 1) {
+            alert("최소 1개의 채팅방은 유지되어야 합니다.");
+            return;
+        }
+        // 현재 선택된 채널이 삭제될 경우 다른 채널로 변경
+        if (selectedChannel === channel.name) {
+            const remainingChannels = chatChannels.filter(ch => ch.id !== channelId);
+            setSelectedChannel(remainingChannels[0].name);
+        }
+
+        setChatChannels(prev => prev.filter(ch => ch.id !== channelId));
+        setChannelContextMenu(prev => ({...prev, visible: false}));
+    };
+
+    // 컨텍스트 메뉴 닫기
+    useEffect(() => {
+        const handleClick = () => {
+            if (channelContextMenu.visible) {
+                setChannelContextMenu(prev => ({...prev, visible: false}));
+            }
+        };
+        window.addEventListener("click", handleClick);
+        return () => window.removeEventListener("click", handleClick);
+    }, [channelContextMenu.visible]);
+
+    //채팅방 모달
+    const handleOpenChannelModal = () => {
+        setIsChannelModalOpen(true);
+        setNewChannelName("");
+    }
+    const handleCloseChannelModal = () => {
+        setIsChannelModalOpen(false);
+        setNewChannelName("");
+    };
+
+    //채팅방 생성
+    const handleCreateChannel = (e) => {
+        e.preventDefault();
+        if (!newChannelName.trim()) return;
+
+        const newChannel = {
+            id: channelIdCounter,
+            name: newChannelName.trim(),
+            type: "chat",
+            isDeletable: true //사용자가 만든 채팅방은 삭제 가능
+        };
+        setChatChannels(prev => [...prev, newChannel]);
+        setChannelIdCounter(prev => prev + 1);
+        setIsChannelModalOpen(false);
+        setNewChannelName("");
+    }
 
     // 기존 상태들
     const [servers, setServers] = useState([]);
     const [selectedServerId, setSelectedServerId] = useState("default");
+
+    // 모달 팝업
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+
+    // 새 서버 및 수정
     const [newServer, setNewServer] = useState({name: "", image: ""});
     const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""});
+
+    //이미지 업로드 및 수정
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState("");
     const [modifyImageFile, setModifyImageFile] = useState(null);
@@ -363,8 +449,10 @@ export default function Header() {
                                     onClick={() => handleServerClick("default")}
                                     title="Home"
                                 >
-                                    <div className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
-                                    <div className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
+                                    <div
+                                        className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
+                                    <div
+                                        className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
                                         <img src="/bundle/img/home_ic.png" alt="Home"
                                              className={selectedServerId === "default" ? styles.active_ic : ""}/>
                                     </div>
@@ -380,7 +468,8 @@ export default function Header() {
                                         onClick={() => handleServerClick(server.id)}
                                         title={server.name}
                                     >
-                                        <div className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
+                                        <div
+                                            className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
                                         <div
                                             className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                             style={{
@@ -474,7 +563,7 @@ export default function Header() {
                                         <div
                                             className={`${styles.menu_item} ${selectedMenuItem === "friend" ? styles.active_menu_item : ""}`}
                                             onClick={() => setSelectedMenuItem("friend")}
-                                            style={{ cursor: "pointer" }}
+                                            style={{cursor: "pointer"}}
                                         >
                                             <img src="/bundle/img/friend_ic.png" alt="friend_ic"/>
                                             <p>Friend</p>
@@ -486,7 +575,7 @@ export default function Header() {
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "calendar" ? styles.active_menu_item : ""}`}
                                                 onClick={() => setSelectedMenuItem("calendar")}
-                                                style={{ cursor: "pointer" }}
+                                                style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
                                                 <p>Calendar</p>
@@ -496,7 +585,7 @@ export default function Header() {
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "todo" ? styles.active_menu_item : ""}`}
                                                 onClick={() => setSelectedMenuItem("todo")}
-                                                style={{ cursor: "pointer" }}
+                                                style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/todo_ic.png" alt="todo_ic"/>
                                                 <p>Todo List</p>
@@ -506,7 +595,7 @@ export default function Header() {
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
                                                 onClick={() => setSelectedMenuItem("board")}
-                                                style={{ cursor: "pointer" }}
+                                                style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/board_ic.png" alt="board_ic"/>
                                                 <p>White Board</p>
@@ -577,7 +666,7 @@ export default function Header() {
                                                                 <div
                                                                     className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
                                                                     onClick={() => setSelectedChannel("voice")}
-                                                                    style={{ cursor: "pointer" }}
+                                                                    style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
                                                                     <span>음성채팅</span>
@@ -620,6 +709,7 @@ export default function Header() {
                                                         src="/bundle/img/add_plus_ic.png"
                                                         alt="add_ic"
                                                         style={{cursor: "pointer"}}
+                                                        onClick={handleOpenChannelModal}
                                                     />
                                                 </div>
                                                 <div
@@ -630,20 +720,49 @@ export default function Header() {
                                                 >
                                                     {openChat && (
                                                         <ul style={{listStyle: "none", margin: 0, padding: 0}}>
-                                                            <li className={styles.channel_item}>
-                                                                <div
-                                                                    className={`${styles.channel_item_box} ${selectedChannel === "general" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("general")}
-                                                                    style={{ cursor: "pointer" }}
-                                                                >
-                                                                    <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
-                                                                    <span>일반채팅</span>
-                                                                </div>
-                                                            </li>
+                                                            {chatChannels.map((channel) => (
+                                                                <li key={channel.id} className={styles.channel_item}>
+                                                                    <div
+                                                                        className={`${styles.channel_item_box} ${selectedChannel === channel.name ? styles.active_channel : ""}`}
+                                                                        onClick={() => setSelectedChannel(channel.name)}
+                                                                        onContextMenu={(e) => handleChannelContextMenu(e, channel.id)}
+                                                                        style={{cursor: "pointer"}}
+                                                                    >
+                                                                        <img src="/bundle/img/chat_hash_ic.png"
+                                                                             alt="chat"/>
+                                                                        <span>{channel.name}</span>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
                                                         </ul>
                                                     )}
                                                 </div>
                                             </div>
+                                            {/* 채팅방 ContextMenu */}
+                                            {channelContextMenu.visible && (
+                                                <ul
+                                                    className={styles.channel_context_menu}
+                                                    style={{
+                                                        top: channelContextMenu.y,
+                                                        left: channelContextMenu.x,
+                                                    }}
+                                                    onClick={() => setChannelContextMenu(prev => ({
+                                                        ...prev,
+                                                        visible: false
+                                                    }))}
+                                                >
+                                                    <li className={styles.channel_context_box}>
+                                                        <div className={`${styles.channel_context_item} ${styles.channel_context_delete}`}
+                                                             onClick={(e) => {
+                                                                 e.stopPropagation();
+                                                                 handleDeleteChannel(channelContextMenu.channelId);
+                                                             }}
+                                                        >
+                                                            <span>채팅방 삭제</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -664,8 +783,10 @@ export default function Header() {
                                     onClick={() => handleServerClick("default")}
                                     title="Home"
                                 >
-                                    <div className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
-                                    <div className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
+                                    <div
+                                        className={`${styles.fill} ${selectedServerId === "default" ? styles.active_fill : ""}`}></div>
+                                    <div
+                                        className={`${styles.server_ic} ${styles.home_ic} ${selectedServerId === "default" ? styles.active_ic : ""}`}>
                                         <img
                                             src="/bundle/img/home_ic.png"
                                             alt="Home"
@@ -684,7 +805,8 @@ export default function Header() {
                                         onClick={() => handleServerClick(server.id)}
                                         title={server.name}
                                     >
-                                        <div className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
+                                        <div
+                                            className={`${styles.fill} ${selectedServerId === server.id ? styles.active_fill : ""}`}></div>
                                         <div
                                             className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                             style={{
@@ -785,7 +907,7 @@ export default function Header() {
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "calendar" ? styles.active_menu_item : ""}`}
                                                 onClick={() => setSelectedMenuItem("calendar")}
-                                                style={{ cursor: "pointer" }}
+                                                style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
                                                 <p>Calendar</p>
@@ -795,7 +917,7 @@ export default function Header() {
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "todo" ? styles.active_menu_item : ""}`}
                                                 onClick={() => setSelectedMenuItem("todo")}
-                                                style={{ cursor: "pointer" }}
+                                                style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/todo_ic.png" alt="cal_ic"/>
                                                 <p>Todo List</p>
@@ -805,7 +927,7 @@ export default function Header() {
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
                                                 onClick={() => setSelectedMenuItem("board")}
-                                                style={{ cursor: "pointer" }}
+                                                style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
                                                 <p>White Board</p>
@@ -875,7 +997,7 @@ export default function Header() {
                                                                 <div
                                                                     className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
                                                                     onClick={() => setSelectedChannel("voice")}
-                                                                    style={{ cursor: "pointer" }}
+                                                                    style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
                                                                     <span>음성채팅</span>
@@ -918,6 +1040,7 @@ export default function Header() {
                                                         src="/bundle/img/add_plus_ic.png"
                                                         alt="add_ic"
                                                         style={{cursor: "pointer"}}
+                                                        onClick={handleOpenChannelModal}
                                                     />
                                                 </div>
                                                 <div
@@ -928,20 +1051,49 @@ export default function Header() {
                                                 >
                                                     {openChat && (
                                                         <ul style={{listStyle: "none", margin: 0, padding: 0}}>
-                                                            <li className={styles.channel_item}>
-                                                                <div
-                                                                    className={`${styles.channel_item_box} ${selectedChannel === "general" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("general")}
-                                                                    style={{ cursor: "pointer" }}
-                                                                >
-                                                                    <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
-                                                                    <span>일반채팅</span>
-                                                                </div>
-                                                            </li>
+                                                            {chatChannels.map((channel) => (
+                                                                <li key={channel.id} className={styles.channel_item}>
+                                                                    <div
+                                                                        className={`${styles.channel_item_box} ${selectedChannel === channel.name ? styles.active_channel : ""}`}
+                                                                        onClick={() => setSelectedChannel(channel.name)}
+                                                                        onContextMenu={(e) => handleChannelContextMenu(e, channel.id)}
+                                                                        style={{cursor: "pointer"}}
+                                                                    >
+                                                                        <img src="/bundle/img/chat_hash_ic.png"
+                                                                             alt="chat"/>
+                                                                        <span>{channel.name}</span>
+                                                                    </div>
+                                                                </li>
+                                                            ))}
                                                         </ul>
                                                     )}
                                                 </div>
                                             </div>
+                                            {/* 채팅방 ContextMenu */}
+                                            {channelContextMenu.visible && (
+                                                <ul
+                                                    className={styles.channel_context_menu}
+                                                    style={{
+                                                        top: channelContextMenu.y,
+                                                        left: channelContextMenu.x,
+                                                    }}
+                                                    onClick={() => setChannelContextMenu(prev => ({
+                                                        ...prev,
+                                                        visible: false
+                                                    }))}
+                                                >
+                                                    <li className={styles.channel_context_box}>
+                                                        <div className={`${styles.channel_context_item}`}
+                                                             onClick={(e) => {
+                                                                 e.stopPropagation();
+                                                                 handleDeleteChannel(channelContextMenu.channelId);
+                                                             }}
+                                                        >
+                                                            <span>채팅방 삭제</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -1192,6 +1344,75 @@ export default function Header() {
                     </div>
                 </div>
             )}
+
+            {/* 채팅방 생성 모달 */}
+            {isChannelModalOpen && (
+                <div
+                    className={modalStyles.modalOverlay}
+                    onClick={handleCloseChannelModal}
+                    tabIndex={-1}
+                    aria-modal="true"
+                    role="dialog"
+                >
+                    <div
+                        className={modalStyles.modal_box}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={modalStyles.modal_title_area}>
+                            <span className={modalStyles.modal_title}>새 채팅방 만들기</span>
+                            <p>채팅방 이름을 입력해주세요!</p>
+                            <button
+                                className={modalStyles.close_btn}
+                                onClick={handleCloseChannelModal}
+                                aria-label="Close"
+                                type="button"
+                            >
+                                <img src="/bundle/img/close_ic.png" alt="close_ic"/>
+                            </button>
+                        </div>
+                        <form onSubmit={handleCreateChannel} className={modalStyles.modal_form}>
+                            <div className={modalStyles.modal_input_area}>
+                                <label
+                                    className={modalStyles.modal_title_label}
+                                    htmlFor="channelName"
+                                >
+                                    채팅방 이름
+                                </label>
+                                <div className={modalStyles.modal_input_box}>
+                                    <input
+                                        id="channelName"
+                                        type="text"
+                                        className={modalStyles.modal_input}
+                                        placeholder="채팅방 이름을 입력하세요"
+                                        value={newChannelName}
+                                        onChange={(e) => setNewChannelName(e.target.value)}
+                                        required
+                                        autoFocus
+                                    />
+                                </div>
+                                <span className={modalStyles.guide}>
+                        나중에 채팅방 이름을 변경할 수 있습니다!
+                    </span>
+                            </div>
+                            <div className={modalStyles.modal_btn_area}>
+                                <div className={modalStyles.buttonRow}>
+                                    <button
+                                        type="button"
+                                        className={modalStyles.backBtn}
+                                        onClick={handleCloseChannelModal}
+                                    >
+                                        취소
+                                    </button>
+                                    <button type="submit" className={modalStyles.createBtn}>
+                                        생성
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
