@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
-
-
-
-
+const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8089'  // ⚠️ 포트 번호는 본인 백엔드 서버에 맞게 수정
+    : 'https://moim.o-r.kr';
 
 // --- Helper Component ---
 const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
@@ -32,7 +31,7 @@ const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
     );
 });
 
-function VideoCall() {
+function Videocall() {
     // --- State Management ---
     const [session, setSession] = useState(null);
     const [publisher, setPublisher] = useState(null);
@@ -43,7 +42,49 @@ function VideoCall() {
     const [isMicEnabled, setIsMicEnabled] = useState(true);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [mainStreamManager, setMainStreamManager] = useState(null);
+    const [chatData, setChatData] = useState(null);
+    const [autoJoin, setAutoJoin] = useState(false);
+    const [showJoinForm, setShowJoinForm] = useState(false);
 
+
+    useEffect(() => {
+        const getStoredData = () => {
+            try {
+                const storedData = sessionStorage.getItem('videoChatData');
+                if (storedData) {
+                    const data = JSON.parse(storedData);
+                    setChatData(data);
+                    console.log('받은 채팅 데이터:', data);
+                    // 자동 연결 데이터가 있으면 폼을 보여주지 않음
+                    setShowJoinForm(false);
+                } else {
+                    // 자동 연결 데이터가 없으면 폼을 보여줌
+                    setShowJoinForm(true);
+                }
+            } catch (error) {
+                console.error('데이터 로딩 오류:', error);
+                setShowJoinForm(true); // 오류 시에도 폼 보여줌
+            }
+        };
+
+        getStoredData();
+    }, []);
+
+    useEffect(() => {
+        if (chatData) {
+            setSessionIdInput(chatData.roomId);
+            setUserName(chatData.userName);
+            setAutoJoin(true);
+            setShowJoinForm(false); // 확실하게 폼 숨김
+        }
+    }, [chatData]);
+
+    useEffect(() => {
+        if (autoJoin && sessionIdInput && userName) {
+            joinSession();
+            setAutoJoin(false);
+        }
+    }, [autoJoin, sessionIdInput, userName]);
     // --- Refs ---
     const OV = useRef(new OpenVidu());
     const sessionRef = useRef(null); // 세션 객체를 ref에 저장하여 최신 상태를 유지
@@ -85,7 +126,7 @@ function VideoCall() {
 
     // 세션 참여 로직 (내부 로직은 동일)
     const joinSession = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         try {
             const roomName = sessionIdInput || "default-room-moim";
             const mySession = OV.current.initSession();
@@ -125,9 +166,14 @@ function VideoCall() {
             setSession(mySession);
             setPublisher(myPublisher);
             setIsConnected(true);
+            setShowJoinForm(false)
         } catch (error) {
             console.error('세션 참여 실패:', error);
             alert(`연결 실패: ${error.message}`);
+            // 연결 실패 시에만 폼을 다시 보여줄지 결정
+            if (!chatData) {
+                setShowJoinForm(true);
+            }
         }
     };
 
@@ -168,7 +214,7 @@ function VideoCall() {
     // --- Render Logic ---
 
     // 접속 전 UI
-    if (!isConnected) {
+    if (!isConnected && !autoJoin && !chatData) {
         return (
             <>
                 <style>{joinFormStyles}</style>
@@ -270,4 +316,4 @@ const videoCallStyles = `
     .control-btn.leave { background-color: #ea4335; }
 `;
 
-export default VideoCall;
+export default Videocall;

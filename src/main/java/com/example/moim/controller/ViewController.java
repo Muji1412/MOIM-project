@@ -35,6 +35,7 @@ public class ViewController {
     @GetMapping("/{pageName}.do")
     public String separatePage(@PathVariable String pageName, Model model) {
         model.addAttribute("pageName", pageName);
+        log.info(pageName + " 접속중");
 
         // 서비스 워커가 필요한 페이지인지 확인 (필요하다면)
         if ("popupTest".equals(pageName) || "chattingView".equals(pageName)) {

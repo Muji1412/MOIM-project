@@ -149,7 +149,7 @@ export default function Header() {
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
     const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
 
-    // --- 🎈[추가] 초대 모달 관련 상태 ---
+    // 초대 관련 모달
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [inviteLink, setInviteLink] = useState('');
     const [inviteDays, setInviteDays] = useState(7);
@@ -176,9 +176,39 @@ export default function Header() {
         serverId: null,
     });
 
-    const [openChat, setOpenChat] = useState(true);
-    const [openVoice, setOpenVoice] = useState(true);
+    // 현재 유저정보 가져오는 api
+    const [currentUser, setCurrentUser] = useState(null);
+    useEffect(() => {
+        const fetchMyInfo = async () => {
+            const token = sessionStorage.getItem('accessToken');
+            if (!token) {
+                console.log('로그인이 필요합니다.');
+                return;
+            }
 
+            try {
+                const response = await fetch('/api/user/my-info', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentUser(data);
+                    console.log('currentUser:', data);
+                } else {
+                    console.error('사용자 정보 로딩 실패');
+                }
+            } catch (error) {
+                console.error('사용자 정보 로딩 중 오류:', error);
+            }
+        };
+
+        fetchMyInfo();
+
+    }, []);
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
 
@@ -271,6 +301,7 @@ export default function Header() {
     // 서버(홈/일반) 클릭 핸들러
     const handleServerClick = (serverId) => {
         setSelectedServerId(serverId);
+        console.log(serverId)
         if (serverId === "default") {
             navigate("/main");
         } else {
@@ -311,14 +342,12 @@ export default function Header() {
         setModifyImageFile(null);
         setModifyImagePreview("");
     };
-    // --- 🎈[추가] 초대 모달 열기 ---
     const openInviteModal = (serverId) => {
         setSelectedServerForInvite(serverId); // 어떤 서버에 대한 초대인지 ID 저장
         setIsInviteModalOpen(true);
         setContextMenu({ visible: false }); // 컨텍스트 메뉴 닫기
     };
 
-    // --- 🎈[추가] 초대 모달 닫기 ---
     const closeInviteModal = () => {
         setIsInviteModalOpen(false);
         setInviteLink(''); // 상태 초기화
@@ -357,6 +386,33 @@ export default function Header() {
         navigator.clipboard.writeText(inviteLink).then(() => {
             alert('초대 링크가 복사되었습니다!');
         });
+    };
+
+    const [openVoice, setOpenVoice] = useState(true);
+    const [openChat, setOpenChat] = useState(true);
+
+    // 화상채팅 팝업창 핸들러
+    const openVideoChatPopup = () => {
+        const popupWidth = 1024;
+        const popupHeight = 768;
+
+        const videoChatData = {
+            userId: currentUser.userNo,
+            userName: currentUser.username,
+            roomId: selectedServerId,
+            timestamp: new Date().toISOString()
+        };
+
+        sessionStorage.setItem('videoChatData', JSON.stringify(videoChatData));
+
+        const left = (window.screen.width / 2) - (popupWidth / 2);
+        const top = (window.screen.height / 2) - (popupHeight / 2);
+
+        window.open(
+            '/videocall.do',
+            'videoChatPopup',
+            `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
     };
 
     // 서버 생성 - 백엔드 API 연동
@@ -789,11 +845,14 @@ export default function Header() {
                                                             <li className={styles.channel_item}>
                                                                 <div
                                                                     className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    onClick={() => {
+                                                                        setSelectedChannel("voice");
+                                                                        openVideoChatPopup(); // 팝업페이지 오픈
+                                                                    }}
                                                                     style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
+                                                                    <span>화상채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -1151,7 +1210,7 @@ export default function Header() {
                                                                     style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
+                                                                    <span>화상채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -1649,7 +1708,7 @@ export default function Header() {
                     </div>
                 </div>
             )}
-            {/* 🎈[추가] 서버 초대 모달 */}
+            {/* 서버 초대 모달 */}
             {isInviteModalOpen && (
                 <div
                     className={modalStyles.modalOverlay}
