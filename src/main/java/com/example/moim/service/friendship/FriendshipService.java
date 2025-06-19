@@ -10,6 +10,7 @@ public interface FriendshipService {
     void acceptFriendRequest(Long accepterId, Long requesterId);
     void rejectFriendRequest(Long accepterId, Long requesterId);
     void removeFriendship(Long accepterId, Long requesterId);
+    void blockFriendship(Long accepterId, Long requesterId);
     List<FriendDTO> getFriends(Long userId);
     List<FriendDTO> getPendingRequests(Long userId);
 }

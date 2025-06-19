@@ -1,3 +1,5 @@
+// /src/main/frontend/src/components/Header/Header.jsx
+
 import React, {useRef, useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
@@ -272,9 +274,53 @@ export default function Header() {
         }
     };
 
+    // 초대 관련 모달
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [inviteLink, setInviteLink] = useState('');
+    const [inviteDays, setInviteDays] = useState(7);
+    const [selectedServerForInvite, setSelectedServerForInvite] = useState(null);
+
+    // 새 서버 및 수정
+    const [newServer, setNewServer] = useState({name: "", image: ""});
+    const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""});
 
 
 
+
+
+    // 현재 유저정보 가져오는 api
+    const [currentUser, setCurrentUser] = useState(null);
+    useEffect(() => {
+        const fetchMyInfo = async () => {
+            const token = sessionStorage.getItem('accessToken');
+            if (!token) {
+                console.log('로그인이 필요합니다.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/my-info', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentUser(data);
+                    console.log('currentUser:', data);
+                } else {
+                    console.error('사용자 정보 로딩 실패');
+                }
+            } catch (error) {
+                console.error('사용자 정보 로딩 중 오류:', error);
+            }
+        };
+
+        fetchMyInfo();
+
+    }, []);
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
 
@@ -431,6 +477,78 @@ export default function Header() {
         setModifyServer({id: "", name: "", image: ""});
         setModifyImageFile(null);
         setModifyImagePreview("");
+    };
+    const openInviteModal = (serverId) => {
+        setSelectedServerForInvite(serverId); // 어떤 서버에 대한 초대인지 ID 저장
+        setIsInviteModalOpen(true);
+        setContextMenu({ visible: false }); // 컨텍스트 메뉴 닫기
+    };
+
+    const closeInviteModal = () => {
+        setIsInviteModalOpen(false);
+        setInviteLink(''); // 상태 초기화
+        setInviteDays(7);
+        setSelectedServerForInvite(null);
+    };
+
+    // 링크 생성 api
+    const handleCreateInviteLink = async () => {
+        if (!selectedServerForInvite) return;
+
+        try {
+            const response = await fetch('/api/groupsInvite/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    groupId: selectedServerForInvite,
+                    days: inviteDays,
+                }),
+            });
+
+            if (response.ok) {
+                const link = await response.text();
+                setInviteLink(link); // 생성된 링크를 state에 저장
+            } else {
+                alert('초대 링크 생성에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('초대 링크 생성 오류:', error);
+            alert('오류가 발생했습니다.');
+        }
+    };
+
+    // 링크 복사 핸들링
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            alert('초대 링크가 복사되었습니다!');
+        });
+    };
+
+    const [openVoice, setOpenVoice] = useState(true);
+    const [openChat, setOpenChat] = useState(true);
+
+    // 화상채팅 팝업창 핸들러
+    const openVideoChatPopup = () => {
+        const popupWidth = 1024;
+        const popupHeight = 768;
+
+        const videoChatData = {
+            userId: currentUser.userNo,
+            userName: currentUser.username,
+            roomId: selectedServerId,
+            timestamp: new Date().toISOString()
+        };
+
+        sessionStorage.setItem('videoChatData', JSON.stringify(videoChatData));
+
+        const left = (window.screen.width / 2) - (popupWidth / 2);
+        const top = (window.screen.height / 2) - (popupHeight / 2);
+
+        window.open(
+            '/videocall.do',
+            'videoChatPopup',
+            `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
     };
 
     // 서버 생성 - 백엔드 API 연동 (수정된 버전)
@@ -736,6 +854,17 @@ export default function Header() {
                                             </div>
                                         </li>
                                         <li className={styles.context_menu_list}>
+                                            <div
+                                                className={styles.context_box}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openInviteModal(contextMenu.serverId);
+                                                }}
+                                            >
+                                                <span>초대하기</span>
+                                            </div>
+                                        </li>
+                                        <li className={styles.context_menu_list}>
                                             <div className={`${styles.context_box} ${styles.context_quit}`}>
                                                 <span>서버 나가기</span>
                                             </div>
@@ -877,11 +1006,14 @@ export default function Header() {
                                                             <li className={styles.channel_item}>
                                                                 <div
                                                                     className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    onClick={() => {
+                                                                        setSelectedChannel("voice");
+                                                                        openVideoChatPopup(); // 팝업페이지 오픈
+                                                                    }}
                                                                     style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
+                                                                    <span>화상채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -1089,6 +1221,17 @@ export default function Header() {
                                             </div>
                                         </li>
                                         <li className={styles.context_menu_list}>
+                                            <div
+                                                className={styles.context_box}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openInviteModal(contextMenu.serverId);
+                                                }}
+                                            >
+                                                <span>초대하기</span>
+                                            </div>
+                                        </li>
+                                        <li className={styles.context_menu_list}>
                                             <div className={`${styles.context_box} ${styles.context_quit}`}>
                                                 <span>서버 나가기</span>
                                             </div>
@@ -1228,7 +1371,7 @@ export default function Header() {
                                                                     style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
+                                                                    <span>화상채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -1726,11 +1869,104 @@ export default function Header() {
                     </div>
                 </div>
             )}
+            {/* 서버 초대 모달 */}
+            {isInviteModalOpen && (
+                <div
+                    className={modalStyles.modalOverlay}
+                    onClick={closeInviteModal}
+                >
+                    <div
+                        className={modalStyles.modal_box}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={modalStyles.modal_title_area}>
+                            <span className={modalStyles.modal_title}>서버에 친구 초대하기</span>
+                            <p>친구를 서버로 초대하여 함께 대화하세요!</p>
+                            <button
+                                className={modalStyles.close_btn}
+                                onClick={closeInviteModal}
+                                type="button"
+                            >
+                                <img src="/bundle/img/close_ic.png" alt="close_ic"/>
+                            </button>
+                        </div>
+
+                        <div className={modalStyles.modal_form}>
+                            {/* 초대 링크가 생성되었을 때 보여주는 화면 */}
+                            {inviteLink ? (
+                                <div className={modalStyles.modal_input_area}>
+                                    <label className={modalStyles.modal_title_label}>
+                                        생성된 초대 링크
+                                    </label>
+                                    <div className={modalStyles.modal_input_box}>
+                                        <input
+                                            type="text"
+                                            className={modalStyles.modal_input}
+                                            value={inviteLink}
+                                            readOnly
+                                        />
+                                    </div>
+                                    <span className={modalStyles.guide}>
+                                        이 링크는 {inviteDays}일 후에 만료됩니다.
+                                    </span>
+                                </div>
+                            ) : (
+                                /* 링크 생성 전에 보여주는 화면 */
+                                <div className={modalStyles.modal_input_area}>
+                                    <label className={modalStyles.modal_title_label} htmlFor="inviteDays">
+                                        초대 링크 유효 기간 (일)
+                                    </label>
+                                    <div className={modalStyles.modal_input_box}>
+                                        <select
+                                            id="inviteDays"
+                                            className={modalStyles.modal_input}
+                                            value={inviteDays}
+                                            onChange={(e) => setInviteDays(Number(e.target.value))}
+                                        >
+                                            <option value="1">1일</option>
+                                            <option value="3">3일</option>
+                                            <option value="7">7일 (기본값)</option>
+                                            <option value="30">30일</option>
+                                            <option value="0">만료 없음</option>
+                                        </select>
+                                    </div>
+                                    <span className={modalStyles.guide}>
+                                       초대 링크가 유효할 기간을 선택하세요.
+                                     </span>
+                                </div>
+                            )}
+
+
+                            <div className={modalStyles.modal_btn_area}>
+                                <div className={modalStyles.buttonRow}>
+                                    <button
+                                        type="button"
+                                        className={modalStyles.backBtn}
+                                        onClick={closeInviteModal}
+                                    >
+                                        닫기
+                                    </button>
+                                    {/* 링크 생성 전/후 버튼 다르게 표시 */}
+                                    {inviteLink ? (
+                                        <button type="button" className={modalStyles.createBtn} onClick={handleCopyLink}>
+                                            링크 복사
+                                        </button>
+                                    ) : (
+                                        <button type="button" className={modalStyles.createBtn} onClick={handleCreateInviteLink}>
+                                            링크 생성
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/*회원정보 모달*/}
             {isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}
                                                      onClose={() => {
                                                          closeAccountModifyModal();
-                                                          }} />)}
+                                                     }} />)}
 
         </div>
     );
