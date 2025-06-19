@@ -56,9 +56,6 @@ export default function Header() {
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
     const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
 
-    // 새 서버 및 수정
-    const [newServer, setNewServer] = useState({name: "", image: ""});
-    const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""});
 
     //이미지 업로드 및 수정
     const [imageFile, setImageFile] = useState(null);
@@ -76,10 +73,6 @@ export default function Header() {
         y: 0,
         serverId: null,
     });
-
-    const [openChat, setOpenChat] = useState(true);
-    const [openVoice, setOpenVoice] = useState(true);
-
 
 
     // 채팅방 수정 모달 열기
@@ -417,33 +410,39 @@ export default function Header() {
 
         if (serverId === "default") {
             navigate("/main");
-            setChatChannels([{id: 1, name: "일반채팅", type: "chat", isDeletable: false}]); // 기본값
+            setChatChannels([]); // 빈 배열로 설정하거나 이 줄 자체를 제거
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
             if (selectedServer) {
-                // 1. 해당 서버의 채널 목록 로드
                 try {
                     const response = await fetch(`/api/groups/${serverId}/channels`);
                     if (response.ok) {
-                        const channels = await response.json();
-                        setChatChannels(channels.map(ch => ({
-                            id: ch.chanNo,
-                            name: ch.chanName,
-                            type: "chat",
-                            isDeletable: ch.chanName !== "일반채팅"
-                        })));
+                        const channelsData = await response.json(); // 변수명 변경
+                        console.log('채널 데이터:', channelsData);
 
-                        // 첫 번째 채널로 자동 이동 (보통 "일반채팅")
-                        const firstChannel = channels[0];
-                        if (firstChannel) {
+                        if (Array.isArray(channelsData) && channelsData.length > 0) {
+                            setChatChannels(channelsData.map(ch => ({
+                                id: ch.chanNo,
+                                name: ch.chanName,
+                                type: "chat",
+                                isDeletable: ch.chanName !== "일반채팅"
+                            })));
+
+                            const firstChannel = channelsData[0];
                             setSelectedChannel(firstChannel.chanName);
                             navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${firstChannel.chanName}`);
+                        } else {
+                            // 채널이 없는 경우 빈 배열로 설정
+                            setChatChannels([]);
+                            console.log('채널이 없습니다.');
                         }
                     } else {
-                        console.error('채널 목록 로드 실패');
+                        console.error('채널 목록 로드 실패:', response.status);
+                        setChatChannels([]);
                     }
                 } catch (error) {
                     console.error('채널 목록 로드 중 오류:', error);
+                    setChatChannels([]);
                 }
             }
         }
