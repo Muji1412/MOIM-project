@@ -21,12 +21,14 @@ public class ChatService {
     private final Storage storage; // GCP Storage 연동 객체
 
     // 1. 채팅 메시지 저장 (채널+날짜별로 구분해서 Redis에 저장)
-    public void saveChat(ChatMessage message) {
-        // Redis의 리스트 자료구조에 메시지 추가
-        // 키 예시: chat:general:2025-06-13
-        redisTemplate.opsForList().rightPush("chat:" + message.getChannel() + ":" + message.getDate(), message);
-    }
+    // 개선된 키 패턴: chat:{groupName}:{channelName}
+    public void saveChat(String groupName, String channelName, ChatMessage message) {
+        String key = String.format("chat:%s:%s", groupName, channelName);
 
+        // Redis List에 메시지 추가 (시간순 정렬 보장)
+        redisTemplate.opsForList().rightPush(key, message);
+
+    }
 
     // 2. 이미지 파일을 GCP에 업로드하고, 업로드된 이미지의 URL을 반환
     public String uploadImageToGCS(MultipartFile file) {
@@ -43,25 +45,21 @@ public class ChatService {
         return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
     }
 
-    // 저장
-    public void saveChat(String projectId, String channelId, ChatMessage message) {
-        String key = "chat:" + projectId + ":" + channelId;
-        redisTemplate.opsForList().rightPush(key, message);
-    }
 
-    // 조회
-    public List<ChatMessage> getChatsByChannel(String projectId, String channelId) {
-        String key = "chat:" + projectId + ":" + channelId;
-        List<Object> list = redisTemplate.opsForList().range(key, 0, -1);
-        List<ChatMessage> result = new ArrayList<>();
-        if (list != null) {
-            for (Object obj : list) {
+    // 채널별 전체 메시지 조회
+    public List<ChatMessage> getChatsByChannel(String groupName, String channelName) {
+        String key = String.format("chat:%s:%s", groupName, channelName);
+        List<Object> rawMessages = redisTemplate.opsForList().range(key, 0, -1);
+
+        List<ChatMessage> messages = new ArrayList<>();
+        if (rawMessages != null) {
+            for (Object obj : rawMessages) {
                 if (obj instanceof ChatMessage) {
-                    result.add((ChatMessage) obj);
+                    messages.add((ChatMessage) obj);
                 }
             }
         }
-        return result;
+        return messages;
     }
 
 

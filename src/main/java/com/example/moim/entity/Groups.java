@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Table(name = "groups")
 @Getter
 @Setter
-public class Groups {
+public class    Groups {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
