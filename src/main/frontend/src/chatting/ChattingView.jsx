@@ -23,6 +23,11 @@ function ChattingView() {
     const projectId = params.get("projectId");
     const channelNum = params.get("channelNum");
 
+    // 서버 URL (수정됨: 포트 8081로 변경)
+    const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
+        ? 'http://localhost:8089'  // 개발 환경 (Docker 포트)
+        : 'https://moim.o-r.kr';   // 배포 환경
+
     // 오늘 날짜를 'YYYY-MM-DD' 형식으로 반환
     function getToday() {
         return new Date().toISOString().slice(0, 10);
@@ -49,9 +54,9 @@ function ChattingView() {
 
         setMessages([]); // 서버/채널이 바뀔 때마다 메시지 초기화
 
-        // 1. WebSocket 연결 (프로젝트 단위)
+        // 1. WebSocket 연결 (프로젝트 단위) - APPLICATION_SERVER_URL 사용
         const client = new Client({
-            webSocketFactory: () => new SockJS(`http://localhost:8089/ws`),
+            webSocketFactory: () => new SockJS(`${APPLICATION_SERVER_URL}/ws`),
             reconnectDelay: 5000
         });
 
@@ -69,8 +74,8 @@ function ChattingView() {
         client.activate();
         stompClient.current = client;
 
-        // 2. 채널별 전체 메시지 조회 (REST)
-        fetch(`http://localhost:8089/api/chat/${projectId}/${channelNum}/all`)
+        // 2. 채널별 전체 메시지 조회 (REST) - APPLICATION_SERVER_URL 사용
+        fetch(`${APPLICATION_SERVER_URL}/api/chat/${projectId}/${channelNum}/all`)
             .then(res => res.json())
             .then(data => setMessages(data));
 
@@ -78,7 +83,6 @@ function ChattingView() {
             client.deactivate();
         };
     }, [location]);
-
 
     // 메시지 전송 함수
     const handleSend = () => {
@@ -97,11 +101,11 @@ function ChattingView() {
         setInputValue('');
     };
 
-    // 이미지 전송 함수
+    // 이미지 전송 함수 - APPLICATION_SERVER_URL 사용
     const handleImageUpload = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch('http://localhost:8089/api/chat/image', {
+        const res = await fetch(`${APPLICATION_SERVER_URL}/api/chat/image`, {
             method: 'POST',
             body: formData,
         });
@@ -152,22 +156,6 @@ function ChattingView() {
         acc[date].push(msg);
         return acc;
     }, {});
-
-    // 오늘 날짜를 'YYYY-MM-DD' 형식으로 반환
-    function getToday() {
-        return new Date().toISOString().slice(0, 10);
-    }
-
-    // 날짜 라벨 포맷 함수 예시
-    function formatDateLabel(dateStr) {
-        const today = new Date().toISOString().slice(0, 10);
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        if (dateStr === today) return "오늘";
-        if (dateStr === yesterday) return "어제";
-        // 원하는 형식으로 변환 (예: '6월 5일 목요일')
-        const dateObj = new Date(dateStr);
-        return dateObj.toLocaleDateString("ko-KR", {month: "long", day: "numeric", weekday: "long"});
-    }
 
     return (
         <div className={styles.section_content}>
