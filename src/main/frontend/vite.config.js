@@ -27,7 +27,8 @@ export default defineConfig({
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
                 //myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
                 calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
-                invite: path.resolve(__dirname, 'src/components/invite/Main.jsx'),
+                invite: path.resolve(__dirname, 'src/invite/Main.jsx'),
+                videocall: path.resolve(__dirname, 'src/videocall/Main.jsx'),
 
             },
             output: {
@@ -40,6 +41,10 @@ export default defineConfig({
                     return 'assets/[name][extname]';
                 },
             },
+        },
+        watch: {
+            // 파일 시스템 폴링을 사용하여 변경 사항을 감지합니다.
+            usePolling: true,
         },
     },
 });
