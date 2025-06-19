@@ -7,6 +7,7 @@ import com.example.moim.repository.PushSubscriptionRepository;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.notification.PushNotificationService;
 import com.example.moim.service.user.CustomUserDetails;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "푸시 알림", description = "푸시 알림 관련 API입니다")
 public class PushNotificationController {
 
     private final PushNotificationService pushNotificationService;

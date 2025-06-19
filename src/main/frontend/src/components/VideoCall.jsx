@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
 
-// 서버 URL
-const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:8089'  // 개발 환경
-    : 'https://moim.o-r.kr';   // 배포 환경
+
+
 
 
 // --- Helper Component ---
