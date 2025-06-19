@@ -101,4 +101,14 @@ public class FriendshipController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/block")
+    public ResponseEntity<?> blockFriendship(@RequestBody UserIdDTO request) {
+        try {
+            friendshipService.blockFriendship(request.getUserA(), request.getUserB());
+            return ResponseEntity.ok().body("친구가 삭제됐습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

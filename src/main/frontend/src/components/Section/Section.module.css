@@ -189,3 +189,40 @@
 .friend_title_button:hover {
     text-decoration: underline;
 }
+
+/* 친구 컨텍스트 메뉴 스타일 */
+.friend_context_menu {
+    position: fixed;
+    background: #23272a; /* 어두운 배경 */
+    border: 1px solid #1a1c1e;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000; /* 다른 요소들 위에 보이도록 */
+    list-style: none;
+    padding: 6px;
+    margin: 0;
+    min-width: 150px;
+    color: #dcddde;
+}
+
+.friend_context_menu li {
+    padding: 0;
+    margin: 0;
+}
+
+.friend_context_item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.friend_context_item:hover {
+    background-color: #3b82f6; /* 파란색 하이라이트 */
+    color: white;
+}
+
+.friend_context_delete:hover {
+    background-color: #ef4444; /* 빨간색 하이라이트 */
+    color: white;
+}
