@@ -7,6 +7,7 @@ import com.example.moim.entity.Friendship;
 import com.example.moim.entity.Users;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.friendship.FriendshipService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/friendship")
 @RequiredArgsConstructor
+@Tag(name = "친구 관리", description = "친구 관련 API입니다")
 public class FriendshipController {
 
     private final FriendshipService friendshipService;

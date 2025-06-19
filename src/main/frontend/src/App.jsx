@@ -36,6 +36,7 @@ export default function App() {
                     {/*<Route path="/servers/:serverId" element={<ServerPage />} />*/}
                     {/* 기타 다른 페이지들 */}
                     {/* <Route path="/todos" element={<TodoPage />} /> */}
+                    <Route path="/invite/:inviteCode" element={<InvitePage />} />
 
                     {/* 기본 경로는 친구 페이지로 설정 */}
                     <Route path="/" element={<FriendPage />} />

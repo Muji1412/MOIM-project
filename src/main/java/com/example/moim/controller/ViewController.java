@@ -1,10 +1,12 @@
 package com.example.moim.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+@Slf4j
 @Controller
 public class ViewController {
 
@@ -30,10 +32,6 @@ public class ViewController {
         return "example_with_sw";
     }
 
-    /**
-     * 로그인, 회원가입 등 별도의 HTML과 번들이 필요한 페이지들을 처리합니다.
-     * 예: /user/login.do, /popupTest.do
-     */
     @GetMapping("/{pageName}.do")
     public String separatePage(@PathVariable String pageName, Model model) {
         model.addAttribute("pageName", pageName);
@@ -45,12 +43,15 @@ public class ViewController {
         return "example";
     }
 
-    /**
-     * /user/ 하위의 별도 페이지들을 처리합니다.
-     */
     @GetMapping("/user/{pageName}.do")
     public String userPage(@PathVariable String pageName, Model model) {
         model.addAttribute("pageName", pageName);
         return "example";
+    }
+
+    @GetMapping("/invite/{inviteCode}")
+    public String invitePage(@PathVariable String inviteCode) {
+        log.info("inviteCode: {}", inviteCode);
+        return "invite";
     }
 }
