@@ -20,8 +20,8 @@ function ChattingView() {
     const channel = "general";
     const location = useLocation();
     const params = new URLSearchParams(location.search);
-    const projectId = params.get("projectId");
-    const channelNum = params.get("channelNum");
+    const groupName = params.get("groupName");
+    const channelName = params.get("channelName");
 
     // 서버 URL (수정됨: 포트 8081로 변경)
     const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
@@ -47,10 +47,10 @@ function ChattingView() {
     useEffect(() => {
         // 파라미터는 항상 location.search에서 추출
         const params = new URLSearchParams(location.search);
-        const projectId = params.get("projectId");
-        const channelNum = params.get("channelNum");
+        const groupName = params.get("groupName");
+        const channelName = params.get("channelName");
 
-        console.log("채팅방 파라미터 변경:", projectId, channelNum);
+        console.log("채팅방 파라미터 변경:", groupName, channelName);
 
         setMessages([]); // 서버/채널이 바뀔 때마다 메시지 초기화
 
@@ -62,10 +62,10 @@ function ChattingView() {
 
         client.onConnect = () => {
             // 프로젝트 전체 구독
-            client.subscribe(`/topic/chat/${projectId}`, (msg) => {
+            client.subscribe(`/topic/chat/${groupName}`, (msg) => {
                 const message = JSON.parse(msg.body);
                 // 현재 보고 있는 채널의 메시지만 화면에 추가
-                if (message.channel === channelNum) {
+                if (message.channel === channelName) {
                     setMessages(prev => [...prev, message]);
                 }
             });
@@ -75,7 +75,7 @@ function ChattingView() {
         stompClient.current = client;
 
         // 2. 채널별 전체 메시지 조회 (REST) - APPLICATION_SERVER_URL 사용
-        fetch(`${APPLICATION_SERVER_URL}/api/chat/${projectId}/${channelNum}/all`)
+        fetch(`${APPLICATION_SERVER_URL}/api/chat/${groupName}/${channelName}/all`)
             .then(res => res.json())
             .then(data => setMessages(data));
 
@@ -92,10 +92,10 @@ function ChattingView() {
             user: '박종범',
             color: 'purple',
             text: inputValue,
-            channel: channelNum// 반드시 현재 채널 ID //channel: channelNum 이런식으로 channelNum
+            channel: channelName// 반드시 현재 채널 ID //channel: channelName 이런식으로 channelName
         };
         stompClient.current.publish({
-            destination: `/app/chat/${projectId}`, //나중에 destination: `/app/chat/${projectId}`, 이런식으로 넘어와야함
+            destination: `/app/chat/${groupName}`, //나중에 destination: `/app/chat/${groupName}`, 이런식으로 넘어와야함
             body: JSON.stringify(newMsg)
         });
         setInputValue('');
@@ -116,10 +116,10 @@ function ChattingView() {
             color: 'purple',
             text: '',
             imageUrl: imageUrl,
-            channel: channelNum
+            channel: channelName
         };
         stompClient.current.publish({
-            destination: `/app/chat/${projectId}`,
+            destination: `/app/chat/${groupName}`,
             body: JSON.stringify(newMsg)
         });
     };
