@@ -197,6 +197,8 @@ export const DmProvider = ({ children }) => {
                 body: JSON.stringify(chatMessage),
             });
             console.log('메시지 전송 완료');
+
+            fetchDmRooms();
         } else {
             console.log('메시지 전송 조건 불만족:');
             console.log('- stompClient:', !!stompClient);
