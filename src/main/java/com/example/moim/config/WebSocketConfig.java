@@ -40,17 +40,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.enableSimpleBroker("/sub", "/topic", "/user", "/queue") // /user 추가
                 .setTaskScheduler(null); // 기본 스케줄러 사용
 
-        config.setApplicationDestinationPrefixes("/pub");
+        config.setApplicationDestinationPrefixes("/app", "/pub");
 
         // ⭐️ 사용자별 목적지 prefix 설정 ⭐️
         config.setUserDestinationPrefix("/user");
-    }
-
-
-
-
-        // 발행용 엔드포인트 - 실제 사용하는 /app에 맞춤
-        config.setApplicationDestinationPrefixes("/app","/pub");
     }
 
 }
