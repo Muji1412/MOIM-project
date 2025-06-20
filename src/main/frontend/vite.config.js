@@ -23,7 +23,7 @@ export default defineConfig({
                 searchPassword: path.resolve(__dirname, 'src/user/searchPassword/Main.jsx'),
 
                 // 필요에 따른 기타 페이지들
-                chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
+                //chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
                 //myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
                 calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),

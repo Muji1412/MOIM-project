@@ -174,6 +174,7 @@ function ChattingView() {
 
     return (
         <div className={styles.section_content}>
+        <div className={styles.section_content}>
             <div className={styles.channel_chat_wrap}>
                 {/* 채팅방 헤더 */}
                 <div className={styles.channel_header}>
@@ -239,6 +240,7 @@ function ChattingView() {
 
                 </div>
             </div>
+        </div>
         </div>
     );
 }
