@@ -22,6 +22,7 @@ function ChattingView() {
     const params = new URLSearchParams(location.search);
     const groupName = params.get("groupName");
     const channelName = params.get("channelName");
+    //작업해봄
 
     // 서버 URL (수정됨: 포트 8081로 변경)
     const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
