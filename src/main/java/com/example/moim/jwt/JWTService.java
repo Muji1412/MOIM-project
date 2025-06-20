@@ -78,10 +78,12 @@ public class JWTService {
      * @param token
      * @return User ID
      */
+    //유저 아이디 추출
     public String getUsername(String token) {
         return parseClaims(token).get("username", String.class);
     }
 
+    //유저 번호 추출
     public String getUserNo(String token) {
         return parseClaims(token).get("userNo", String.class);
     }

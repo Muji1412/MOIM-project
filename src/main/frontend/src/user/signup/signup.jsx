@@ -152,7 +152,6 @@ export default function Signup() {
         })
         .then(res => {
             if (res.status === 200) {
-                //alert("회원가입 성공!");
                 setShowModal(true);
             } else {
                 alert(data.message || "오류로 인하여 가입에 실패하였습니다.");

@@ -1,8 +1,7 @@
 /* 캘린더 페이지 */
 
-/* 1. 전체 배경 -  중앙 정렬 */
-.login-background {
-    min-height: 100vh;
+.background {
+    min-height: 60vh;
     background-repeat: no-repeat;
     background-position: center;
     display: flex;
@@ -10,3 +9,28 @@
     align-items: center;
 }
 
+/*월,년 (June 2025)*/
+.rbc-toolbar-label{
+    font-weight: bold;
+}
+
+/*달력 가장 바깥 테두리*/
+.rbc-month-view{
+    border-radius: 5px;
+}
+
+/*일정 */
+/*.rbc-event {*/
+/*    border: 1px solid white !important;*/
+/*    !*border-radius: 5px !important;*!*/
+/*    background-color: #8aa82b !important;*/
+/*    !*opacity: 0.1;*!*/
+/*    border-radius: 0;*/
+/*}*/
+
+/*오늘 날짜 테두리*/
+.rbc-today {
+    background: #ffffff;
+    opacity: 0.3;
+    box-shadow: 0 0 0 8px #a7cf1c inset;
+}

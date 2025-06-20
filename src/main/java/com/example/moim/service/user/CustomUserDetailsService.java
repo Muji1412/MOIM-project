@@ -25,6 +25,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         customUserInfoVO.setUserNo(user.getUserNo());
         customUserInfoVO.setUserLastLoggedDate(user.getUserLastLoggedDate());
 
-        return new CustomUserDetails(customUserInfoVO, user.getUserPhone(), user.getUserImg(), user.getUserMsg());
+        return new CustomUserDetails(customUserInfoVO, user.getUserPhone(), user.getUserImg(), user.getUserMsg(), user.getUserNick());
+    }
+
+    @Override
+    public UserDetails loadUserByUserNo(long userNo) throws UsernameNotFoundException {
+
+        Users user = usersRepository.findByUserNo(userNo).orElseThrow( ()-> new UsernameNotFoundException("유저가 없습니다."));
+        CustomUserInfoVO customUserInfoVO = new CustomUserInfoVO();
+        customUserInfoVO.setUsername(user.getUsername());
+        customUserInfoVO.setUserNo(user.getUserNo());
+        customUserInfoVO.setUserLastLoggedDate(user.getUserLastLoggedDate());
+        return new CustomUserDetails(customUserInfoVO, user.getUserPhone(), user.getUserImg(), user.getUserMsg(), user.getUserNick());
     }
 }

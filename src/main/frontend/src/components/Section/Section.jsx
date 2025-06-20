@@ -17,6 +17,13 @@ export default function Section() {
     setShowAddFriend(false);
   };
 
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
+
+  //header에서 화이트보드 버튼 클릭 시 호출
+  const handleShowWhiteboard = () => {
+    setShowWhiteboard(true);
+    setShowAddFriend(false); //다른 화면 숨김
+  };
   return (
       <section className={styles.section}>
         <div className={styles.section_cotainer}>
@@ -52,9 +59,14 @@ export default function Section() {
           {/* 자식 컴포넌트에 상태(showAddFriend)와
             상태를 변경할 함수(handleShowFriendList)를 함께 전달합니다.
           */}
+          {/* SectionContent에 props 전달 */}
           <SectionContent
               showAddFriend={showAddFriend}
-              onBackToList={handleShowFriendList}
+              showWhiteboard={showWhiteboard}
+              onBackToList={() => {
+                setShowAddFriend(false);
+                setShowWhiteboard(false);
+              }}
           />
         </div>
       </section>

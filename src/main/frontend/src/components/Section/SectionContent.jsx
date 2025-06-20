@@ -1,5 +1,6 @@
 // src/main/frontend/src/components/Section/SectionContent.jsx
 
+
 import React, { useState, useEffect } from 'react';
 import styles from './Section.module.css';
 import FriendContextMenu from "../Context/FriendContextMenu";
@@ -9,6 +10,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
 
     // 친구 관리 상태들만 유지
     const [friendId, setFriendId] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -17,6 +19,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
     });
     const [currentUser, setCurrentUser] = useState(null);
     const { selectDmRoom } = useDm();
+
 
     // 친구 관리 useEffect들
     useEffect(() => {
@@ -31,6 +34,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
                 if (response.ok) {
                     const data = await response.json();
                     setCurrentUser(data);
@@ -41,6 +45,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
                 console.error('사용자 정보 로딩 중 오류:', error);
             }
         };
+
         fetchMyInfo();
     }, []);
 
@@ -364,6 +369,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
         );
     }
 
+
     // 친구 목록 화면 (기본)
     return (
         <div className={styles.section_content}>
@@ -378,6 +384,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
                         />
                         <div className={styles.section_search_ic}>
                             <img src="/bundle/img/search_ic.png" alt="search_ic" />
+
                         </div>
                     </div>
                 </div>
@@ -389,6 +396,7 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
                     </div>
                 ) : filteredFriends.length === 0 ? (
                     <div className={styles.no_pending_message}>
+
                         <p>"{searchQuery}"와(과) 일치하는 친구가 없습니다.</p>
                     </div>
                 ) : (
@@ -428,3 +436,4 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
 };
 
 export default SectionContent;
+

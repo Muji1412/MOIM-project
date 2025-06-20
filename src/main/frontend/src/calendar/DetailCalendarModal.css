@@ -1,4 +1,4 @@
-/*캘린더 일정 추가 모달*/
+/*캘린더 디테일 확인 모달*/
 
 /*모달 뒷배경*/
 .modal-background {
@@ -23,6 +23,7 @@
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     color: #eaeaea;
+    overflow: hidden;
 }
 
 /*하트 아이콘 박스*/
@@ -38,6 +39,40 @@
 /*Create an Event 타이틀*/
 .head-title{
     font-weight: bold;
+    height: 40px;
+    color: #cccccc;
+    font-size: 30px;
+    padding: 5px;
+    margin: 20px;
+}
+
+/*일정 내용*/
+.head-content{
+    background: #cccccc;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 18px;
+    width: 410px;
+    color: #373a3c;
+}
+
+/*마감일*/
+/*.input-text-cal{*/
+/*    background: #cccccc;*/
+/*    width: 440px;*/
+/*}*/
+
+/*일정 삭제 버튼 */
+.modal-btn-delete {
+    float: right;
+    background-color: #ee2349;
+    color: white;
+    border: none;
+    padding: 2px;
+    font-size: 10px;
+    border-radius: 3px;
+    margin-top: 5px;
+    cursor: pointer;
 }
 
 .inner-box{
@@ -65,7 +100,7 @@
 }
 
 /*input 박스 포커싱*/
-.label > input:focus {
+.input-text {
     outline: 2px solid #8aa82b;
     display: block;
     background: #cccccc;
@@ -122,7 +157,7 @@
 }
 
 /*수정 버튼*/
-.modal-btn {
+.modal-btn-modify {
     background-color: #97b82d;
     color: white;
     border: none;

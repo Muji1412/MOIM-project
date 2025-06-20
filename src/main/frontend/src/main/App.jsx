@@ -14,6 +14,7 @@ import FriendPage from "../components/Page/FriendPage";
 import TestApp from "../popupTest/TestApp";
 import ChattingView from "../chatting/ChattingView";
 import DmChatView from '../chatting/DmChatView';
+import MyCalendar from "../calendar/MyCalendar";
 
 // --- 페이지별 컨텐츠 컴포넌트 정의 ---
 function ServerPageContent() {
@@ -58,5 +59,6 @@ export default function App() {
                 </BrowserRouter>
             </DmProvider>
         </AuthProvider>
+
     );
 }

@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor
-public class GroupsController {
+public class  GroupsController {
 
     private final GroupsService groupsService;
     private final FileUploadService fileUploadService;

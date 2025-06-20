@@ -1,0 +1,95 @@
+/* Todo list 페이지 */
+
+/*가장 바깥쪽*/
+.full-background{
+    text-align: center;
+}
+
+/*todo list 박스*/
+.todo-outer-box{
+    width: 80%;
+    border: 2px solid #777777;
+    border-radius: 18px;
+    padding: 20px;
+}
+
+/*제목 박스 */
+.todo-header-box{
+    width: 80%;
+    margin: 30px 10%;
+    overflow: hidden;
+}
+
+/*제목(TODO LIST)*/
+.todo-title{
+    display: inline-block;
+    float: left;
+    margin-left: 40%;
+    width: 20%;
+    text-align: center;
+}
+
+/*검색 드롭박스*/
+.search-dropbox{
+    float: right;
+}
+
+/*할일 박스*/
+.todo-section{
+    text-align: center;
+    padding: 15px;
+}
+
+/*할일박스 위 제목*/
+.todo-section-title{
+    height: 30px;
+    width: 100%;
+    border-bottom: #777777;
+}
+
+/*#*/
+.section-label-move{
+    width: 5%;
+    text-align: center;
+}
+
+/*항목*/
+.section-label-cont{
+    width: 65%;
+    text-align: center;
+}
+
+/*완료여부*/
+.section-label-progress{
+    width: 10%;
+    text-align: center;
+}
+
+/*마감일*/
+.section-label-end-date{
+    width: 10%;
+    text-align: center;
+}
+
+/*수정/삭제*/
+.section-label-modify-delete{
+    width: 10%;
+    text-align: center;
+}
+
+/*할일들*/
+.todo-section-things{
+
+}
+
+/*할일 추가 버튼*/
+.things-add-btn{
+    overflow: hidden;
+}
+
+.add-btn{
+    width: 24px;
+    height: 24px;
+    float: right;
+}
+
