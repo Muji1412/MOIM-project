@@ -3,8 +3,9 @@
 /* 1. 전체 배경 -  중앙 정렬 */
 .login-background {
   min-height: 100vh;
-  background-image: url('/img/loginBg.png');
+  background-image: url('/img/bg_1920.png');
   background-repeat: no-repeat;
+  background-size: cover;
   background-position: center;
   display: flex;
   justify-content: center;

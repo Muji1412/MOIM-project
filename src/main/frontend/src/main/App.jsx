@@ -10,6 +10,7 @@ import NotificationComponent from "../components/Notifications";
 import FriendPage from "../components/Page/FriendPage";
 import TestApp from "../popupTest/TestApp";
 import ChattingView from "../chatting/ChattingView";
+import MyCalendar from "../calendar/MyCalendar";
 
 
 // --- 페이지별 컴포넌트 정의 ---
@@ -61,6 +62,8 @@ export default function App() {
                     <Route path="/popup" element={<TestApp />} />
                     <Route path="/main" element={<PopupMain />} />
                     <Route path="/chat" element={<ChattingView />} />
+                    <Route path="/calendar" element={<MyCalendar />} />
+
 
                     {/* 예시: /servers/123 같은 동적 경로도 가능 */}
                     {/* <Route path="/servers/:serverId" element={<ServerPage />} /> */}
