@@ -10,6 +10,7 @@ export default function SectionContent({ showAddFriend, onBackToList }) {
   const [friendsList, setFriendsList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
+
   // 친구 목록 컨텍스트 메뉴 상태 체크
   const [friendContextMenu, setFriendContextMenu] = useState({
     visible: false,

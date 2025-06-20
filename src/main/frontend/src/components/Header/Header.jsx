@@ -51,6 +51,7 @@ export default function Header() {
     const [isChannelModifyModalOpen, setIsChannelModifyModalOpen] = useState(false);
     const [modifyChannelData, setModifyChannelData] = useState({id: "", name: ""});
 
+
     // 모달 팝업
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
@@ -73,7 +74,6 @@ export default function Header() {
         y: 0,
         serverId: null,
     });
-
 
     // 채팅방 수정 모달 열기
     const handleOpenChannelModifyModal = (channelId) => {
@@ -133,8 +133,6 @@ export default function Header() {
             alert('채널 수정 중 오류가 발생했습니다.');
         }
     };
-
-
 
     // 채팅방 삭제
     // 채널 삭제를 API 호출로 변경
@@ -316,10 +314,16 @@ export default function Header() {
     }, []);
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
-
         const fetchServers = async () => {
             try {
-                const response = await fetch('/api/groups');
+                const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
+                const response = await fetch('/api/groups', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                        'Content-Type': 'application/json'
+                    }
+                });
                 if (response.ok) {
                     const serverList = await response.json();
                     const mappedServers = serverList.map(group => ({
@@ -329,6 +333,8 @@ export default function Header() {
                     }));
                     setServers(mappedServers);
                     console.log('매핑된 서버 목록:', mappedServers);
+                } else if (response.status === 401) {
+                    console.error('인증 실패: 로그인이 필요합니다');
                 } else {
                     console.error('서버 목록 불러오기 실패');
                 }
@@ -339,6 +345,7 @@ export default function Header() {
 
         fetchServers();
     }, []);
+
 
     // 현재 경로에 따른 aside 타입 결정
     const getAsideType = () => {
@@ -556,6 +563,13 @@ export default function Header() {
         if (!newServer.name.trim()) return;
 
         try {
+            const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
+
+            if (!token) {
+                alert('로그인이 필요합니다. 다시 로그인해주세요.');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('name', newServer.name);
             if (imageFile) {
@@ -563,6 +577,9 @@ export default function Header() {
             }
             const response = await fetch('/api/groups', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                },
                 body: formData,
             });
 
@@ -606,8 +623,14 @@ export default function Header() {
 
                 setServers((prev) => [...prev, createdServer]);
                 closeModal();
+
+                console.log('서버 생성 성공:', createdServer);
+            } else if (response.status === 401) {
+                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
                 console.log('서버 및 기본 채널 생성 완료:', createdServer);
+              
             }  else {
+
                 let errorMessage = '서버 생성에 실패했습니다.';
                 try {
                     const errorData = await response.json();
@@ -624,12 +647,20 @@ export default function Header() {
         }
     };
 
+
     // 서버 정보 수정 함수
     const handleModifyServer = async (e) => {
         e.preventDefault();
         if (!modifyServer.name.trim()) return;
 
         try {
+            const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
+            console.log('[디버깅] 토큰:', token);
+            if (!token) {
+                alert('로그인이 필요합니다. 다시 로그인해주세요.');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('name', modifyServer.name);
             if (modifyImageFile) {
@@ -640,6 +671,9 @@ export default function Header() {
 
             const response = await fetch(`/api/groups/${modifyServer.id}`, {
                 method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                },
                 body: formData,
             });
 
@@ -662,6 +696,8 @@ export default function Header() {
                 );
                 closeModifyModal();
                 console.log('서버 수정 성공:', updatedServer);
+            } else if (response.status === 401) {
+                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
             } else {
                 let errorMessage = '서버 수정에 실패했습니다.';
                 try {
@@ -678,6 +714,7 @@ export default function Header() {
             alert('서버 수정 중 오류가 발생했습니다: ' + error.message);
         }
     };
+
 
     // 기존 변수들
     const isFriendMenu = selectedServerId === "default";
