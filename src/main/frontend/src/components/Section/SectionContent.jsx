@@ -17,8 +17,6 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
     const [contextMenu, setContextMenu] = useState({
         visible: false, x: 0, y: 0, friend: null,
     });
-    const [currentUser, setCurrentUser] = useState(null);
-    const { selectDmRoom } = useDm();
 
 
     // 친구 관리 useEffect들
