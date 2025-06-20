@@ -1,9 +1,9 @@
 import {useEffect, useState, useRef} from "react";
 import SockJS from "sockjs-client";
 import {Client} from "@stomp/stompjs";
+import styles from './../components/Section/Section.module.css';
 import './chattingView.css';
 
-import styles from './../components/Section/Section.module.css';
 import {useLocation} from "react-router-dom";
 
 
