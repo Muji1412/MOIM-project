@@ -6,6 +6,7 @@ import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
 // import {useNavigate} from "react-router-dom";
 import MyAccount from "./myAccount/myAccount.jsx";
+import { useDm } from '../../context/DmContext';
 
 export default function Header() {
 
@@ -73,11 +74,15 @@ export default function Header() {
     const serverNameInputRef = useRef();
     const modifyServerNameInputRef = useRef();
 
+    // DM 관련 state
+    const { dmRooms, selectDmRoom, activeDmRoom } = useDm();
+
     const [contextMenu, setContextMenu] = useState({
         visible: false,
         x: 0,
         y: 0,
         serverId: null,
+        friend: null,
     });
 
     // 채팅방 수정 모달 열기
@@ -1010,18 +1015,35 @@ export default function Header() {
                                                 <img src="/bundle/img/add_plus_ic.png" alt="add_something"/>
                                             </div>
                                             <div className={styles.server_menu_user_area}>
-                                                <div className={styles.menu_user_box}>
-                                                    <div className={styles.menu_user_list}>
-                                                        <img src="#" alt="#"/>
-                                                        <p>User</p>
-                                                    </div>
-                                                </div>
-                                                <div className={styles.menu_user_box}>
-                                                    <div className={styles.menu_user_list}>
-                                                        <img src="#" alt="#"/>
-                                                        <p>User</p>
-                                                    </div>
-                                                </div>
+                                                {currentUser && dmRooms && dmRooms.map((room) => {
+                                                    // DTO 구조에 맞게 수정
+                                                    const opponent = room.user1Nick === currentUser.userNick
+                                                        ? {
+                                                            userNick: room.user2Nick,
+                                                            userImg: room.user2Img || "/bundle/img/default_profile.png",
+                                                            userNo: room.user2No
+                                                        }
+                                                        : {
+                                                            userNick: room.user1Nick,
+                                                            userImg: room.user1Img || "/bundle/img/default_profile.png",
+                                                            userNo: room.user1No
+                                                        };
+
+                                                    return (
+                                                        <div
+                                                            key={room.id}
+                                                            className={`${styles.menu_user_box} ${activeDmRoom?.id === room.id ? styles.active : ''}`}
+                                                            onClick={() => selectDmRoom(opponent)} // opponent 객체 전달
+                                                        >
+                                                            <div className={styles.menu_user_list}>
+                                                                <img
+                                                                    src={opponent.userImg}
+                                                                    alt="profile"/>
+                                                                <p>{opponent.userNick}</p>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </>
                                     ) : (
