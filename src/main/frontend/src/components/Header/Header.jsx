@@ -1,10 +1,10 @@
 // /src/main/frontend/src/components/Header/Header.jsx
 
 import React, {useRef, useState, useEffect} from "react";
-import {useLocation} from "react-router-dom";
+import {useLocation,useNavigate} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
-import {useNavigate} from "react-router-dom";
+// import {useNavigate} from "react-router-dom";
 import MyAccount from "./myAccount/myAccount.jsx";
 
 export default function Header() {
@@ -18,6 +18,11 @@ export default function Header() {
     //선택한 서버 or 채널
     const [selectedMenuItem, setSelectedMenuItem] = useState("friend");
     const [selectedChannel, setSelectedChannel] = useState("general"); // 채널 선택 상태 추가
+
+    //화이트보드
+    const handleWhiteboardClick = (serverId) => {
+        navigate(`/chat?projectId=${serverId}&channelNum=whiteboard`);
+    };
 
     // 채팅방 부분 - 기본 채팅방은 삭제 불가 (최소 1개 이상 남아있어야 함)
     const [chatChannels, setChatChannels] = useState([{id: 1, name: "일반채팅", type: "chat", isDeletable: false}]);
@@ -628,7 +633,7 @@ export default function Header() {
             } else if (response.status === 401) {
                 alert('인증이 만료되었습니다. 다시 로그인해주세요.');
                 console.log('서버 및 기본 채널 생성 완료:', createdServer);
-              
+
             }  else {
 
                 let errorMessage = '서버 생성에 실패했습니다.';
@@ -971,10 +976,24 @@ export default function Header() {
                                         <div className={styles.menu_box}>
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
-                                                onClick={() => setSelectedMenuItem("board")}
+                                                onClick={() => {
+                                                    setSelectedMenuItem("board");
+
+
+                                                    //현재 url에서 projectId 가져오기
+                                                    const urlParams = new URLSearchParams(window.location.search);
+                                                    const currentProjectId = urlParams.get('projectId');
+
+                                                    if (currentProjectId) {
+                                                        // navigate 사용 (권장)
+                                                        navigate(`/whiteboard?projectId=${currentProjectId}`);
+                                                    } else {
+                                                        alert("먼저 서버를 선택해주세요!");
+                                                    }
+                                                }}
                                                 style={{cursor: "pointer"}}
                                             >
-                                                <img src="/bundle/img/board_ic.png" alt="board_ic"/>
+                                                <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
                                                 <p>White Board</p>
                                             </div>
                                         </div>
