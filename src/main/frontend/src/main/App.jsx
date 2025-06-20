@@ -1,8 +1,11 @@
+// src/main/frontend/src/main/App.jsx
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext'; // AuthProvider import
+import { DmProvider, useDm } from '../context/DmContext';
 
-// 컴포넌트 임포트 경로를 현재 파일 위치 기준으로 수정합니다.
-
+// 컴포넌트 임포트
 import styles from '../components/Default.module.css';
 import Header from "../components/Header/Header";
 import Section from "../components/Section/Section";
@@ -10,70 +13,52 @@ import NotificationComponent from "../components/Notifications";
 import FriendPage from "../components/Page/FriendPage";
 import TestApp from "../popupTest/TestApp";
 import ChattingView from "../chatting/ChattingView";
+import DmChatView from '../chatting/DmChatView';
 import MyCalendar from "../calendar/MyCalendar";
 
-
-// --- 페이지별 컴포넌트 정의 ---
-
-// '/servers' 경로를 위한 컴포넌트
-function ServerPage() {
-    return <Section />;
+// --- 페이지별 컨텐츠 컴포넌트 정의 ---
+function ServerPageContent() {
+    return <div>서버 컨텐츠가 표시될 영역입니다.</div>;
 }
 
-// '/main' 경로를 위한 컴포넌트
 function PopupMain() {
     return <NotificationComponent userId={"user1234"} />;
+}
+
+// --- 공통 레이아웃 컴포넌트 ---
+function MainLayout({ children }) {
+    const { activeDmRoom } = useDm();
+
+    return (
+        <div className={styles.wrap}>
+            <Header />
+            <Section />
+            <div className={styles.content_container}>
+                {activeDmRoom ? <DmChatView /> : children}
+            </div>
+        </div>
+    );
 }
 
 // --- 메인 App 컴포넌트 (라우팅 설정) ---
 export default function App() {
     return (
-        <BrowserRouter>
-            <div className={styles.wrap}>
-                {/* 나중에 헤더 타입별로 바꿔지게 변경
-                 function Header({ type = "default" }) {
-                    if (type === "friend") {
-                        return (
-                            <header className={styles.friendHeader}>
-                                <h1>친구 목록</h1>
-                                <button>친구 추가</button>
-                            </header>
-                        );
-                    }
+        // AuthProvider가 최상위, 그 안에 DmProvider가 위치
+        <AuthProvider>
+            <DmProvider>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/home" element={<MainLayout><FriendPage /></MainLayout>} />
+                        <Route path="/servers" element={<MainLayout><ServerPageContent /></MainLayout>} />
+                        <Route path="/chat" element={<MainLayout><ChattingView /></MainLayout>} />
+                        <Route path="/" element={<MainLayout><FriendPage /></MainLayout>} />
 
+                        <Route path="/popup" element={<TestApp />} />
+                        <Route path="/main" element={<PopupMain />} />
+                    </Routes>
+                </BrowserRouter>
+            </DmProvider>
+        </AuthProvider>
 
-                    function ServerPage() {
-                        return (
-                            <>
-                                <Header type="server" />
-                                <Section />
-                            </>
-                        );
-                    }
-
-                 */}
-
-                <Header/>
-
-                {/* URL 경로에 따라 이 부분만 교체됩니다 */}
-                <Routes>
-                    <Route path="/home" element={<FriendPage />} />
-                    <Route path="/servers" element={<ServerPage />} />
-                    <Route path="/popup" element={<TestApp />} />
-                    <Route path="/main" element={<PopupMain />} />
-                    <Route path="/chat" element={<ChattingView />} />
-                    <Route path="/calendar" element={<MyCalendar />} />
-
-
-                    {/* 예시: /servers/123 같은 동적 경로도 가능 */}
-                    {/* <Route path="/servers/:serverId" element={<ServerPage />} /> */}
-
-                    {/* 기본 경로는 친구 페이지로 설정 */}
-                    <Route path="/" element={<FriendPage />} />
-                </Routes>
-
-
-            </div>
-        </BrowserRouter>
     );
 }

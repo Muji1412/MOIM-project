@@ -1,21 +1,25 @@
 // src/main/frontend/src/components/Section/SectionContent.jsx
 
-import styles from "./Section.module.css";
-import {useState, useEffect} from 'react';
 
-export default function SectionContent({showAddFriend, onBackToList}) {
+import React, { useState, useEffect } from 'react';
+import styles from './Section.module.css';
+import FriendContextMenu from "../Context/FriendContextMenu";
+import { useDm } from "../../context/DmContext";
+
+const SectionContent = ({ showAddFriend, onBackToList }) => {
+
     // 친구 관리 상태들만 유지
     const [friendId, setFriendId] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [friendContextMenu, setFriendContextMenu] = useState({
-        visible: false,
-        x: 0,
-        y: 0,
-        friend: null,
+    const [contextMenu, setContextMenu] = useState({
+        visible: false, x: 0, y: 0, friend: null,
     });
+    const [currentUser, setCurrentUser] = useState(null);
+    const { selectDmRoom } = useDm();
+
 
     // 친구 관리 useEffect들
     useEffect(() => {
@@ -25,13 +29,10 @@ export default function SectionContent({showAddFriend, onBackToList}) {
                 console.log('로그인이 필요합니다.');
                 return;
             }
-
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
@@ -49,52 +50,52 @@ export default function SectionContent({showAddFriend, onBackToList}) {
     }, []);
 
     useEffect(() => {
-        if (showAddFriend && currentUser) {
-            fetchPendingRequests();
-        }
-    }, [showAddFriend, currentUser]);
+        if (!currentUser) return;
 
-    useEffect(() => {
-        if (!showAddFriend && currentUser) {
+        if (showAddFriend) {
+            fetchPendingRequests();
+        } else {
             fetchFriends();
         }
     }, [showAddFriend, currentUser]);
 
     useEffect(() => {
-        const handleClick = () => {
-            if (friendContextMenu.visible) {
-                setFriendContextMenu({visible: false, x: 0, y: 0, friend: null});
+        const handleClickOutside = () => {
+            if (contextMenu.visible) {
+                setContextMenu({ visible: false, x: 0, y: 0, friend: null });
             }
         };
-        window.addEventListener("click", handleClick);
-        return () => window.removeEventListener("click", handleClick);
-    }, [friendContextMenu.visible]);
+        window.addEventListener("click", handleClickOutside);
+        return () => window.removeEventListener("click", handleClickOutside);
+    }, [contextMenu.visible]);
+
 
     // 친구 관리 함수들
-    const fetchPendingRequests = async () => {
-        const token = sessionStorage.getItem('accessToken');
-        if (!token || !currentUser) return;
+    const filteredFriends = friendsList.filter(friend =>
+        friend.userNick.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-        try {
-            const response = await fetch('/api/friendship/pending', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({userId: currentUser.userNo})
-            });
+    const handleStartDm = (e, friend) => {
+        e.stopPropagation();
+        console.log('=== DM 시작 클릭 ===');
+        console.log('friend 데이터:', friend);
+        console.log('selectDmRoom 함수:', selectDmRoom);
 
-            if (response.ok) {
-                const data = await response.json();
-                setPendingRequests(data);
-            } else {
-                setPendingRequests([]);
-            }
-        } catch (error) {
-            console.error('친구 요청 중 오류:', error);
-            setPendingRequests([]);
-        }
+        // friend 객체가 올바른 구조인지 확인
+        const dmTarget = {
+            userNick: friend.userNick,
+            userNo: friend.userNo,
+            userImg: friend.userImg
+        };
+
+        console.log('DM 대상:', dmTarget); // 디버깅용
+        selectDmRoom(dmTarget);
+    };
+
+    const handleFriendContextMenu = (e, friend) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextMenu({ visible: true, x: e.clientX, y: e.clientY, friend: friend });
     };
 
     const fetchFriends = async () => {
@@ -120,6 +121,32 @@ export default function SectionContent({showAddFriend, onBackToList}) {
         } catch (error) {
             console.error('친구 목록 로딩 중 오류:', error);
             setFriendsList([]);
+        }
+    };
+
+    const fetchPendingRequests = async () => {
+        const token = sessionStorage.getItem('accessToken');
+        if (!token || !currentUser) return;
+
+        try {
+            const response = await fetch('/api/friendship/pending', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({userId: currentUser.userNo})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setPendingRequests(data);
+            } else {
+                setPendingRequests([]);
+            }
+        } catch (error) {
+            console.error('친구 요청 중 오류:', error);
+            setPendingRequests([]);
         }
     };
 
@@ -207,17 +234,6 @@ export default function SectionContent({showAddFriend, onBackToList}) {
         }
     };
 
-    const handleFriendContextMenu = (e, friend) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setFriendContextMenu({
-            visible: true,
-            x: e.clientX,
-            y: e.clientY,
-            friend: friend,
-        });
-    };
-
     const handleDeleteFriend = async (friend) => {
         if (!friend || !window.confirm(`'${friend.userNick}'님을 친구 목록에서 삭제하시겠습니까?`)) {
             return;
@@ -247,7 +263,6 @@ export default function SectionContent({showAddFriend, onBackToList}) {
     };
 
     const handleBlockFriend = async (friend) => {
-        console.log("친구 차단 로직 시작")
         if (!friend || !window.confirm(`'${friend.userNick}'님을 차단하시겠습니까?`)) {
             return;
         }
@@ -276,9 +291,6 @@ export default function SectionContent({showAddFriend, onBackToList}) {
         }
     };
 
-    const filteredFriends = friendsList.filter(friend =>
-        friend.userNick.toLowerCase().includes(searchQuery.toLowerCase())
-    );
 
     // 친구 추가 화면
     if (showAddFriend) {
@@ -357,6 +369,7 @@ export default function SectionContent({showAddFriend, onBackToList}) {
         );
     }
 
+
     // 친구 목록 화면 (기본)
     return (
         <div className={styles.section_content}>
@@ -370,7 +383,8 @@ export default function SectionContent({showAddFriend, onBackToList}) {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                         <div className={styles.section_search_ic}>
-                            <img src="/bundle/img/search_ic.png" alt="search_ic"/>
+                            <img src="/bundle/img/search_ic.png" alt="search_ic" />
+
                         </div>
                     </div>
                 </div>
@@ -382,6 +396,7 @@ export default function SectionContent({showAddFriend, onBackToList}) {
                     </div>
                 ) : filteredFriends.length === 0 ? (
                     <div className={styles.no_pending_message}>
+
                         <p>"{searchQuery}"와(과) 일치하는 친구가 없습니다.</p>
                     </div>
                 ) : (
@@ -392,7 +407,11 @@ export default function SectionContent({showAddFriend, onBackToList}) {
                                 <p>{friend.userNick}</p>
                             </div>
                             <div className={styles.friend_setting_area}>
-                                <img src="/bundle/img/talk_ic.png" alt="talk_ic"/>
+                                <img
+                                    src="/bundle/img/talk_ic.png"
+                                    alt="talk_ic"
+                                    onClick={(e) => handleStartDm(e, friend)}
+                                />
                                 <img
                                     src="/bundle/img/pt3_ic.png"
                                     alt="pt3_ic"
@@ -404,26 +423,17 @@ export default function SectionContent({showAddFriend, onBackToList}) {
                 )}
             </div>
 
-            {friendContextMenu.visible && (
-                <ul
-                    className={styles.friend_context_menu}
-                    style={{
-                        top: friendContextMenu.y,
-                        left: friendContextMenu.x,
-                    }}
-                >
-                    <li onClick={() => handleDeleteFriend(friendContextMenu.friend)}>
-                        <div className={`${styles.friend_context_item} ${styles.friend_context_delete}`}>
-                            친구 삭제하기
-                        </div>
-                    </li>
-                    <li onClick={() => handleBlockFriend(friendContextMenu.friend)}>
-                        <div className={styles.friend_context_item}>
-                            친구 차단하기
-                        </div>
-                    </li>
-                </ul>
+            {contextMenu.visible && (
+                <FriendContextMenu
+                    contextMenu={contextMenu}
+                    onClose={() => setContextMenu({ visible: false, x: 0, y: 0, friend: null })}
+                    onDelete={() => handleDeleteFriend(contextMenu.friend)}
+                    onBlock={() => handleBlockFriend(contextMenu.friend)}
+                />
             )}
         </div>
     );
-}
+};
+
+export default SectionContent;
+
