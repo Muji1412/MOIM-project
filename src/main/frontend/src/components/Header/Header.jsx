@@ -1013,21 +1013,37 @@ export default function Header() {
                                         <div className={styles.menu_box}>
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
+                                                // 수정해야 할 코드
                                                 onClick={() => {
                                                     setSelectedMenuItem("board");
 
-
-                                                    //현재 url에서 projectId 가져오기
-                                                    const urlParams = new URLSearchParams(window.location.search);
-                                                    const currentProjectId = urlParams.get('projectId');
-
-                                                    if (currentProjectId) {
-                                                        // navigate 사용 (권장)
-                                                        navigate(`/whiteboard?projectId=${currentProjectId}`);
-                                                    } else {
+                                                    if (selectedServerId === "default") {
                                                         alert("먼저 서버를 선택해주세요!");
+                                                        return;
                                                     }
+
+                                                    const whiteboardData = {
+                                                        roomId: `group-${selectedServerId}-whiteboard`,
+                                                        userName: currentUser?.userNick || "User",
+                                                        userId: currentUser?.userNo || "unknown",
+                                                        groupId: selectedServerId,
+                                                        timestamp: Date.now()
+                                                    };
+
+                                                    sessionStorage.setItem('whiteboardData', JSON.stringify(whiteboardData));
+
+                                                    const popupWidth = 1400;
+                                                    const popupHeight = 900;
+                                                    const left = (window.screen.width / 2) - (popupWidth / 2);
+                                                    const top = (window.screen.height / 2) - (popupHeight / 2);
+
+                                                    window.open(
+                                                        '/whiteboard.do',
+                                                        'whiteboardPopup',
+                                                        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes`
+                                                    );
                                                 }}
+
                                                 style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
@@ -1395,18 +1411,38 @@ export default function Header() {
                                         </div>
                                         <div className={styles.menu_box}>
                                             <div
-                                                className={`${styles.menu_item} ${selectedMenuItem === "todo" ? styles.active_menu_item : ""}`}
-                                                onClick={() => setSelectedMenuItem("todo")}
-                                                style={{cursor: "pointer"}}
-                                            >
-                                                <img src="/bundle/img/todo_ic.png" alt="cal_ic"/>
-                                                <p>Todo List</p>
-                                            </div>
-                                        </div>
-                                        <div className={styles.menu_box}>
-                                            <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
-                                                onClick={() => setSelectedMenuItem("board")}
+                                                 // 수정해야 할 코드
+                                                onClick={() => {
+                                                    setSelectedMenuItem("board");
+
+                                                    if (selectedServerId === "default") {
+                                                        alert("먼저 서버를 선택해주세요!");
+                                                        return;
+                                                    }
+
+                                                    const whiteboardData = {
+                                                        roomId: `group-${selectedServerId}-whiteboard`,
+                                                        userName: currentUser?.userNick || "User",
+                                                        userId: currentUser?.userNo || "unknown",
+                                                        groupId: selectedServerId,
+                                                        timestamp: Date.now()
+                                                    };
+
+                                                    sessionStorage.setItem('whiteboardData', JSON.stringify(whiteboardData));
+
+                                                    const popupWidth = 1400;
+                                                    const popupHeight = 900;
+                                                    const left = (window.screen.width / 2) - (popupWidth / 2);
+                                                    const top = (window.screen.height / 2) - (popupHeight / 2);
+
+                                                    window.open(
+                                                        '/whiteboard.do',
+                                                        'whiteboardPopup',
+                                                        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes`
+                                                    );
+                                                }}
+
                                                 style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
