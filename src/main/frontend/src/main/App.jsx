@@ -32,7 +32,6 @@ function MainLayout({ children }) {
     return (
         <div className={styles.wrap}>
             <Header />
-            <Section />
             <div className={styles.content_container}>
                 {activeDmRoom ? <DmChatView /> : children}
             </div>
