@@ -4,13 +4,16 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { toast } from 'react-toastify'; // 추가
 
 const DmContext = createContext({
     dmRooms: [],
     activeDmRoom: null,
     dmMessages: [],
+    notifications: [], // 추가
     selectDmRoom: () => {},
     sendMessage: () => {},
+    markNotificationAsRead: () => {}, // 추가
 });
 
 export const useDm = () => useContext(DmContext);
@@ -22,12 +25,30 @@ export const DmProvider = ({ children }) => {
     const [dmMessages, setDmMessages] = useState([]);
     const [stompClient, setStompClient] = useState(null);
     const [subscription, setSubscription] = useState(null);
+    const [notificationSubscription, setNotificationSubscription] = useState(null); // 추가
+    const [notifications, setNotifications] = useState([]); // 추가
 
     useEffect(() => {
         const client = new Client({
             webSocketFactory: () => new SockJS('/ws'),
-            onConnect: () => console.log('Connected to WebSocket for DM'),
-            onStompError: (frame) => console.error('Broker reported error: ' + frame.headers['message']),
+            onConnect: (frame) => {
+                console.log('Connected to WebSocket for DM');
+                console.log('Connection frame:', frame);
+                // ⭐️ 연결 완료 후 알림 구독 ⭐️
+                if (currentUser) {
+                    subscribeToNotifications(client);
+                }
+            },
+            onStompError: (frame) => {
+                console.error('Broker reported error: ' + frame.headers['message']);
+                console.error('Error frame:', frame);
+            },
+            onWebSocketError: (error) => {
+                console.error('WebSocket error:', error);
+            },
+            onDisconnect: () => {
+                console.log('STOMP 연결 해제됨');
+            }
         });
 
         client.activate();
@@ -38,18 +59,134 @@ export const DmProvider = ({ children }) => {
         };
     }, []);
 
+    // ⭐️ 알림 구독 함수 ⭐️
+    const subscribeToNotifications = (client) => {
+        if (!currentUser || !client || !client.connected) {
+            console.log('구독 조건 불만족:', {
+                currentUser: !!currentUser,
+                client: !!client,
+                connected: client?.connected
+            });
+            return;
+        }
+
+        console.log('=== 알림 구독 시작 ===');
+        console.log('currentUser.username:', currentUser.username);
+
+        // 기존 구독 해제
+        if (notificationSubscription) {
+            notificationSubscription.unsubscribe();
+        }
+
+        try {
+            // ⭐️ 여러 구독 방식으로 테스트 ⭐️
+
+            // 방법 1: 기본 구독
+            const subscription1 = client.subscribe(
+                `/sub/notification/${currentUser.username}`,
+                (message) => {
+                    console.log('=== 방법1 알림 수신 ===', message.body);
+                    const notificationData = JSON.parse(message.body);
+                    handleNewNotification(notificationData);
+                }
+            );
+
+            // 방법 2: user prefix 사용 (Spring Boot 2.4+ 권장)
+            const subscription2 = client.subscribe(
+                `/user/queue/notification`,
+                (message) => {
+                    console.log('=== 방법2 알림 수신 ===', message.body);
+                    const notificationData = JSON.parse(message.body);
+                    handleNewNotification(notificationData);
+                }
+            );
+
+            setNotificationSubscription(subscription1); // 기본 구독 사용
+            console.log('✅ 알림 구독 성공!');
+
+            // ⭐️ 구독 성공 확인을 위한 테스트 메시지 요청 ⭐️
+            setTimeout(() => {
+                client.publish('/pub/test-notification', {}, JSON.stringify({
+                    username: currentUser.username,
+                    message: '구독 테스트'
+                }));
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ 알림 구독 실패:', error);
+        }
+    };
+
+    // ⭐️ 새 알림 처리 ⭐️
+    const handleNewNotification = (notificationData) => {
+        // 토스트 알림 표시
+        toast.info(
+            `${notificationData.senderNick}님이 메시지를 보냈습니다`,
+            {
+                onClick: () => {
+                    // 알림 클릭 시 해당 DM방으로 이동
+                    const targetRoom = dmRooms.find(room => room.id === notificationData.roomId);
+                    if (targetRoom) {
+                        setActiveDmRoom(targetRoom);
+                    }
+                    markNotificationAsRead(notificationData.id);
+                },
+                autoClose: 5000
+            }
+        );
+
+        // 알림 목록에 추가
+        setNotifications(prev => [{
+            id: notificationData.id,
+            type: 'DM',
+            senderNick: notificationData.senderNick,
+            message: notificationData.message,
+            roomId: notificationData.roomId,
+            timestamp: notificationData.sentAt,
+            isRead: false
+        }, ...prev]);
+
+        // DM 방 목록 새로고침 (새 메시지 표시용)
+        fetchDmRooms();
+    };
+
+    // ⭐️ currentUser 변경 시 알림도 다시 구독 ⭐️
     useEffect(() => {
         if (currentUser) {
             console.log('=== currentUser 변경됨, DM 방 목록 조회 ===');
             console.log('currentUser:', currentUser);
             fetchDmRooms();
+
+            // ⭐️ 웹소켓이 연결되어 있고 CONNECTED 상태일 때만 알림 구독 ⭐️
+            if (stompClient?.active && stompClient.state === 'CONNECTED') {
+                subscribeToNotifications(stompClient);
+            }
         } else {
             console.log('=== currentUser 없음, 상태 초기화 ===');
             setDmRooms([]);
             setActiveDmRoom(null);
-        }
-    }, [currentUser]);
+            setNotifications([]);
 
+            // 알림 구독 해제
+            if (notificationSubscription) {
+                notificationSubscription.unsubscribe();
+                setNotificationSubscription(null);
+            }
+        }
+    }, [currentUser, stompClient?.state]);
+
+    // ⭐️ 알림 읽음 처리 ⭐️
+    const markNotificationAsRead = (notificationId) => {
+        setNotifications(prev =>
+            prev.map(notif =>
+                notif.id === notificationId
+                    ? { ...notif, isRead: true }
+                    : notif
+            )
+        );
+    };
+
+    // 기존 useEffect들은 그대로...
     useEffect(() => {
         if (activeDmRoom && stompClient?.active) {
             console.log('=== activeDmRoom 변경됨, 웹소켓 구독 ===');
@@ -77,6 +214,7 @@ export const DmProvider = ({ children }) => {
         }
     }, [activeDmRoom, stompClient]);
 
+    // 기존 함수들은 그대로...
     const fetchDmRooms = async () => {
         console.log('=== fetchDmRooms 호출 ===');
         const token = sessionStorage.getItem('accessToken');
@@ -98,6 +236,7 @@ export const DmProvider = ({ children }) => {
         }
     };
 
+    // 나머지 함수들도 그대로...
     const fetchMessages = async (roomId) => {
         console.log('=== fetchMessages 호출 ===');
         console.log('roomId:', roomId);
@@ -116,7 +255,7 @@ export const DmProvider = ({ children }) => {
             console.log('메시지 목록 API 응답:', response.data);
 
             const formattedMessages = response.data.map(msg => ({
-                user: msg.senderNick, // DTO 구조에 맞게 수정
+                user: msg.senderNick,
                 text: msg.message,
                 timestamp: msg.sentAt
             }));
@@ -157,32 +296,20 @@ export const DmProvider = ({ children }) => {
             );
 
             console.log('DM 방 생성/조회 API 응답:', response.data);
-            console.log('응답 데이터 구조 확인:');
-            console.log('- id:', response.data.id);
-            console.log('- user1Nick:', response.data.user1Nick);
-            console.log('- user2Nick:', response.data.user2Nick);
-
             setActiveDmRoom(response.data);
 
             if (!dmRooms.find(room => room.id === response.data.id)) {
                 console.log('새로운 DM 방이므로 목록 새로고침');
                 fetchDmRooms();
-            } else {
-                console.log('기존 DM 방이므로 목록 새로고침 생략');
             }
         } catch (error) {
             console.error('Failed to create or get DM room:', error);
-            console.error('에러 상세:', error.response?.data);
-            console.error('에러 상태:', error.response?.status);
         }
     };
 
     const sendMessage = (content) => {
         console.log('=== sendMessage 호출 ===');
         console.log('content:', content);
-        console.log('stompClient 상태:', stompClient?.active);
-        console.log('activeDmRoom:', activeDmRoom);
-        console.log('currentUser:', currentUser);
 
         if (stompClient && activeDmRoom && content && currentUser) {
             const chatMessage = {
@@ -199,12 +326,6 @@ export const DmProvider = ({ children }) => {
             console.log('메시지 전송 완료');
 
             fetchDmRooms();
-        } else {
-            console.log('메시지 전송 조건 불만족:');
-            console.log('- stompClient:', !!stompClient);
-            console.log('- activeDmRoom:', !!activeDmRoom);
-            console.log('- content:', !!content);
-            console.log('- currentUser:', !!currentUser);
         }
     };
 
@@ -212,8 +333,10 @@ export const DmProvider = ({ children }) => {
         dmRooms,
         activeDmRoom,
         dmMessages,
+        notifications, // 추가
         selectDmRoom,
         sendMessage,
+        markNotificationAsRead, // 추가
     };
 
     return <DmContext.Provider value={value}>{children}</DmContext.Provider>;

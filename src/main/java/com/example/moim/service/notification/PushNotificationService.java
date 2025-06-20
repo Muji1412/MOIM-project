@@ -1,13 +1,17 @@
 package com.example.moim.service.notification;
 
 
+import com.example.moim.command.DirectMessageDTO;
 import com.example.moim.command.PushSubscriptionDto;
+import com.example.moim.entity.DirectMessage;
+import com.example.moim.entity.DirectMessageRoom;
 import com.example.moim.entity.PushSubscription;
 import com.example.moim.entity.Users;
 import com.example.moim.repository.PushSubscriptionRepository;
 import com.example.moim.repository.UsersRepository;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor; // Lombok 사용
@@ -17,7 +21,9 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,6 +35,7 @@ public class PushNotificationService {
     private final PushService pushService;
     private final PushSubscriptionRepository subscriptionRepository;
     private final UsersRepository usersRepository; // 유저 단일로 보내주기 위해서
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 구독 정보 저장 로직 (이하 동일)
     public void subscribe(PushSubscriptionDto subscriptionDto, Users user) {
@@ -113,6 +120,36 @@ public class PushNotificationService {
                 }
             }
         });
+    }
+
+    public void sendDMNotification(DirectMessage savedMessage) {
+        DirectMessageDTO messageDTO = new DirectMessageDTO(savedMessage);
+        String recipientUserId = getRecipientUserId(savedMessage);
+
+        if (recipientUserId != null) {
+            // ⭐️ 두 가지 방식으로 모두 전송 ⭐️
+
+            // 방법 1: 기본 방식
+            messagingTemplate.convertAndSend("/sub/notification/" + recipientUserId, messageDTO);
+
+            // 방법 2: 사용자별 방식 (Spring Boot 2.4+ 권장)
+            messagingTemplate.convertAndSendToUser(recipientUserId, "/queue/notification", messageDTO);
+
+            System.out.println("DM 알림 전송 완료: " + recipientUserId);
+        }
+    }
+
+
+    private String getRecipientUserId(DirectMessage message) {
+        DirectMessageRoom room = message.getRoom();
+        Users sender = message.getSender();
+
+        // 방에 참여한 사람 중 발신자가 아닌 사람의 username 반환
+        if (room.getUser1().getUserNo().equals(sender.getUserNo())) {
+            return room.getUser2().getUsername(); // user2가 받는 사람
+        } else {
+            return room.getUser1().getUsername(); // user1이 받는 사람
+        }
     }
 }
     // 특정 사용자에게 알림 보내기
