@@ -11,10 +11,11 @@ import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
 import java.util.List;
 
-//@Repository
-//public interface TodolistRepository extends JpaRepository<TodolistEntity,Long> {
-//
-//    List<TodolistEntity> getTodolist(@AuthenticationPrincipal CustomUserDetails user);
-//    List<TodolistEntity> getTodolistByUserNoAndTodoStart(long userNo, Timestamp todoStart);
-//
-//}
+@Repository
+public interface TodolistRepository extends JpaRepository<TodolistEntity,Long> {
+
+    //List<TodolistEntity> getTodolist(@AuthenticationPrincipal CustomUserDetails user);
+    @Query("select t from TodolistEntity t where t.users.userNo = :userNo")
+    List<TodolistEntity> getTodolistByUserNoAndTodoEndAfter(long userNo, String todoEnd);
+
+}

@@ -2,12 +2,15 @@ package com.example.moim.config;
 
 import com.example.moim.jwt.JWTService;
 import com.example.moim.service.user.CustomUserDetailsService;
+import com.example.moim.util.JWTAuthenticationFilter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import com.example.moim.util.CustomAuthenticationEntryPoint;
 import com.example.moim.util.CustomLoginFilter;
+//import com.example.moim.util.JWTAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,7 +25,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -68,21 +70,29 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomLoginFilter customLoginFilter) throws Exception {
+       //AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+        //CustomLoginFilter customLoginFilter = new CustomLoginFilter(jwtService);
+        //customLoginFilter.setAuthenticationManager(authenticationManager);
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 // ✅ 이 부분을 수정합니다.
                 .authorizeHttpRequests(authorize -> authorize
                         // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
-                        .anyRequest().permitAll()
+                        //.anyRequest().permitAll()
+                        .requestMatchers("/api/user/refresh","/login.do", "/user/login", "/signup.do", "/searchpassword.do",
+                                "/api/user/login", "/api/user/emailCheck", "/api/user/nickCheck",
+                                "/api/user/usernameCheck", "/api/user/signUp").permitAll()
+                        .requestMatchers("/static/**", "/bundle/**", "/img/**").permitAll()
+                        .anyRequest().authenticated()
                 );
 
         http.formLogin(AbstractHttpConfigurer::disable);
 
         // CustomLoginFilter는 토큰이 있을 때만 동작하므로 그대로 두어도 괜찮습니다.
-        http.addFilterBefore(new CustomLoginFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
-
+        http.addFilterBefore(new JWTAuthenticationFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
         http.exceptionHandling((exceptionhandler) -> exceptionhandler
                 .authenticationEntryPoint(authenticationEntryPoint));
 
@@ -127,10 +137,29 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
+
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(
+            HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+        return builder.build();
     }
+
+    @Bean
+    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager, JWTService jwtService) {
+        CustomLoginFilter filter = new CustomLoginFilter(jwtService);
+        filter.setAuthenticationManager(authenticationManager);
+        return filter;
+    }
+
+
+
+
 
 }
 

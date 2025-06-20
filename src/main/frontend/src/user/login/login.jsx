@@ -5,14 +5,18 @@ export default function Login() {
   const [id, setId] = useState('');
   const [pw, setPw] = useState('');
   const [result, setResult] = useState('');
+  const form = new URLSearchParams();
 
    const handleLogin = () => {
+     form.append("username", id);
+     form.append("password", pw);
     fetch('/api/user/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: id, password: pw }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form.toString(),
     })
       .then(async res => {
+        console.log("어 씨발 돌았나")
       // status 별 분기
       if (res.status === 200) {
         // 성공: 토큰 응답 - 토큰 저장
@@ -20,7 +24,9 @@ export default function Login() {
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('refreshToken', data.refreshToken);
         //window.location.href = "/main.html";
+        console.log(res.status, " 토큰")
         window.location.href = "/";
+        console.log(res.status, " 왔는데 왜 줏어먹지를 못하니")
       } else {
         // 실패: 에러 메시지 추출
         const data = await res.json();
@@ -34,6 +40,7 @@ export default function Login() {
       }
     })
     .catch(err => {
+      console.log(err);
       setResult("서버와의 연결에 문제가 있습니다");
     });
       //.then(res => res.json())

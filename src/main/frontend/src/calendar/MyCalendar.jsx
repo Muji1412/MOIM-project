@@ -30,6 +30,7 @@ export default function MyCalendar() {
         }, [modalOpen, detailModalOpen])
 
     const fetchEvents = () => {
+        console.log("아 ㅁㄴㅇㄹ")
         fetch('api/calendar', {
             method: 'POST',
             headers: {
@@ -37,7 +38,15 @@ export default function MyCalendar() {
                 "Content-Type": "application/x-www-form-urlencoded"},
             body: new URLSearchParams({ groupNo })
         })
-            .then(res=>res.json())
+            //.then(res=>res.json())
+            .then(res => {
+                console.log("dj TLqkf")
+                if (res.status === 401) {
+                    window.location.href = '/login.do';
+                    return Promise.reject('401 Unauthorized');
+                }
+                return res.json();
+            })
             .then(data => {
                 const events = data.map(item => ({
                     id: item.calNo,
