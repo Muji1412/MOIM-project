@@ -1,5 +1,5 @@
 // src/main/frontend/src/context/DmContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, {createContext, useState, useContext, useEffect, useRef} from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
@@ -27,6 +27,14 @@ export const DmProvider = ({ children }) => {
     const [subscription, setSubscription] = useState(null);
     const [notificationSubscription, setNotificationSubscription] = useState(null); // 추가
     const [notifications, setNotifications] = useState([]); // 추가
+
+    // ⭐️ [추가된 로직 1] activeDmRoom의 최신 값을 담을 ref 생성
+    const activeDmRoomRef = useRef(activeDmRoom); // [!code ++]
+
+    // ⭐️ [추가된 로직 2] activeDmRoom 상태가 변경될 때마다 ref 값을 업데이트
+    useEffect(() => { // [!code ++]
+        activeDmRoomRef.current = activeDmRoom; // [!code ++]
+    }, [activeDmRoom]); // [!code ++]
 
     useEffect(() => {
         const client = new Client({
@@ -119,6 +127,13 @@ export const DmProvider = ({ children }) => {
 
     // ⭐️ 새 알림 처리 ⭐️
     const handleNewNotification = (notificationData) => {
+        const currentActiveRoom = activeDmRoomRef.current;
+        // ⭐️ [수정된 로직] state 대신 ref 값을 사용하여 현재 활성화된 채팅방의 알림인지 확인
+        if (currentActiveRoom && currentActiveRoom.id === notificationData.roomId) {
+            console.log(`현재 활성화된 방(${currentActiveRoom.id})의 메시지이므로 알림을 표시하지 않습니다.`);
+            return; // 함수 종료
+        }
+
         // 토스트 알림 표시
         toast.info(
             `${notificationData.senderNick}님이 메시지를 보냈습니다`,
@@ -149,6 +164,37 @@ export const DmProvider = ({ children }) => {
         // DM 방 목록 새로고침 (새 메시지 표시용)
         fetchDmRooms();
     };
+    // const handleNewNotification = (notificationData) => {
+    //     // 토스트 알림 표시
+    //     toast.info(
+    //         `${notificationData.senderNick}님이 메시지를 보냈습니다`,
+    //         {
+    //             onClick: () => {
+    //                 // 알림 클릭 시 해당 DM방으로 이동
+    //                 const targetRoom = dmRooms.find(room => room.id === notificationData.roomId);
+    //                 if (targetRoom) {
+    //                     setActiveDmRoom(targetRoom);
+    //                 }
+    //                 markNotificationAsRead(notificationData.id);
+    //             },
+    //             autoClose: 5000
+    //         }
+    //     );
+    //
+    //     // 알림 목록에 추가
+    //     setNotifications(prev => [{
+    //         id: notificationData.id,
+    //         type: 'DM',
+    //         senderNick: notificationData.senderNick,
+    //         message: notificationData.message,
+    //         roomId: notificationData.roomId,
+    //         timestamp: notificationData.sentAt,
+    //         isRead: false
+    //     }, ...prev]);
+    //
+    //     // DM 방 목록 새로고침 (새 메시지 표시용)
+    //     fetchDmRooms();
+    // };
 
     // ⭐️ currentUser 변경 시 알림도 다시 구독 ⭐️
     useEffect(() => {
