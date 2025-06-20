@@ -1,7 +1,18 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
 import { DmProvider } from '../context/DmContext';
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import Header from './components/Header/Header';
+import FriendPage from './components/Page/FriendPage';
+import Section from './components/Section/Section'; // Section도 라우팅 대상이 될 수 있습니다.
+import styles from './components/Default.module.css';
+import TestApp from "./popupTest/TestApp";
+import Whiteboard from '../whiteboard/index';
+import NotificationComponent from "./components/Notifications";
+import SectionContent from "./components/Section/SectionContent";
+import React, {useState} from 'react';
+import ChattingView from "./chatting/ChattingView";
+
 
 // 컴포넌트 임포트
 import styles from '../components/Default.module.css';
