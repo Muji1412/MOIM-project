@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GroupsRepository extends JpaRepository<Groups, Long> {
@@ -26,4 +27,7 @@ public interface GroupsRepository extends JpaRepository<Groups, Long> {
 
     // 서버 존재 여부 확인 (소유자 기준)
     boolean existsByGroupNoAndGroupOwnerId(Long groupNo, String groupOwnerId);
+
+    //그룹번호로 그룹찾기 - 캘린더 일정넣을때
+    Optional<Groups> findByGroupNo(long groupNo);
 }
