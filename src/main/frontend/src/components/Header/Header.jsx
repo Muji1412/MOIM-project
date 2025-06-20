@@ -191,7 +191,6 @@ export default function Header() {
         }
     };
 
-    // 채널 클릭 시 채팅 페이지로 이동
     const handleChannelClick = (channelName) => {
         setSelectedChannel(channelName);
 
@@ -199,11 +198,11 @@ export default function Header() {
             const selectedServer = servers.find(s => s.id === selectedServerId);
             if (selectedServer) {
                 // URL 파라미터로 서버명과 채널명을 전달하여 채팅 페이지로 이동
+                // 이 navigate 함수가 App.jsx의 <Route path="/chat" ...>를 활성화시킵니다.
                 navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${encodeURIComponent(channelName)}`);
             }
         }
     };
-
 
     // 컨텍스트 메뉴 닫기
     useEffect(() => {

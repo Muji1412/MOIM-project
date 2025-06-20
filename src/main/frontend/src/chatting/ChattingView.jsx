@@ -1,6 +1,6 @@
 import {useEffect, useState, useRef} from "react";
-import styles from './../components/Section/Section.module.css';
-import './chattingView.css';
+//import styles from './../components/Section/Section.module.css';
+import styles from './ChattingView.module.css';
 import {useLocation} from "react-router-dom";
 
 function ChattingView() {
@@ -72,6 +72,7 @@ function ChattingView() {
 
     // 메시지 전송 함수
     const handleSend = () => {
+
         // 1. 입력값 검증
         if (!inputValue.trim()) return;
 
@@ -173,7 +174,7 @@ function ChattingView() {
     }, {});
 
     return (
-        <div className={styles.section_content}>
+
         <div className={styles.section_content}>
             <div className={styles.channel_chat_wrap}>
                 {/* 채팅방 헤더 */}
@@ -241,7 +242,7 @@ function ChattingView() {
                 </div>
             </div>
         </div>
-        </div>
+
     );
 }
 
