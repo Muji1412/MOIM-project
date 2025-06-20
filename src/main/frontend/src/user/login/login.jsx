@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './login.css';
 
 export default function Login() {
   const [id, setId] = useState('');
   const [pw, setPw] = useState('');
   const [result, setResult] = useState('');
-  //const navigate = useNavigate();
 
-  const handleLogin = () => {
+   const handleLogin = () => {
     fetch('/api/user/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -85,6 +84,9 @@ export default function Login() {
             // placeholder="비밀번호"
             value={pw}
             onChange={e => setPw(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && id !== '') handleLogin();
+            }}
           />
         </div>
         {result && <div className="login-error">{result}</div>}

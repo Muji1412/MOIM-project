@@ -41,4 +41,7 @@ public class CalendarEntity {
     @Column(name = "cal_is_done")
     private String calIsDone; //일정완료여부
 
+    @Column(name = "cal_is_deleted")
+    private boolean calIsDeleted; //일정완료여부
+
 }

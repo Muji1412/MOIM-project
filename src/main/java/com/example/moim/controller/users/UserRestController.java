@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -172,6 +173,20 @@ public class UserRestController {
         // 비밀번호와 비밀번호 토큰은 민감 정보이므로 제외합니다.
 
         return ResponseEntity.ok(userInfo);
+    }
+
+    //유저넘버(user 테이블 pk)를 받아서 닉네임 등의 정보를 가져오는 메서드
+    @PostMapping("/getInfo")
+    public ResponseEntity<?> getInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                     @RequestParam long userNo) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body("Invalidate User");
+        }
+        Optional<Users> user = usersRepository.findByUserNo(userNo);
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자가 없습니다.");
+        }
+        return ResponseEntity.status(200).body(Map.of("username", user.get().getUsername()));
     }
 
 
