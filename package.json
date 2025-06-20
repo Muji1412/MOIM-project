@@ -27,8 +27,9 @@
   "scripts": {
     "dev": "vite --config src/main/frontend/vite.config.js",
     "build": "vite build --config src/main/frontend/vite.config.js",
-    "watch": "vite build --watch --config src/main/frontend/vite.config.js"
+    "watch": "vite build --watch --debug --config src/main/frontend/vite.config.js"
   },
+
   "eslintConfig": {
     "extends": [
       "react-app",

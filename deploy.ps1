@@ -12,7 +12,7 @@ if ($?) {
     if ($?) {
         Write-Host "✅ Docker 노캐시 이미지 생성 완료"
 
-        # 3. Docker Hub에 푸시
+        # 3. Docker Hub에 푸시 (수정됨)
         docker push urditto2/moim-app:latest
 
         # 푸시 성공 여부 확인

@@ -22,13 +22,13 @@ public class ChatController {
     }
 
     // 1. 실시간 채팅 메시지 처리 (채널별)
-    // 클라이언트가 /app/chat/{projectId}로 메시지를 보내면 이 메서드가 실행됨
+    // 클라이언트가 /app/chat/{groupName}로 메시지를 보내면 이 메서드가 실행됨
     // @SendTo로 지정한 /topic/chat/{channel}을 구독한 모든 클라이언트에게 메시지를 실시간으로 전달
-    @MessageMapping("/chat/{projectId}")
-    @SendTo("/topic/chat/{projectId}")
-    public ChatMessage sendMessage(@DestinationVariable String projectId, ChatMessage message) {
+    @MessageMapping("/chat/{groupName}")
+    @SendTo("/topic/chat/{groupName}")
+    public ChatMessage sendMessage(@DestinationVariable String groupName, ChatMessage message) {
         // message.channel 필드에 채널 ID가 들어있어야 함
-        chatService.saveChat(projectId, message.getChannel(), message);
+        chatService.saveChat(groupName, message.getChannel(), message);
         return message; // 브로드캐스트
     }
 
@@ -44,10 +44,10 @@ public class ChatController {
 
     // 메시지 전송 (WebSocket)
     // 채널별 전체 메시지 조회 (REST)
-    @GetMapping("/api/chat/{projectId}/{channelId}/all")
+    @GetMapping("/api/chat/{groupName}/{channelName}/all")
     @ResponseBody
-    public List<ChatMessage> getAllChats(@PathVariable String projectId, @PathVariable String channelId) {
-        return chatService.getChatsByChannel(projectId, channelId);
+    public List<ChatMessage> getAllChats(@PathVariable String groupName, @PathVariable String channelName) {
+        return chatService.getChatsByChannel(groupName, channelName);
     }
 
 }

@@ -7,6 +7,7 @@ import com.example.moim.entity.Friendship;
 import com.example.moim.entity.Users;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.friendship.FriendshipService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/friendship")
 @RequiredArgsConstructor
+@Tag(name = "친구 관리", description = "친구 관련 API입니다")
 public class FriendshipController {
 
     private final FriendshipService friendshipService;
@@ -96,6 +98,16 @@ public class FriendshipController {
     public ResponseEntity<?> deleteFriendship(@RequestBody UserIdDTO request) {
         try {
             friendshipService.removeFriendship(request.getUserA(), request.getUserB());
+            return ResponseEntity.ok().body("친구가 삭제됐습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/block")
+    public ResponseEntity<?> blockFriendship(@RequestBody UserIdDTO request) {
+        try {
+            friendshipService.blockFriendship(request.getUserA(), request.getUserB());
             return ResponseEntity.ok().body("친구가 삭제됐습니다.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

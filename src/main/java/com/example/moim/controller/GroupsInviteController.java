@@ -6,9 +6,12 @@ import com.example.moim.entity.Users;
 import com.example.moim.repository.GroupsRepository;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.GroupsInvite.GroupsInviteService;
+import com.example.moim.service.user.CustomUserDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +36,7 @@ public class GroupsInviteController {
 
             inviteCode = groupsInviteService.createInviteLink(request.getDays(), groups);
 
-            String Link = "moim.o-r.kr/invite/" + inviteCode + "/";
+            String Link = "moim.o-r.kr/invite/" + inviteCode;
 
             return ResponseEntity.ok().body(Link);
 
@@ -43,17 +46,24 @@ public class GroupsInviteController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<?> joinInvite(@RequestParam String inviteCode,
-                                        @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> joinInvite(@RequestParam String inviteCode, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.badRequest().body("인증되지 않은 사용자입니다.");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         try {
-//            Users currentUser = usersRepository.findByUsername(userDetails.getUsername())
-//                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
-            Users testUser = usersRepository.findByUserNo(1L)
+            Users currentUser = usersRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
 
-//            groupsInviteService.addUserToGroup(inviteCode, currentUser);
-            groupsInviteService.addUserToGroup(inviteCode, testUser);
+            groupsInviteService.addUserToGroup(inviteCode, currentUser);
+
+            // 테스트용 코드
+//            Users testUser = usersRepository.findByUserNo(1L)
+//                    .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
+//            groupsInviteService.addUserToGroup(inviteCode, testUser);
 
             return ResponseEntity.ok().body("그룹 참여가 완료됐습니다.");
 

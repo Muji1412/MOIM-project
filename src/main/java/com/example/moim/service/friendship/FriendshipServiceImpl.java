@@ -29,6 +29,11 @@ public class FriendshipServiceImpl implements FriendshipService{
         FriendshipId friendshipId =
                 new FriendshipId(requesterId, receiverId);
         if (friendshipRepository.findById(friendshipId).isPresent()) {
+            Friendship friendship = friendshipRepository.findById(friendshipId).isPresent() ? friendshipRepository.findById(friendshipId).get() : null;
+
+            if (friendship.getFriendStat().equals("blocked")){
+                throw new IllegalStateException("요청을 보낼 수 없습니다.");
+            }
             throw new IllegalStateException("이미 요청을 보냈습니다.");
         }
 
@@ -82,7 +87,20 @@ public class FriendshipServiceImpl implements FriendshipService{
             throw new IllegalStateException("친구관계가 존재하지 않습니다.");
         }
     }
-    
+
+    @Override
+    public void blockFriendship(Long accepterId, Long requesterId) {
+        FriendshipId friendshipId = new FriendshipId(accepterId, requesterId);
+        Friendship friendship = friendshipRepository.findById(friendshipId).isPresent() ? friendshipRepository.findById(friendshipId).get() : null;
+
+        if (friendship != null) {
+            friendship.setFriendStat("blocked");
+            friendshipRepository.save(friendship);
+        } else {
+            throw new IllegalStateException("잘못된 요청입니다.");
+        }
+    }
+
     // 친구목록 조회 메서드
     @Override
     public List<FriendDTO> getFriends(Long userId) {
