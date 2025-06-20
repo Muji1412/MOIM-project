@@ -6,6 +6,8 @@ import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
 import {useNavigate} from "react-router-dom";
 import MyAccount from "./myAccount/myAccount.jsx";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 export default function Header() {
 
@@ -67,6 +69,9 @@ export default function Header() {
     const modifyInputRef = useRef();
     const serverNameInputRef = useRef();
     const modifyServerNameInputRef = useRef();
+
+    //웹소켓관려
+    const stompClient = useRef(null);
 
     const [contextMenu, setContextMenu] = useState({
         visible: false,
@@ -178,6 +183,7 @@ export default function Header() {
         if (selectedServerId !== "default") {
             const selectedServer = servers.find(s => s.id === selectedServerId);
             if (selectedServer) {
+                // URL 파라미터로 서버명과 채널명을 전달하여 채팅 페이지로 이동
                 navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${encodeURIComponent(channelName)}`);
             }
         }
@@ -209,11 +215,6 @@ export default function Header() {
     // 채널 생성을 API 호출로 변경
     const handleCreateChannel = async (e) => {
         e.preventDefault();
-
-        // 가장 먼저 이 로그가 나오는지 확인
-        alert('함수가 실행되었습니다!'); // 임시로 alert 추가
-        console.log('=== 함수 시작 ===');
-
         if (!newChannelName.trim()) return;
 
         // 기본 서버에서는 채널 생성 불가
@@ -222,27 +223,22 @@ export default function Header() {
             return;
         }
 
-        console.log('=== 채널 생성 요청 시작 ===');
-        console.log('selectedServerId:', selectedServerId);
-        console.log('newChannelName:', newChannelName);
-
         try {
+            // 백엔드 API로 새 채널 생성 요청
             const response = await fetch(`/api/groups/${selectedServerId}/channels?channel_name=${encodeURIComponent(newChannelName.trim())}`, {
                 method: 'POST',
             });
-
-            console.log('응답 상태:', response.status);
-            console.log('응답 헤더:', response.headers);
 
             if (response.ok) {
                 const createdChannel = await response.json();
                 console.log('백엔드 응답 데이터:', createdChannel);
 
+                // 새 채널을 프론트엔드 상태에 추가
                 const newChannel = {
                     id: createdChannel.chanNo,
                     name: createdChannel.chanName,
                     type: "chat",
-                    isDeletable: true
+                    isDeletable: true // 새로 생성된 채널은 삭제 가능
                 };
 
                 console.log('새로 생성할 채널 객체:', newChannel);
@@ -409,52 +405,83 @@ export default function Header() {
     };
 
 
-    //서버클릭시 /chat으로 넘어갈때 파라미터싣고 넘어가게..
+    //서버클릭시 웹소켓연결
+    // 다른서버 진입시 기존웹소켓해제, 다른서버 웹소켓연결
     // 서버(홈/일반) 클릭 핸들러
     // 서버 클릭 시 채널 목록도 함께 로드
     const handleServerClick = async (serverId) => {
         setSelectedServerId(serverId);
 
+        // 홈 서버 선택 시 - 웹소켓 연결 해제하고 메인 페이지로 이동
         if (serverId === "default") {
             navigate("/main");
-            setChatChannels([]); // 빈 배열로 설정하거나 이 줄 자체를 제거
+            setChatChannels([]);
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
             if (selectedServer) {
+                // 1. 먼저 해당 서버의 채널 목록을 API로 로드
                 try {
                     const response = await fetch(`/api/groups/${serverId}/channels`);
                     if (response.ok) {
-                        const channelsData = await response.json(); // 변수명 변경
-                        console.log('채널 데이터:', channelsData);
+                        const channels = await response.json();
+                        // 백엔드 데이터를 프론트엔드 형식으로 변환
+                        const mappedChannels = channels.map(channel => ({
+                            id: channel.chanNo,
+                            name: channel.chanName,
+                            type: "chat",
+                            isDeletable: channel.chanName !== "일반채팅"
+                        }));
 
-                        if (Array.isArray(channelsData) && channelsData.length > 0) {
-                            setChatChannels(channelsData.map(ch => ({
-                                id: ch.chanNo,
-                                name: ch.chanName,
-                                type: "chat",
-                                isDeletable: ch.chanName !== "일반채팅"
-                            })));
+                        setChatChannels(mappedChannels);
 
-                            const firstChannel = channelsData[0];
-                            setSelectedChannel(firstChannel.chanName);
-                            navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${firstChannel.chanName}`);
-                        } else {
-                            // 채널이 없는 경우 빈 배열로 설정
-                            setChatChannels([]);
-                            console.log('채널이 없습니다.');
+                        // 첫 번째 채널(일반적으로 "일반채팅")로 자동 이동
+                        if (mappedChannels.length > 0) {
+                            const firstChannel = mappedChannels[0];
+                            setSelectedChannel(firstChannel.name);
+                            navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${encodeURIComponent(firstChannel.name)}`);
                         }
-                    } else {
-                        console.error('채널 목록 로드 실패:', response.status);
-                        setChatChannels([]);
                     }
                 } catch (error) {
-                    console.error('채널 목록 로드 중 오류:', error);
-                    setChatChannels([]);
+                    console.error('채널 목록 로드 실패:', error);
                 }
+
+                // 2. 기존 웹소켓 연결이 있다면 해제 (다른 서버로 이동 시)
+                if (stompClient.current) {
+                    console.log("기존 웹소켓 연결 해제");
+                    stompClient.current.deactivate();
+                }
+
+                const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
+                    ? 'http://localhost:8089'
+                    : 'https://moim.o-r.kr';
+
+                // STOMP 클라이언트 생성 (SockJS 사용)
+                const client = new Client({
+                    webSocketFactory: () => new SockJS(`${APPLICATION_SERVER_URL}/ws`),
+                    reconnectDelay: 5000
+                });
+
+                // 웹소켓 연결 성공 시 실행되는 콜백
+                client.onConnect = () => {
+                    console.log(`서버 ${selectedServer.name}에 웹소켓 연결됨`);
+                    window.globalStompClient = client; // 전역에서 접근 가능하도록 설정
+
+                    // 해당 서버의 채팅 토픽 구독 (실시간 메시지 수신)
+                    client.subscribe(`/topic/chat/${selectedServer.name}`, (msg) => {
+                        const payload = JSON.parse(msg.body);
+                        // 새 메시지를 다른 컴포넌트에 전달하기 위한 커스텀 이벤트 발생
+                        window.dispatchEvent(new CustomEvent('newChatMessage', {
+                            detail: payload
+                        }));
+                    });
+                };
+
+                // 웹소켓 연결 활성화
+                client.activate();
+                stompClient.current = client;
             }
         }
     };
-
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => {

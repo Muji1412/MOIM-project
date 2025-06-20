@@ -1,29 +1,21 @@
 import {useEffect, useState, useRef} from "react";
-import SockJS from "sockjs-client";
-import {Client} from "@stomp/stompjs";
 import styles from './../components/Section/Section.module.css';
 import './chattingView.css';
-
 import {useLocation} from "react-router-dom";
-
 
 function ChattingView() {
     // 채팅 메시지 목록을 저장할 state (화면에 표시되는 메시지들)
     const [messages, setMessages] = useState([]);
     // 입력창에 입력된 값을 저장할 state
     const [inputValue, setInputValue] = useState('');
-    // STOMP 클라이언트 인스턴스를 저장할 ref (컴포넌트가 다시 렌더링되어도 값이 유지됨)
-    const stompClient = useRef(null);
     // 파일 업로드 input을 제어할 ref
     const fileInputRef = useRef(null);
-    // 채널명 (방 이름) - 여기서는 예시로 'general' 사용
-    const channel = "general";
+
+    // URL에서 서버명과 채널명 추출
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const groupName = params.get("groupName");
     const channelName = params.get("channelName");
-    //작업해봄
-    //////
 
     // 서버 URL (수정됨: 포트 8081로 변경)
     const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
@@ -46,72 +38,91 @@ function ChattingView() {
         return dateObj.toLocaleDateString("ko-KR", {month: "long", day: "numeric", weekday: "long"});
     }
 
+    //실시간 메시지 수신 함수
+    const handleNewMessage = (event) => {
+        const payload = event.detail; // Header에서 발생시킨 커스텀 이벤트의 데이터
+
+        // 현재 보고 있는 채널의 메시지만 화면에 추가
+        if (payload.channel === channelName) {
+            setMessages(prev => [...prev, payload]);
+        }
+    };
+
     useEffect(() => {
-        // 파라미터는 항상 location.search에서 추출
         const params = new URLSearchParams(location.search);
         const groupName = params.get("groupName");
         const channelName = params.get("channelName");
 
-        console.log("채팅방 파라미터 변경:", groupName, channelName);
+        setMessages([]); // 채널 바뀔 때마다 메시지 초기화
 
-        setMessages([]); // 서버/채널이 바뀔 때마다 메시지 초기화
-
-        // 1. WebSocket 연결 (프로젝트 단위) - APPLICATION_SERVER_URL 사용
-        const client = new Client({
-            webSocketFactory: () => new SockJS(`${APPLICATION_SERVER_URL}/ws`),
-            reconnectDelay: 5000
-        });
-
-        client.onConnect = () => {
-            // 프로젝트 전체 구독
-            client.subscribe(`/topic/chat/${groupName}`, (msg) => {
-                const message = JSON.parse(msg.body);
-                // 현재 보고 있는 채널의 메시지만 화면에 추가
-                if (message.channel === channelName) {
-                    setMessages(prev => [...prev, message]);
-                }
-            });
-        };
-
-        client.activate();
-        stompClient.current = client;
-
-        // 2. 채널별 전체 메시지 조회 (REST) - APPLICATION_SERVER_URL 사용
+        // 해당 채널의 기존 채팅 히스토리를 API로 로드
         fetch(`${APPLICATION_SERVER_URL}/api/chat/${groupName}/${channelName}/all`)
             .then(res => res.json())
-            .then(data => setMessages(data));
+            .then(data => setMessages(data))
+            .catch(err => console.error("채팅 히스토리 로드 실패:", err));
 
+        // 실시간 메시지 수신을 위한 이벤트 리스너 등록
+        window.addEventListener('newChatMessage', handleNewMessage);
+
+        // 컴포넌트 언마운트 시 이벤트 리스너 제거
         return () => {
-            client.deactivate();
+            window.removeEventListener('newChatMessage', handleNewMessage);
         };
-    }, [location]);
+    }, [location]); // URL이 변경될 때마다 실행
 
     // 메시지 전송 함수
     const handleSend = () => {
-        if (!inputValue.trim() || !stompClient.current || !stompClient.current.connected) return;
+        // 1. 입력값 검증
+        if (!inputValue.trim()) return;
+
+        const params = new URLSearchParams(location.search);
+        const groupName = params.get("groupName");
+        const channelName = params.get("channelName");
+
+        // 전송할 메시지 객체 생성
         const newMsg = {
             date: new Date().toISOString(),
-            user: '박종범',
+            user: '박종범', // 실제로는 현재 로그인한 사용자 정보 사용
             color: 'purple',
             text: inputValue,
-            channel: channelName// 반드시 현재 채널 ID //channel: channelName 이런식으로 channelName
+            channel: channelName // 어느 채널의 메시지인지 명시
         };
-        stompClient.current.publish({
-            destination: `/app/chat/${groupName}`, //나중에 destination: `/app/chat/${groupName}`, 이런식으로 넘어와야함
-            body: JSON.stringify(newMsg)
-        });
-        setInputValue('');
+
+        // Header에서 설정한 전역 웹소켓 클라이언트를 통해 메시지 전송
+        if (window.globalStompClient && window.globalStompClient.connected) {
+            window.globalStompClient.publish({
+                destination: `/app/chat/${groupName}`,
+                body: JSON.stringify(newMsg)
+            });
+            setInputValue(''); // 입력창 초기화
+        } else {
+            console.error("웹소켓 연결이 없습니다. 서버를 먼저 선택해주세요.");
+        }
     };
 
-    // 이미지 전송 함수 - APPLICATION_SERVER_URL 사용
+    // 이미지 업로드 및 전송 함수
     const handleImageUpload = async (file) => {
+        // 웹소켓 연결 상태 확인
+        if (!window.globalStompClient || !window.globalStompClient.connected) {
+            console.error("웹소켓 연결이 없습니다.");
+            return;
+        }
+
+        const params = new URLSearchParams(location.search);
+        const groupName = params.get("groupName");
+        const channelName = params.get("channelName");
+
+        // 이미지 파일을 서버에 업로드
         const formData = new FormData();
         formData.append('file', file);
         const res = await fetch(`${APPLICATION_SERVER_URL}/api/chat/image`, {
             method: 'POST',
             body: formData,
         });
-        const imageUrl = await res.text();
+
+        const imageUrl = await res.text(); // 업로드된 이미지의 URL 받기
+
+        // 이미지 메시지 객체 생성
         const newMsg = {
             date: getToday(),
             user: '박종범',
@@ -120,7 +131,9 @@ function ChattingView() {
             imageUrl: imageUrl,
             channel: channelName
         };
-        stompClient.current.publish({
+        //  전역 클라이언트 사용 (stompClient.current 대신)
+        // 웹소켓을 통해 이미지 메시지 전송
+        window.globalStompClient.publish({
             destination: `/app/chat/${groupName}`,
             body: JSON.stringify(newMsg)
         });
