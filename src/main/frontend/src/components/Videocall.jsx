@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { OpenVidu } from 'openvidu-browser';
 
-
-// 서버 URL
 const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:8089'  // 개발 환경
-    : 'https://moim.o-r.kr';   // 배포 환경
-
+    ? 'http://localhost:8089'  // ⚠️ 포트 번호는 본인 백엔드 서버에 맞게 수정
+    : 'https://moim.o-r.kr';
 
 // --- Helper Component ---
 const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
@@ -34,7 +31,7 @@ const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
     );
 });
 
-function VideoCall() {
+function Videocall() {
     // --- State Management ---
     const [session, setSession] = useState(null);
     const [publisher, setPublisher] = useState(null);
@@ -45,27 +42,86 @@ function VideoCall() {
     const [isMicEnabled, setIsMicEnabled] = useState(true);
     const [isVideoEnabled, setIsVideoEnabled] = useState(true);
     const [mainStreamManager, setMainStreamManager] = useState(null);
+    const [chatData, setChatData] = useState(null);
+    const [autoJoin, setAutoJoin] = useState(false);
+    const [showJoinForm, setShowJoinForm] = useState(false);
 
     // --- Refs ---
     const OV = useRef(new OpenVidu());
-    const sessionRef = useRef(null); // 세션 객체를 ref에 저장하여 최신 상태를 유지
+    const sessionRef = useRef(null);
 
     // --- Session State Synchronization ---
-    // session 상태가 변경될 때마다 ref에도 최신 값을 반영
     useEffect(() => {
         sessionRef.current = session;
     }, [session]);
 
+    // ✅ 데이터를 가져오는 로직을 useCallback으로 감싸서 재사용 가능하도록 만듭니다.
+    const getStoredData = useCallback(() => {
+        try {
+            const storedData = sessionStorage.getItem('videoChatData');
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                console.log('저장된 데이터 확인:', data);
 
-    // =========================================================================
-    // !!!!! 여기가 핵심 수정 부분입니다 !!!!!
-    //
-    // 이 useEffect는 의존성 배열이 `[]` 이므로,
-    // 컴포넌트가 "처음 생성될 때"와 "완전히 사라질 때" 단 한 번씩만 실행됩니다.
-    // 상태가 변해도 중간에 재실행되지 않으므로, 연결되자마자 끊기는 문제가 발생하지 않습니다.
-    //
-    // 컴포넌트가 사라질 때(unmount), ref에 저장된 최신 세션의 연결을 끊습니다.
-    // =========================================================================
+                if (!chatData || chatData.roomId !== data.roomId) {
+                    console.log(`roomId 변경 감지: ${chatData?.roomId} -> ${data.roomId}. 상태를 업데이트합니다.`);
+                    setChatData(data);
+
+                    // 상태 초기화
+                    if (sessionRef.current) {
+                        sessionRef.current.disconnect();
+                    }
+                    setIsConnected(false);
+                    setSession(null);
+                    setPublisher(null);
+                    setSubscribers([]);
+                }
+            } else {
+                setShowJoinForm(true);
+            }
+        } catch (error) {
+            console.error('데이터 로딩 오류:', error);
+            setShowJoinForm(true);
+        }
+    }, [chatData]);
+
+    // ✅ 데이터를 가져오고, 팝업창 가시성 변경을 감지하는 useEffect
+    useEffect(() => {
+        getStoredData();
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                console.log('팝업 창이 다시 활성화되었습니다. 데이터를 다시 확인합니다.');
+                getStoredData();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [getStoredData]);
+
+    // ✅ chatData가 변경되면 세션 정보를 설정하는 useEffect
+    useEffect(() => {
+        if (chatData) {
+            setSessionIdInput(chatData.roomId);
+            setUserName(chatData.userName);
+            setAutoJoin(true);
+            setShowJoinForm(false);
+        }
+    }, [chatData]);
+
+    // ✅ 자동 참가를 처리하는 useEffect
+    useEffect(() => {
+        if (autoJoin && sessionIdInput && userName && !isConnected) {
+            joinSession();
+            setAutoJoin(false);
+        }
+    }, [autoJoin, sessionIdInput, userName, isConnected]);
+
+    // ✅ 컴포넌트 언마운트 시 세션 연결을 해제하는 useEffect
     useEffect(() => {
         const handleBeforeUnload = () => {
             if (sessionRef.current) {
@@ -82,12 +138,14 @@ function VideoCall() {
                 sessionRef.current.disconnect();
             }
         };
-    }, []); // <-- 의존성 배열을 비워서 최초 1회만 실행되도록 설정
+    }, []);
 
-
-    // 세션 참여 로직 (내부 로직은 동일)
+    // ... (joinSession, leaveSession 등 나머지 함수는 동일하게 유지)
     const joinSession = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+
+        if (session?.connection) return;
+
         try {
             const roomName = sessionIdInput || "default-room-moim";
             const mySession = OV.current.initSession();
@@ -127,13 +185,17 @@ function VideoCall() {
             setSession(mySession);
             setPublisher(myPublisher);
             setIsConnected(true);
+            setShowJoinForm(false)
         } catch (error) {
             console.error('세션 참여 실패:', error);
             alert(`연결 실패: ${error.message}`);
+
+            if (!chatData) {
+                setShowJoinForm(true);
+            }
         }
     };
 
-    // UI에서 사용하는 '나가기' 버튼용 함수
     const leaveSession = () => {
         if (session) {
             session.disconnect();
@@ -141,7 +203,6 @@ function VideoCall() {
         }
     };
 
-    // --- UI Control Handlers ---
     const toggleMicrophone = () => publisher?.publishAudio(!isMicEnabled);
     const toggleVideo = () => publisher?.publishVideo(!isVideoEnabled);
 
@@ -170,7 +231,7 @@ function VideoCall() {
     // --- Render Logic ---
 
     // 접속 전 UI
-    if (!isConnected) {
+    if (!isConnected && (!chatData || showJoinForm)) {
         return (
             <>
                 <style>{joinFormStyles}</style>
@@ -238,7 +299,6 @@ function VideoCall() {
     );
 }
 
-
 // --- CSS Styles (unchanged) ---
 const joinFormStyles = `
     .join-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; font-family: sans-serif; }
@@ -272,4 +332,4 @@ const videoCallStyles = `
     .control-btn.leave { background-color: #ea4335; }
 `;
 
-export default VideoCall;
+export default Videocall;

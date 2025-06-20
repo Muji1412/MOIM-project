@@ -1,3 +1,5 @@
+// /src/main/frontend/src/components/Header/Header.jsx
+
 import React, {useRef, useState, useEffect} from "react";
 import {useLocation} from "react-router-dom";
 import styles from "./Header.module.css";
@@ -6,6 +8,10 @@ import {useNavigate} from "react-router-dom";
 import MyAccount from "./myAccount/myAccount.jsx";
 
 export default function Header() {
+
+
+
+
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -19,6 +25,10 @@ export default function Header() {
     const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
     const [newChannelName, setNewChannelName] = useState("");
     const [channelContextMenu, setChannelContextMenu] = useState({visible: false, x: 0, y: 0, channelId: null,});
+
+    // 기존 상태들
+    const [servers, setServers] = useState([]);
+    const [selectedServerId, setSelectedServerId] = useState("default");
 
     // 채팅방 ContextMenu
     const handleChannelContextMenu = (e, channelId) => {
@@ -40,7 +50,32 @@ export default function Header() {
     //채팅방 수정
     const [isChannelModifyModalOpen, setIsChannelModifyModalOpen] = useState(false);
     const [modifyChannelData, setModifyChannelData] = useState({id: "", name: ""});
-// 채팅방 수정 모달 열기
+
+
+    // 모달 팝업
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+    const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
+
+
+    //이미지 업로드 및 수정
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState("");
+    const [modifyImageFile, setModifyImageFile] = useState(null);
+    const [modifyImagePreview, setModifyImagePreview] = useState("");
+    const inputRef = useRef();
+    const modifyInputRef = useRef();
+    const serverNameInputRef = useRef();
+    const modifyServerNameInputRef = useRef();
+
+    const [contextMenu, setContextMenu] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        serverId: null,
+    });
+
+    // 채팅방 수정 모달 열기
     const handleOpenChannelModifyModal = (channelId) => {
         const channelToModify = chatChannels.find(ch => ch.id === channelId);
         if (channelToModify) {
@@ -60,45 +95,94 @@ export default function Header() {
     };
 
     // 채팅방 이름 수정 실행
-    const handleModifyChannel = (e) => {
+    // 채널 수정을 API 호출로 변경
+    const handleModifyChannel = async (e) => {
         e.preventDefault();
         if (!modifyChannelData.name.trim()) return;
 
-        // 채팅방 목록에서 해당 채팅방 업데이트
-        setChatChannels(prev =>
-            prev.map(channel =>
-                channel.id === modifyChannelData.id
-                    ? {...channel, name: modifyChannelData.name.trim()}
-                    : channel
-            )
-        );
+        try {
+            const response = await fetch(`/api/groups/${selectedServerId}/channels/${modifyChannelData.id}/update?chanName=${encodeURIComponent(modifyChannelData.name.trim())}`, {
+                method: 'POST',
+            });
 
-        // 현재 선택된 채널이 수정된 채널인 경우 선택 상태도 업데이트
-        if (selectedChannel === chatChannels.find(ch => ch.id === modifyChannelData.id)?.name) {
-            setSelectedChannel(modifyChannelData.name.trim());
+            if (response.ok) {
+                const updatedChannel = await response.json();
+
+                // 프론트엔드 state 업데이트
+                setChatChannels(prev =>
+                    prev.map(channel =>
+                        channel.id === modifyChannelData.id
+                            ? {...channel, name: updatedChannel.chanName}
+                            : channel
+                    )
+                );
+
+                // 현재 선택된 채널이 수정된 채널인 경우
+                if (selectedChannel === chatChannels.find(ch => ch.id === modifyChannelData.id)?.name) {
+                    setSelectedChannel(updatedChannel.chanName);
+                }
+
+                handleCloseChannelModifyModal();
+                console.log('채널 수정 성공:', updatedChannel);
+            } else {
+                console.error('채널 수정 실패');
+                alert('채널 수정에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('채널 수정 중 오류:', error);
+            alert('채널 수정 중 오류가 발생했습니다.');
         }
-
-        handleCloseChannelModifyModal();
     };
 
-
     // 채팅방 삭제
-    const handleDeleteChannel = (channelId) => {
+    // 채널 삭제를 API 호출로 변경
+    const handleDeleteChannel = async (channelId) => {
         const channel = chatChannels.find(ch => ch.id === channelId);
-        //삭제 가능 여부
+
+        // 삭제 가능 여부 확인
         if (!channel?.isDeletable || chatChannels.length <= 1) {
             alert("최소 1개의 채팅방은 유지되어야 합니다.");
             return;
         }
-        // 현재 선택된 채널이 삭제될 경우 다른 채널로 변경
-        if (selectedChannel === channel.name) {
-            const remainingChannels = chatChannels.filter(ch => ch.id !== channelId);
-            setSelectedChannel(remainingChannels[0].name);
-        }
 
-        setChatChannels(prev => prev.filter(ch => ch.id !== channelId));
-        setChannelContextMenu(prev => ({...prev, visible: false}));
+        try {
+            const response = await fetch(`/api/groups/${selectedServerId}/channels/${channelId}/delete`, {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                // 현재 선택된 채널이 삭제될 경우 다른 채널로 변경
+                if (selectedChannel === channel.name) {
+                    const remainingChannels = chatChannels.filter(ch => ch.id !== channelId);
+                    setSelectedChannel(remainingChannels[0].name);
+                }
+
+                setChatChannels(prev => prev.filter(ch => ch.id !== channelId));
+                setChannelContextMenu(prev => ({...prev, visible: false}));
+
+                console.log('채널 삭제 성공');
+            } else {
+                console.error('채널 삭제 실패');
+                alert('채널 삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('채널 삭제 중 오류:', error);
+            alert('채널 삭제 중 오류가 발생했습니다.');
+        }
     };
+
+    // 채널 클릭 시 채팅 페이지로 이동
+    const handleChannelClick = (channelName) => {
+        setSelectedChannel(channelName);
+
+        if (selectedServerId !== "default") {
+            const selectedServer = servers.find(s => s.id === selectedServerId);
+            if (selectedServer) {
+                navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${encodeURIComponent(channelName)}`);
+            }
+        }
+    };
+
 
     // 컨텍스트 메뉴 닫기
     useEffect(() => {
@@ -121,62 +205,125 @@ export default function Header() {
         setNewChannelName("");
     };
 
-    //채팅방 생성
-    const handleCreateChannel = (e) => {
+    // 채팅방 생성
+    // 채널 생성을 API 호출로 변경
+    const handleCreateChannel = async (e) => {
         e.preventDefault();
+
+        // 가장 먼저 이 로그가 나오는지 확인
+        alert('함수가 실행되었습니다!'); // 임시로 alert 추가
+        console.log('=== 함수 시작 ===');
+
         if (!newChannelName.trim()) return;
 
-        const newChannel = {
-            id: channelIdCounter,
-            name: newChannelName.trim(),
-            type: "chat",
-            isDeletable: true //사용자가 만든 채팅방은 삭제 가능
-        };
-        setChatChannels(prev => [...prev, newChannel]);
-        setChannelIdCounter(prev => prev + 1);
-        setIsChannelModalOpen(false);
-        setNewChannelName("");
-    }
+        // 기본 서버에서는 채널 생성 불가
+        if (selectedServerId === "default") {
+            alert("서버를 선택한 후 채널을 생성해주세요.");
+            return;
+        }
 
-    // 기존 상태들
-    const [servers, setServers] = useState([]);
-    const [selectedServerId, setSelectedServerId] = useState("default");
+        console.log('=== 채널 생성 요청 시작 ===');
+        console.log('selectedServerId:', selectedServerId);
+        console.log('newChannelName:', newChannelName);
 
-    // 모달 팝업
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
-    const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
+        try {
+            const response = await fetch(`/api/groups/${selectedServerId}/channels?channel_name=${encodeURIComponent(newChannelName.trim())}`, {
+                method: 'POST',
+            });
+
+            console.log('응답 상태:', response.status);
+            console.log('응답 헤더:', response.headers);
+
+            if (response.ok) {
+                const createdChannel = await response.json();
+                console.log('백엔드 응답 데이터:', createdChannel);
+
+                const newChannel = {
+                    id: createdChannel.chanNo,
+                    name: createdChannel.chanName,
+                    type: "chat",
+                    isDeletable: true
+                };
+
+                console.log('새로 생성할 채널 객체:', newChannel);
+                console.log('현재 채널 목록:', chatChannels);
+
+                setChatChannels(prev => {
+                    const updated = [...prev, newChannel];
+                    console.log('업데이트된 채널 목록:', updated);
+                    return updated;
+                });
+
+                setIsChannelModalOpen(false);
+                setNewChannelName("");
+            } else {
+                const errorText = await response.text();
+                console.error('채널 생성 실패 응답:', errorText);
+            }
+        } catch (error) {
+            console.error('채널 생성 중 네트워크 오류:', error);
+        }
+    };
+
+    // 초대 관련 모달
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [inviteLink, setInviteLink] = useState('');
+    const [inviteDays, setInviteDays] = useState(7);
+    const [selectedServerForInvite, setSelectedServerForInvite] = useState(null);
 
     // 새 서버 및 수정
     const [newServer, setNewServer] = useState({name: "", image: ""});
     const [modifyServer, setModifyServer] = useState({id: "", name: "", image: ""});
 
-    //이미지 업로드 및 수정
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState("");
-    const [modifyImageFile, setModifyImageFile] = useState(null);
-    const [modifyImagePreview, setModifyImagePreview] = useState("");
-    const inputRef = useRef();
-    const modifyInputRef = useRef();
-    const serverNameInputRef = useRef();
-    const modifyServerNameInputRef = useRef();
 
-    const [contextMenu, setContextMenu] = useState({
-        visible: false,
-        x: 0,
-        y: 0,
-        serverId: null,
-    });
 
-    const [openChat, setOpenChat] = useState(true);
-    const [openVoice, setOpenVoice] = useState(true);
 
+
+    // 현재 유저정보 가져오는 api
+    const [currentUser, setCurrentUser] = useState(null);
+    useEffect(() => {
+        const fetchMyInfo = async () => {
+            const token = sessionStorage.getItem('accessToken');
+            if (!token) {
+                console.log('로그인이 필요합니다.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/user/my-info', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentUser(data);
+                    console.log('currentUser:', data);
+                } else {
+                    console.error('사용자 정보 로딩 실패');
+                }
+            } catch (error) {
+                console.error('사용자 정보 로딩 중 오류:', error);
+            }
+        };
+
+        fetchMyInfo();
+
+    }, []);
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
-
         const fetchServers = async () => {
             try {
-                const response = await fetch('/api/groups');
+                const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
+                const response = await fetch('/api/groups', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                        'Content-Type': 'application/json'
+                    }
+                });
                 if (response.ok) {
                     const serverList = await response.json();
                     const mappedServers = serverList.map(group => ({
@@ -186,6 +333,8 @@ export default function Header() {
                     }));
                     setServers(mappedServers);
                     console.log('매핑된 서버 목록:', mappedServers);
+                } else if (response.status === 401) {
+                    console.error('인증 실패: 로그인이 필요합니다');
                 } else {
                     console.error('서버 목록 불러오기 실패');
                 }
@@ -196,6 +345,7 @@ export default function Header() {
 
         fetchServers();
     }, []);
+
 
     // 현재 경로에 따른 aside 타입 결정
     const getAsideType = () => {
@@ -261,19 +411,50 @@ export default function Header() {
 
     //서버클릭시 /chat으로 넘어갈때 파라미터싣고 넘어가게..
     // 서버(홈/일반) 클릭 핸들러
-    const handleServerClick = (serverId) => {
+    // 서버 클릭 시 채널 목록도 함께 로드
+    const handleServerClick = async (serverId) => {
         setSelectedServerId(serverId);
+
         if (serverId === "default") {
             navigate("/main");
+            setChatChannels([]); // 빈 배열로 설정하거나 이 줄 자체를 제거
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
             if (selectedServer) {
-                // 예시로 channelNum=1(일반채팅) 고정, 실제로는 서버의 채널 리스트에서 선택할 것
-                navigate(`/chat?projectId=${encodeURIComponent(selectedServer.name)}&channelNum=일반채팅`);
-            }
+                try {
+                    const response = await fetch(`/api/groups/${serverId}/channels`);
+                    if (response.ok) {
+                        const channelsData = await response.json(); // 변수명 변경
+                        console.log('채널 데이터:', channelsData);
 
+                        if (Array.isArray(channelsData) && channelsData.length > 0) {
+                            setChatChannels(channelsData.map(ch => ({
+                                id: ch.chanNo,
+                                name: ch.chanName,
+                                type: "chat",
+                                isDeletable: ch.chanName !== "일반채팅"
+                            })));
+
+                            const firstChannel = channelsData[0];
+                            setSelectedChannel(firstChannel.chanName);
+                            navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${firstChannel.chanName}`);
+                        } else {
+                            // 채널이 없는 경우 빈 배열로 설정
+                            setChatChannels([]);
+                            console.log('채널이 없습니다.');
+                        }
+                    } else {
+                        console.error('채널 목록 로드 실패:', response.status);
+                        setChatChannels([]);
+                    }
+                } catch (error) {
+                    console.error('채널 목록 로드 중 오류:', error);
+                    setChatChannels([]);
+                }
+            }
         }
     };
+
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => {
@@ -303,40 +484,153 @@ export default function Header() {
         setModifyImageFile(null);
         setModifyImagePreview("");
     };
+    const openInviteModal = (serverId) => {
+        setSelectedServerForInvite(serverId); // 어떤 서버에 대한 초대인지 ID 저장
+        setIsInviteModalOpen(true);
+        setContextMenu({ visible: false }); // 컨텍스트 메뉴 닫기
+    };
 
-    // 서버 생성 - 백엔드 API 연동
+    const closeInviteModal = () => {
+        setIsInviteModalOpen(false);
+        setInviteLink(''); // 상태 초기화
+        setInviteDays(7);
+        setSelectedServerForInvite(null);
+    };
+
+    // 링크 생성 api
+    const handleCreateInviteLink = async () => {
+        if (!selectedServerForInvite) return;
+
+        try {
+            const response = await fetch('/api/groupsInvite/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    groupId: selectedServerForInvite,
+                    days: inviteDays,
+                }),
+            });
+
+            if (response.ok) {
+                const link = await response.text();
+                setInviteLink(link); // 생성된 링크를 state에 저장
+            } else {
+                alert('초대 링크 생성에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('초대 링크 생성 오류:', error);
+            alert('오류가 발생했습니다.');
+        }
+    };
+
+    // 링크 복사 핸들링
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            alert('초대 링크가 복사되었습니다!');
+        });
+    };
+
+    const [openVoice, setOpenVoice] = useState(true);
+    const [openChat, setOpenChat] = useState(true);
+
+    // 화상채팅 팝업창 핸들러
+    const openVideoChatPopup = () => {
+        const popupWidth = 1024;
+        const popupHeight = 768;
+
+        const videoChatData = {
+            userId: currentUser.userNo,
+            userName: currentUser.username,
+            roomId: selectedServerId,
+            timestamp: new Date().toISOString()
+        };
+
+        sessionStorage.setItem('videoChatData', JSON.stringify(videoChatData));
+
+        const left = (window.screen.width / 2) - (popupWidth / 2);
+        const top = (window.screen.height / 2) - (popupHeight / 2);
+
+        window.open(
+            '/videocall.do',
+            'videoChatPopup',
+            `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
+    };
+
+    // 서버 생성 - 백엔드 API 연동 (수정된 버전)
     const handleAddServer = async (e) => {
         e.preventDefault();
         if (!newServer.name.trim()) return;
 
         try {
+            const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
+
+            if (!token) {
+                alert('로그인이 필요합니다. 다시 로그인해주세요.');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('name', newServer.name);
             if (imageFile) {
                 formData.append('image', imageFile);
             }
-
-            console.log('서버 생성 요청 시작:', newServer.name);
-
             const response = await fetch('/api/groups', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                },
                 body: formData,
             });
 
-            console.log('응답 상태:', response.status, response.statusText);
-
             if (response.ok) {
                 const createdGroup = await response.json();
-                console.log('백엔드 응답:', createdGroup);
+
                 const createdServer = {
                     id: createdGroup.groupNo.toString(),
                     name: createdGroup.groupName,
                     image: createdGroup.groupImage || ""
                 };
+
+                // 서버 생성 후 기본 "일반채팅" 채널 자동 생성
+                try {
+                    const channelResponse = await fetch(`/api/groups/${createdServer.id}/channels?channel_name=${encodeURIComponent('일반채팅')}`, {
+                        method: 'POST',
+                    });
+
+                    if (channelResponse.ok) {
+                        const defaultChannel = await channelResponse.json();
+
+                        // 생성된 서버로 자동 이동
+                        setSelectedServerId(createdServer.id);
+                        setChatChannels([{
+                            id: defaultChannel.chanNo,
+                            name: defaultChannel.chanName,
+                            type: "chat",
+                            isDeletable: false // 일반채팅은 삭제 불가
+                        }]);
+                        setSelectedChannel(defaultChannel.chanName);
+
+                        // 채팅 페이지로 이동
+                        navigate(`/chat?groupName=${encodeURIComponent(createdServer.name)}&channelName=${encodeURIComponent(defaultChannel.chanName)}`);
+
+                    } else {
+                        console.error('기본 채널 생성 실패');
+                    }
+                } catch (channelError) {
+                    console.error('기본 채널 생성 중 오류:', channelError);
+                }
+
                 setServers((prev) => [...prev, createdServer]);
                 closeModal();
+
                 console.log('서버 생성 성공:', createdServer);
-            } else {
+            } else if (response.status === 401) {
+                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+                console.log('서버 및 기본 채널 생성 완료:', createdServer);
+              
+            }  else {
+
                 let errorMessage = '서버 생성에 실패했습니다.';
                 try {
                     const errorData = await response.json();
@@ -353,12 +647,20 @@ export default function Header() {
         }
     };
 
+
     // 서버 정보 수정 함수
     const handleModifyServer = async (e) => {
         e.preventDefault();
         if (!modifyServer.name.trim()) return;
 
         try {
+            const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
+            console.log('[디버깅] 토큰:', token);
+            if (!token) {
+                alert('로그인이 필요합니다. 다시 로그인해주세요.');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('name', modifyServer.name);
             if (modifyImageFile) {
@@ -369,6 +671,9 @@ export default function Header() {
 
             const response = await fetch(`/api/groups/${modifyServer.id}`, {
                 method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                },
                 body: formData,
             });
 
@@ -391,6 +696,8 @@ export default function Header() {
                 );
                 closeModifyModal();
                 console.log('서버 수정 성공:', updatedServer);
+            } else if (response.status === 401) {
+                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
             } else {
                 let errorMessage = '서버 수정에 실패했습니다.';
                 try {
@@ -407,6 +714,7 @@ export default function Header() {
             alert('서버 수정 중 오류가 발생했습니다: ' + error.message);
         }
     };
+
 
     // 기존 변수들
     const isFriendMenu = selectedServerId === "default";
@@ -582,6 +890,17 @@ export default function Header() {
                                             </div>
                                         </li>
                                         <li className={styles.context_menu_list}>
+                                            <div
+                                                className={styles.context_box}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openInviteModal(contextMenu.serverId);
+                                                }}
+                                            >
+                                                <span>초대하기</span>
+                                            </div>
+                                        </li>
+                                        <li className={styles.context_menu_list}>
                                             <div className={`${styles.context_box} ${styles.context_quit}`}>
                                                 <span>서버 나가기</span>
                                             </div>
@@ -723,11 +1042,14 @@ export default function Header() {
                                                             <li className={styles.channel_item}>
                                                                 <div
                                                                     className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
-                                                                    onClick={() => setSelectedChannel("voice")}
+                                                                    onClick={() => {
+                                                                        setSelectedChannel("voice");
+                                                                        openVideoChatPopup(); // 팝업페이지 오픈
+                                                                    }}
                                                                     style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
+                                                                    <span>화상채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -782,7 +1104,7 @@ export default function Header() {
                                                                 <li key={channel.id} className={styles.channel_item}>
                                                                     <div
                                                                         className={`${styles.channel_item_box} ${selectedChannel === channel.name ? styles.active_channel : ""}`}
-                                                                        onClick={() => setSelectedChannel(channel.name)}
+                                                                        onClick={() => handleChannelClick(channel.name)}
                                                                         onContextMenu={(e) => handleChannelContextMenu(e, channel.id)}
                                                                         style={{cursor: "pointer"}}
                                                                     >
@@ -935,6 +1257,17 @@ export default function Header() {
                                             </div>
                                         </li>
                                         <li className={styles.context_menu_list}>
+                                            <div
+                                                className={styles.context_box}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openInviteModal(contextMenu.serverId);
+                                                }}
+                                            >
+                                                <span>초대하기</span>
+                                            </div>
+                                        </li>
+                                        <li className={styles.context_menu_list}>
                                             <div className={`${styles.context_box} ${styles.context_quit}`}>
                                                 <span>서버 나가기</span>
                                             </div>
@@ -1074,7 +1407,7 @@ export default function Header() {
                                                                     style={{cursor: "pointer"}}
                                                                 >
                                                                     <img src="/bundle/img/voice_ic.png" alt="voice"/>
-                                                                    <span>음성채팅</span>
+                                                                    <span>화상채팅</span>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -1572,11 +1905,104 @@ export default function Header() {
                     </div>
                 </div>
             )}
+            {/* 서버 초대 모달 */}
+            {isInviteModalOpen && (
+                <div
+                    className={modalStyles.modalOverlay}
+                    onClick={closeInviteModal}
+                >
+                    <div
+                        className={modalStyles.modal_box}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className={modalStyles.modal_title_area}>
+                            <span className={modalStyles.modal_title}>서버에 친구 초대하기</span>
+                            <p>친구를 서버로 초대하여 함께 대화하세요!</p>
+                            <button
+                                className={modalStyles.close_btn}
+                                onClick={closeInviteModal}
+                                type="button"
+                            >
+                                <img src="/bundle/img/close_ic.png" alt="close_ic"/>
+                            </button>
+                        </div>
+
+                        <div className={modalStyles.modal_form}>
+                            {/* 초대 링크가 생성되었을 때 보여주는 화면 */}
+                            {inviteLink ? (
+                                <div className={modalStyles.modal_input_area}>
+                                    <label className={modalStyles.modal_title_label}>
+                                        생성된 초대 링크
+                                    </label>
+                                    <div className={modalStyles.modal_input_box}>
+                                        <input
+                                            type="text"
+                                            className={modalStyles.modal_input}
+                                            value={inviteLink}
+                                            readOnly
+                                        />
+                                    </div>
+                                    <span className={modalStyles.guide}>
+                                        이 링크는 {inviteDays}일 후에 만료됩니다.
+                                    </span>
+                                </div>
+                            ) : (
+                                /* 링크 생성 전에 보여주는 화면 */
+                                <div className={modalStyles.modal_input_area}>
+                                    <label className={modalStyles.modal_title_label} htmlFor="inviteDays">
+                                        초대 링크 유효 기간 (일)
+                                    </label>
+                                    <div className={modalStyles.modal_input_box}>
+                                        <select
+                                            id="inviteDays"
+                                            className={modalStyles.modal_input}
+                                            value={inviteDays}
+                                            onChange={(e) => setInviteDays(Number(e.target.value))}
+                                        >
+                                            <option value="1">1일</option>
+                                            <option value="3">3일</option>
+                                            <option value="7">7일 (기본값)</option>
+                                            <option value="30">30일</option>
+                                            <option value="0">만료 없음</option>
+                                        </select>
+                                    </div>
+                                    <span className={modalStyles.guide}>
+                                       초대 링크가 유효할 기간을 선택하세요.
+                                     </span>
+                                </div>
+                            )}
+
+
+                            <div className={modalStyles.modal_btn_area}>
+                                <div className={modalStyles.buttonRow}>
+                                    <button
+                                        type="button"
+                                        className={modalStyles.backBtn}
+                                        onClick={closeInviteModal}
+                                    >
+                                        닫기
+                                    </button>
+                                    {/* 링크 생성 전/후 버튼 다르게 표시 */}
+                                    {inviteLink ? (
+                                        <button type="button" className={modalStyles.createBtn} onClick={handleCopyLink}>
+                                            링크 복사
+                                        </button>
+                                    ) : (
+                                        <button type="button" className={modalStyles.createBtn} onClick={handleCreateInviteLink}>
+                                            링크 생성
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/*회원정보 모달*/}
             {isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}
                                                      onClose={() => {
                                                          closeAccountModifyModal();
-                                                          }} />)}
+                                                     }} />)}
 
         </div>
     );
