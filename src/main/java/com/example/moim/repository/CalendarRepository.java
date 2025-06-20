@@ -14,4 +14,6 @@ public interface CalendarRepository extends JpaRepository<CalendarEntity, Intege
     @Query("select c from CalendarEntity c where c.groups.groupNo = :groupNo")
     List<CalendarEntity> getCalendarsByGroupNo(@Param("groupNo") long groupNo);
 
+    CalendarEntity getCalendarByCalNo(long calNo);
+
 }

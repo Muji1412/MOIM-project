@@ -1,22 +1,35 @@
 import {Calendar, dateFnsLocalizer} from "react-big-calendar";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import koLocale from 'date-fns/locale/ko';
 import {format,parse,startOfWeek,getDay} from "date-fns";
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import AddCalendarModal from './AddCalendarModal';
+import './MyCalendar.css';
+import DetailCalendarModal from "./DetailCalendarModal";
 
 const locales = {'ko' : koLocale };
 const localizer = dateFnsLocalizer({format, parse, startOfWeek, getDay, locales});
 
-export default  function MyCalendar() {
+export default function MyCalendar() {
     const [events, setEvents] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [groupNo, setGroupNo] = useState(22);
+    const [groupNo, setGroupNo] = useState(14);
+    const [detailEvent, setDetailEvent] = useState('');
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
 
     //db의 데이터를 json 형태로 가져와서 events 객체에 넣는다.
     //이 events 객체가 달력에 표시되는 각각의 일정이다.
     useEffect(() => {
+        fetchEvents();
+        if (modalOpen || detailModalOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+            // cleanup: 모달 닫힐 때 리스너 제거
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+        }, [modalOpen, detailModalOpen])
+
+    const fetchEvents = () => {
         fetch('api/calendar', {
             method: 'POST',
             headers: {
@@ -25,8 +38,43 @@ export default  function MyCalendar() {
             body: new URLSearchParams({ groupNo })
         })
             .then(res=>res.json())
-            .then(data => setEvents(data));
+            .then(data => {
+                const events = data.map(item => ({
+                    id: item.calNo,
+                    title: item.calTitle,
+                    start: new Date(item.calStart),
+                    end: new Date(item.calEnd),
+                    resource: {
+                        calType: item.calType,
+                        calContent: item.calContent,
+                        calIsDone: item.calIsDone,
+                        userNo: item.userNo
+                    }
+                }));
+                setEvents(events);
+            });
+    }
+
+    // 모달창 ESC로 닫기
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Escape') {
+            setModalOpen(false);
+            setDetailModalOpen(false);
+        }
     }, []);
+
+    const handleModalClose = () => {
+        setModalOpen(false);
+        fetchEvents();
+    }
+
+    const handleDetailModal = () => {
+        setDetailModalOpen(true);
+    }
+
+    const handleDetailModalClose = () => {
+        setDetailModalOpen(false);
+    }
 
     return (
         <div>
@@ -40,21 +88,50 @@ export default  function MyCalendar() {
                     setSelectedSlot(slotInfo);
                     setModalOpen(true);
                 }}
+                onSelectEvent={(event, e) => {
+                    setDetailEvent(event);
+                    handleDetailModal();
+                }}
+                eventPropGetter={
+                    (event, start, end, isSelected) => {
+                        let newStyle = {
+                            backgroundColor: "#8aa82b",
+                            color: 'white',
+                            borderRadius: "0px",
+                            border: "none"
+                        };
+
+                        if (event.resource.calType === '휴가'){
+                            newStyle.backgroundColor = "#3b99fc"
+                        }
+                        if (event.resource.calType === '공지'){
+                            newStyle.backgroundColor = "#fc753b"
+                        }
+
+                        return {
+                            className: "rbc-event",
+                            style: newStyle
+                        };
+                    }
+                }
                 selectable
             />
-            {/* 모달 */}
+            {/* 일정 추가 모달 */}
             {modalOpen && (
                 < AddCalendarModal
-                    onClose={()=>setModalOpen(false)}
+                    onClose={handleModalClose}
                     slotInfo={selectedSlot}
-                    onSave={async (formData) => {
-                       await fetch('api/calendar', {
-                           method: 'POST',
-                           headers: {'Content-Type': 'applicaion/json'},
-                           body: JSON.stringify(formData)
-                       });
-                       setModalOpen(false);
-                }}/>
+                    group_No={groupNo}
+                />
+            )}
+            {/* 일정 클릭 시 뜨는 상세 일정 모달 */}
+            {detailModalOpen && (
+                < DetailCalendarModal
+                    onClose={handleDetailModalClose}
+                    // slotInfo={selectedSlot}
+                    group_No={groupNo}
+                    event={detailEvent}
+                />
             )}
         </div>
     )
