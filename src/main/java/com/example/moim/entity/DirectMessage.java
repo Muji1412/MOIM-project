@@ -33,7 +33,7 @@ public class DirectMessage {
     private String message;
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column
     private LocalDateTime sentAt;
 
     @Builder

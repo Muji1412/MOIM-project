@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,6 +54,12 @@ public class DirectMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         List<DirectMessageRoom> rooms = dmRoomRepository.findAllByUserWithUsers(user);
+        for (DirectMessageRoom room : rooms) {
+            System.out.println(room.getLastMessageSentAt());
+        }
+
+        rooms.sort(Comparator.comparing(DirectMessageRoom::getLastMessageSentAt,
+                Comparator.nullsLast(Comparator.reverseOrder())));
 
         // 엔티티를 DTO로 변환
         return rooms.stream()
@@ -83,6 +91,8 @@ public class DirectMessageService {
                 .sender(sender)
                 .message(chatMessage.getText())
                 .build();
+        room.setLastMessageSentAt(LocalDateTime.now());
+        dmRoomRepository.save(room);
 
         return dmRepository.save(dm);
     }
