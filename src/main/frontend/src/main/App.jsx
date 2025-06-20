@@ -2,8 +2,10 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '../context/AuthContext'; // AuthProvider import
+import { AuthProvider } from '../context/AuthContext';
 import { DmProvider, useDm } from '../context/DmContext';
+import { ToastContainer } from 'react-toastify'; // 추가
+import 'react-toastify/dist/ReactToastify.css'; // 추가
 
 // 컴포넌트 임포트
 import styles from '../components/Default.module.css';
@@ -35,29 +37,46 @@ function MainLayout({ children }) {
             <div className={styles.content_container}>
                 {activeDmRoom ? <DmChatView /> : children}
             </div>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ zIndex: 9999 }} // 다른 요소들 위에 표시
+            />
         </div>
     );
 }
 
-// --- 메인 App 컴포넌트 (라우팅 설정) ---
+function DmRoutes() {
+    return (
+        <DmProvider>
+            <Routes>
+                <Route path="/home" element={<MainLayout><FriendPage /></MainLayout>} />
+                <Route path="/servers" element={<MainLayout><ServerPageContent /></MainLayout>} />
+                <Route path="/chat" element={<MainLayout><ChattingView /></MainLayout>} />
+                <Route path="/" element={<MainLayout><FriendPage /></MainLayout>} />
+            </Routes>
+        </DmProvider>
+    );
+}
+
 export default function App() {
     return (
-        // AuthProvider가 최상위, 그 안에 DmProvider가 위치
         <AuthProvider>
-            <DmProvider>
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/home" element={<MainLayout><FriendPage /></MainLayout>} />
-                        <Route path="/servers" element={<MainLayout><ServerPageContent /></MainLayout>} />
-                        <Route path="/chat" element={<MainLayout><ChattingView /></MainLayout>} />
-                        <Route path="/" element={<MainLayout><FriendPage /></MainLayout>} />
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/*" element={<DmRoutes />} />
 
-                        <Route path="/popup" element={<TestApp />} />
-                        <Route path="/main" element={<PopupMain />} />
-                    </Routes>
-                </BrowserRouter>
-            </DmProvider>
+                    <Route path="/popup" element={<TestApp />} />
+                    <Route path="/main" element={<PopupMain />} />
+                </Routes>
+            </BrowserRouter>
         </AuthProvider>
-
     );
 }
