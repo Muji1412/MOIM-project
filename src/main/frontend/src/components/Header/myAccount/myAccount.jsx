@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './myAccount.css';
 import MyAccountModifyModal from "./myAccountModifyModal";
 import ChangePasswordModal from "./ChangePassword/changePasswordModal";
@@ -45,8 +45,22 @@ export default function MyAccount ({isOpen, onClose}) {
 
     useEffect(() => {
         fetchUserInfo();
-    }, []);
+        if (showLogoutModal || showModifyModal || showPwModal || showDeleteModal) {
+            window.addEventListener('keydown', handleKeyDown);
+            // cleanup: 모달 닫힐 때 리스너 제거
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [showLogoutModal, showModifyModal, showPwModal, showDeleteModal]);
 
+    // 모달창 ESC로 닫기
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Escape') {
+            setShowLogoutModal(false);
+            setShowModifyModal(false);
+            setShowPwModal(false);
+            setShowDeleteModal(false);
+        }
+    }, []);
 
     //로그아웃 모달창 켜기
     const handleLogout = () => {

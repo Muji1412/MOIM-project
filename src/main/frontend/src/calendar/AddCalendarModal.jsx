@@ -1,32 +1,143 @@
-import {useState} from "react";
+import React, {useState} from "react";
+import './AddCalendarModal.css';
 
-export default function MyModal({ onClose, slotInfo, onSave }) {
+export default function MyModal({ group_No, onClose, slotInfo }) {
+    const [isEventAdded, setIsEventAdded] = useState(false);
+    const [groupNo, setGroupNo] = useState(group_No);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [type, setType] = useState('');
-    const [isDone, setIsDone] = useState('');
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({
-            title,
-            start: slotInfo.start,
-            end: slotInfo.end,
-        });
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [type, setType] = useState('할일');
+    const types = ['할일', '휴가', '공지'];
+    const [isTypeExpanded, setIsTypeExpanded] = useState(false);
+    const [isDone, setIsDone] = useState("");
+
+
+    const handleSubmit = () => {
+        fetch('/api/calendar/addEvent', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                groupNo: groupNo,
+                calTitle: title,
+                calContent: content,
+                calStart: slotInfo.start,
+                calEnd: endDate,
+                calType: type,
+                calIsDone: isDone
+            })
+        }).then(res => {
+            if (res.status === 200) {
+                setIsEventAdded(prev=>!prev);
+                onClose();
+            } else {
+                console.log('???');
+            }
+        })
     };
+
+    const handleExpand = () => {
+        setIsTypeExpanded(prev => !prev);
+    };
+
+    const typeHandler = (selectedType) => {
+        setType(selectedType);
+        setIsTypeExpanded(false); // 타입 선택 시 드롭다운 닫기
+    };
+
+    const handleRadio = (e) => setIsDone(e.target.value);
+
+
     return (
         <div className="modal-background">
             <div className="modal-content">
-                <h2 className="head-title">Create an event</h2>
-                <form onSubmit={handleSubmit}>
-                    <label className="label">Title <input value={title} onChange={e => setTitle(e.target.value)} /></label>
-                    <label className="label">Content <input value={content} onChange={e => setContent(e.target.value)} /></label>
-                    <label className="label">Event Type <input type='select'
-                        value={type} onChange={e => setType(e.target.value)} /></label>
-                    <label className="label">Progress <input type='radio'
-                        value={isDone} onChange={e => setIsDone(e.target.value)} /></label>
-                    <button type="submit" className="modal-btn">Save</button>
-                    <button type="button" className="modal-btn-close" onClick={onClose}>Close</button>
-                </form>
+                {/* 제목 위 하트 아이콘 */}
+                <p className="modal-header-heart"><img src="/img/symbol_heart.png" alt="heart"/> </p>
+                <h2 className="head-title">Create an Event</h2>
+                <div className="inner-box">
+                        <label className="label">
+                            Title
+                            <input className="input-text"
+                                value={title} onChange={e => setTitle(e.target.value)} />
+                        </label>
+                        <label className="label">
+                            Content
+                            <input className="input-text"
+                                value={content} onChange={e => setContent(e.target.value)} />
+                        </label>
+                        <label className="label">
+                            Start Date
+                            <input className="input-text" type="date"
+                                   value={startDate} onChange={e => setStartDate(e.target.value)} />
+                        </label>
+                        <label className="label">
+                            End Date
+                            <input className="input-text" type="date"
+                                   value={endDate} onChange={e => setEndDate(e.target.value)} />
+                        </label>
+                        <label className="label-dropdown">
+                            Event Type
+                        </label>
+                        <div style={{ position: 'relative', display: 'block' }}>
+                            {/* 기본 버튼 */}
+                            {!isTypeExpanded && (
+                                <button className="typeBtn" type="button" onClick={handleExpand}>
+                                    {type}
+                                </button>
+                            )}
+                            {/* 드롭다운 메뉴 */}
+                            {isTypeExpanded && (
+                                <div className="typeBtn-drop" >
+                                    {types.map((item, idx) => (
+                                        <button className="typeBtn-drop-inner"
+                                            type="button"
+                                            key={item}
+                                            onClick={() => typeHandler(item)}
+
+                                        >
+                                            {item}
+                                            {/*{idx !== types.length - 1 && <hr />}*/}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className='label'>Progress<br/>
+                        <label className="label-radio">
+                            <input
+                                type="radio"
+                                name="progress"
+                                value="in_progress"
+                                checked={isDone === "in_progress"}
+                                onChange={handleRadio}
+                            /> In Progress
+                        </label>
+                        <label className="label-radio">
+                            <input
+                                type="radio"
+                                name="progress"
+                                value="Done"
+                                checked={isDone === "Done"}
+                                onChange={handleRadio}
+                            /> Done
+                        </label>
+                        <label className="label-radio">
+                            <input
+                                type="radio"
+                                name="progress"
+                                value="Canceled"
+                                checked={isDone === "Canceled"}
+                                onChange={handleRadio}
+                            /> Canceled
+                        </label><br/>
+                        </div>
+                        <button type="submit" className="modal-btn" onClick={handleSubmit}>Save</button>
+                        <button type="button" className="modal-btn-close" onClick={onClose}>Close</button>
+                </div>
             </div>
         </div>
     );

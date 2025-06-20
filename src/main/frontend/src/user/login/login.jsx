@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './login.css';
 
 export default function Login() {
@@ -6,6 +6,22 @@ export default function Login() {
   const [pw, setPw] = useState('');
   const [result, setResult] = useState('');
   //const navigate = useNavigate();
+
+
+  useEffect(() => {
+    if ((id !=='') && (pw!=='')) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [id, pw]);
+
+  //엔터키로 로그인
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      console.log('id: ', id, ' pw: ', pw)
+      handleLogin();
+    }
+  }, []);
 
   const handleLogin = () => {
     fetch('/api/user/login', {
