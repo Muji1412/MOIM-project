@@ -1,12 +1,14 @@
-import React from 'react';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import Header from './components/Header/Header';
 import FriendPage from './components/Page/FriendPage';
 import Section from './components/Section/Section'; // Section도 라우팅 대상이 될 수 있습니다.
 import styles from './components/Default.module.css';
 import TestApp from "./popupTest/TestApp";
+import WhiteboardPage from './components/Page/WhiteboardPage';
 import NotificationComponent from "./components/Notifications";
 import SectionContent from "./components/Section/SectionContent";
+import React, {useState} from 'react';
+import ChattingView from "./chatting/ChattingView";
 
 // 서버 페이지 (예시)
 function ServerPage({selectedServer, selectedMenu}) {
@@ -58,6 +60,8 @@ export default function App() {
                     />}/>
                     <Route path="/popup" element={<TestApp/>}/>
                     <Route path="/main" element={<PopupMain/>}/>
+                    <Route path="/chat" element={<ChattingView/>}/>
+                    <Route path="/whiteboard" element={<WhiteboardPage/>}/>
                     <Route path="/addfriend" element={<SectionContent/>}/>
                     {/*<Route path="/servers/:serverId" element={<ServerPage />} />*/}
                     {/* 기타 다른 페이지들 */}

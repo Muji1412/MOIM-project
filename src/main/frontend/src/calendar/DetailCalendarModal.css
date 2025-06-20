@@ -43,7 +43,24 @@
     color: #cccccc;
     font-size: 30px;
     padding: 5px;
+    margin: 20px;
 }
+
+/*일정 내용*/
+.head-content{
+    background: #cccccc;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 18px;
+    width: 410px;
+    color: #373a3c;
+}
+
+/*마감일*/
+/*.input-text-cal{*/
+/*    background: #cccccc;*/
+/*    width: 440px;*/
+/*}*/
 
 /*일정 삭제 버튼 */
 .modal-btn-delete {
@@ -83,7 +100,7 @@
 }
 
 /*input 박스 포커싱*/
-.label > input:focus {
+.input-text {
     outline: 2px solid #8aa82b;
     display: block;
     background: #cccccc;

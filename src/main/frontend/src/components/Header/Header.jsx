@@ -1,13 +1,17 @@
 // /src/main/frontend/src/components/Header/Header.jsx
 
 import React, {useRef, useState, useEffect} from "react";
-import {useLocation} from "react-router-dom";
+import {useLocation,useNavigate} from "react-router-dom";
 import styles from "./Header.module.css";
 import modalStyles from "./Modal.module.css";
-import {useNavigate} from "react-router-dom";
+// import {useNavigate} from "react-router-dom";
 import MyAccount from "./myAccount/myAccount.jsx";
+
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+
+import { useDm } from '../../context/DmContext';
+
 
 export default function Header() {
 
@@ -20,6 +24,11 @@ export default function Header() {
     //선택한 서버 or 채널
     const [selectedMenuItem, setSelectedMenuItem] = useState("friend");
     const [selectedChannel, setSelectedChannel] = useState("general"); // 채널 선택 상태 추가
+
+    //화이트보드
+    const handleWhiteboardClick = (serverId) => {
+        navigate(`/chat?projectId=${serverId}&channelNum=whiteboard`);
+    };
 
     // 채팅방 부분 - 기본 채팅방은 삭제 불가 (최소 1개 이상 남아있어야 함)
     const [chatChannels, setChatChannels] = useState([{id: 1, name: "일반채팅", type: "chat", isDeletable: false}]);
@@ -70,14 +79,20 @@ export default function Header() {
     const serverNameInputRef = useRef();
     const modifyServerNameInputRef = useRef();
 
-    //웹소켓관려
+
+    //웹소켓관
     const stompClient = useRef(null);
+
+    // DM 관련 state
+    const { dmRooms, selectDmRoom, activeDmRoom } = useDm();
+
 
     const [contextMenu, setContextMenu] = useState({
         visible: false,
         x: 0,
         y: 0,
         serverId: null,
+        friend: null,
     });
 
     // 채팅방 수정 모달 열기
@@ -655,7 +670,7 @@ export default function Header() {
             } else if (response.status === 401) {
                 alert('인증이 만료되었습니다. 다시 로그인해주세요.');
                 console.log('서버 및 기본 채널 생성 완료:', createdServer);
-              
+
             }  else {
 
                 let errorMessage = '서버 생성에 실패했습니다.';
@@ -998,10 +1013,24 @@ export default function Header() {
                                         <div className={styles.menu_box}>
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
-                                                onClick={() => setSelectedMenuItem("board")}
+                                                onClick={() => {
+                                                    setSelectedMenuItem("board");
+
+
+                                                    //현재 url에서 projectId 가져오기
+                                                    const urlParams = new URLSearchParams(window.location.search);
+                                                    const currentProjectId = urlParams.get('projectId');
+
+                                                    if (currentProjectId) {
+                                                        // navigate 사용 (권장)
+                                                        navigate(`/whiteboard?projectId=${currentProjectId}`);
+                                                    } else {
+                                                        alert("먼저 서버를 선택해주세요!");
+                                                    }
+                                                }}
                                                 style={{cursor: "pointer"}}
                                             >
-                                                <img src="/bundle/img/board_ic.png" alt="board_ic"/>
+                                                <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
                                                 <p>White Board</p>
                                             </div>
                                         </div>
@@ -1018,18 +1047,35 @@ export default function Header() {
                                                 <img src="/bundle/img/add_plus_ic.png" alt="add_something"/>
                                             </div>
                                             <div className={styles.server_menu_user_area}>
-                                                <div className={styles.menu_user_box}>
-                                                    <div className={styles.menu_user_list}>
-                                                        <img src="#" alt="#"/>
-                                                        <p>User</p>
-                                                    </div>
-                                                </div>
-                                                <div className={styles.menu_user_box}>
-                                                    <div className={styles.menu_user_list}>
-                                                        <img src="#" alt="#"/>
-                                                        <p>User</p>
-                                                    </div>
-                                                </div>
+                                                {currentUser && dmRooms && dmRooms.map((room) => {
+                                                    // DTO 구조에 맞게 수정
+                                                    const opponent = room.user1Nick === currentUser.userNick
+                                                        ? {
+                                                            userNick: room.user2Nick,
+                                                            userImg: room.user2Img || "/bundle/img/default_profile.png",
+                                                            userNo: room.user2No
+                                                        }
+                                                        : {
+                                                            userNick: room.user1Nick,
+                                                            userImg: room.user1Img || "/bundle/img/default_profile.png",
+                                                            userNo: room.user1No
+                                                        };
+
+                                                    return (
+                                                        <div
+                                                            key={room.id}
+                                                            className={`${styles.menu_user_box} ${activeDmRoom?.id === room.id ? styles.active : ''}`}
+                                                            onClick={() => selectDmRoom(opponent)} // opponent 객체 전달
+                                                        >
+                                                            <div className={styles.menu_user_list}>
+                                                                <img
+                                                                    src={opponent.userImg}
+                                                                    alt="profile"/>
+                                                                <p>{opponent.userNick}</p>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </>
                                     ) : (

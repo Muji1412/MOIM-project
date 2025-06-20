@@ -30,6 +30,7 @@ public class CalendarController {
         this.groupsRepository = groupsRepository;
     }
 
+    //달력 불러오기
     @PostMapping
     public List<CalendarDTO> getCalendar(@AuthenticationPrincipal CustomUserDetails user,
                                          @RequestParam long groupNo) {
@@ -38,6 +39,7 @@ public class CalendarController {
                 .map(CalendarDTO::new).collect(Collectors.toList());
     }
 
+    //일정 추가
     @PostMapping("/addEvent")
     public ResponseEntity<?> addEvent(@RequestBody CalendarDTO calendarDTO,
                                       @AuthenticationPrincipal CustomUserDetails user) {
@@ -62,6 +64,7 @@ public class CalendarController {
         return ResponseEntity.ok("New Event Added!");
     }
 
+    //일정 삭제
     @PostMapping("/deleteEvent")
     public ResponseEntity<?> deleteEvent(@RequestBody CalendarDTO calendarDTO) {
 
@@ -75,6 +78,23 @@ public class CalendarController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return ResponseEntity.ok("Event Deleted");
+    }
+
+    //일정 수정
+    @PostMapping("/modifyEvent")
+    public ResponseEntity<?> modifyEvent(@RequestBody CalendarDTO calendarDTO) {
+        long calNo = calendarDTO.getCalNo();
+        CalendarEntity cEntity = calendarRepository.getCalendarByCalNo(calNo);
+        cEntity.setCalContent((calendarDTO.getCalContent()));
+        cEntity.setCalEnd(calendarDTO.getCalEnd());
+        cEntity.setCalIsDone((calendarDTO.getCalIsDone()));
+
+        try{
+            CalendarEntity result = calendarRepository.save(cEntity);
+        } catch(Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return ResponseEntity.ok("Event Modified");
     }
 
 }
