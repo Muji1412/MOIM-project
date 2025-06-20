@@ -13,6 +13,7 @@ import { Client } from "@stomp/stompjs";
 import { useDm } from '../../context/DmContext';
 
 
+
 export default function Header() {
 
 
@@ -428,7 +429,7 @@ export default function Header() {
 
         // 홈 서버 선택 시 - 웹소켓 연결 해제하고 메인 페이지로 이동
         if (serverId === "default") {
-            navigate("/main");
+            navigate("/");
             setChatChannels([]);
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
