@@ -4,7 +4,7 @@ import FriendPage from './components/Page/FriendPage';
 import Section from './components/Section/Section'; // Section도 라우팅 대상이 될 수 있습니다.
 import styles from './components/Default.module.css';
 import TestApp from "./popupTest/TestApp";
-import WhiteboardPage from './components/Page/WhiteboardPage';
+import Whiteboard from '../whiteboard/index';
 import NotificationComponent from "./components/Notifications";
 import SectionContent from "./components/Section/SectionContent";
 import React, {useState} from 'react';
@@ -61,11 +61,13 @@ export default function App() {
                     <Route path="/popup" element={<TestApp/>}/>
                     <Route path="/main" element={<PopupMain/>}/>
                     <Route path="/chat" element={<ChattingView/>}/>
-                    <Route path="/whiteboard" element={<WhiteboardPage/>}/>
                     <Route path="/addfriend" element={<SectionContent/>}/>
                     {/*<Route path="/servers/:serverId" element={<ServerPage />} />*/}
                     {/* 기타 다른 페이지들 */}
                     {/* <Route path="/todos" element={<TodoPage />} /> */}
+
+                    {/* 화이트보드 경로 추가 */}
+                    <Route path="/whiteboard" element={<Whiteboard/>}/>
                     <Route path="/invite/:inviteCode" element={<InvitePage />} />
 
                     {/* 기본 경로는 친구 페이지로 설정 */}

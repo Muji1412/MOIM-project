@@ -29,6 +29,7 @@ export default defineConfig({
                 calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
                 invite: path.resolve(__dirname, 'src/invite/Main.jsx'),
                 videocall: path.resolve(__dirname, 'src/videocall/Main.jsx'),
+                whiteboard: path.resolve(__dirname, 'src/whiteboard/Main.jsx'),
                 // todoList: path.resolve(__dirname, 'src/todoList/Main.jsx')
 
             },
