@@ -36,13 +36,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     // 4. 이후 리액트가 onMessage 같은 핸들러로 메세지를 처리해줌
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // 메시지 구독 요청 url -> 메시지 받을 때
-        config.enableSimpleBroker("/sub");
-        // 메시지 발행 요청 url -> 메시지 보낼 때
-        config.setApplicationDestinationPrefixes("/pub");
+        // 구독용 엔드포인트 - 실제 사용하는 /topic에 맞춤
+        config.enableSimpleBroker("/topic", "/queue","/sub");
+
+        // 발행용 엔드포인트 - 실제 사용하는 /app에 맞춤
+        config.setApplicationDestinationPrefixes("/app","/pub");
     }
-
-
-
 
 }

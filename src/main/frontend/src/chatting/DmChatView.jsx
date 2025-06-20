@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDm } from '../context/DmContext';
 import { useAuth } from '../context/AuthContext';
-import './chattingView.css';
+import styles from './ChattingView.module.css';
 
 const DmChatView = () => {
     const { activeDmRoom, dmMessages, sendMessage } = useDm();

@@ -21,7 +21,7 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    // 1. 실시간 채팅 메시지 처리 (채널별)
+    // 1. 실시간 채팅 메시지 저장 (채널별)
     // 클라이언트가 /app/chat/{groupName}로 메시지를 보내면 이 메서드가 실행됨
     // @SendTo로 지정한 /topic/chat/{channel}을 구독한 모든 클라이언트에게 메시지를 실시간으로 전달
     @MessageMapping("/chat/{groupName}")
