@@ -126,6 +126,7 @@ public class PushNotificationService {
         DirectMessageDTO messageDTO = new DirectMessageDTO(savedMessage);
         String recipientUserId = getRecipientUserId(savedMessage);
 
+
         if (recipientUserId != null) {
             // ⭐️ 두 가지 방식으로 모두 전송 ⭐️
 
@@ -135,6 +136,10 @@ public class PushNotificationService {
             // 방법 2: 사용자별 방식 (Spring Boot 2.4+ 권장)
             messagingTemplate.convertAndSendToUser(recipientUserId, "/queue/notification", messageDTO);
 
+
+            String title = savedMessage.getSender().getUserNick() + "님의 새 메시지"; //
+            String body = savedMessage.getMessage(); //
+            sendNotificationToUser(recipientUserId, title, body);
             System.out.println("DM 알림 전송 완료: " + recipientUserId);
         }
     }
