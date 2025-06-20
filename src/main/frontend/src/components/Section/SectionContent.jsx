@@ -1,12 +1,13 @@
 // src/main/frontend/src/components/Section/SectionContent.jsx
 
-
 import React, { useState, useEffect } from 'react';
 import styles from './Section.module.css';
 import FriendContextMenu from "../Context/FriendContextMenu";
-import { useDm } from "../../context/DmContext";
+import { useDm } from "../../context/DmContext"; // [!code ++]
 
 const SectionContent = ({ showAddFriend, onBackToList }) => {
+    // DM 컨텍스트에서 selectDmRoom 함수를 가져옵니다.
+    const { selectDmRoom } = useDm(); // [!code ++]
 
     // 친구 관리 상태들만 유지
     const [friendId, setFriendId] = useState('');
@@ -434,4 +435,3 @@ const SectionContent = ({ showAddFriend, onBackToList }) => {
 };
 
 export default SectionContent;
-
