@@ -131,7 +131,7 @@ export default function MyAccount ({isOpen, onClose}) {
                         {/* 회원정보 박스 상단 프로필사진, modify 버튼*/}
                         <div className="myAccount-container-head">
                             <div className="profile-image">
-                                <img src={userInfo.img} alt="profile-image" className="profile-image-img"/>
+                                <img src={userInfo.img || "/bundle/img/default_profile.png"} alt="user_img" className="profile-image-img"/>
                             </div>
                             <div>
                                 <button className="modify-btn" onClick={handleModify}>Modify</button>

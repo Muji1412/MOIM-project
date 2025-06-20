@@ -1579,15 +1579,22 @@ export default function Header() {
                     <div className={styles.aside_user_box}>
                         <div className={styles.user_box_area}>
                             <div className={styles.user_lbox}>
-                                <img src="#" alt="#"/>
+                                <img
+                                    src={currentUser?.userImg || "/bundle/img/default_profile.png"}
+                                    alt="user_profile"
+                                    style={{
+                                        width: "40px",
+                                        height: "40px",
+                                        borderRadius: "50%",
+                                        objectFit: "cover"
+                                    }}
+                                />
                                 <div className={styles.mini_l_box}>
-                                    <strong>User</strong>
-                                    <span>UserId</span>
+                                    <strong>{currentUser?.userNick || "User"}</strong>
+                                    <span>{currentUser?.username || "UserId"}</span>
                                 </div>
                             </div>
                             <div className={styles.user_rbox}>
-                                <img src="/bundle/img/close_mic.png" alt="mic"/>
-                                <img src="/bundle/img/open_head.png" alt="  head"/>
                                 <img src="/bundle/img/setting_ic.png" alt="set" onClick={openAccountModifyModal}/>
                             </div>
                         </div>
