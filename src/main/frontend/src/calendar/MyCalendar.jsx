@@ -94,18 +94,20 @@ export default function MyCalendar() {
                 }}
                 eventPropGetter={
                     (event, start, end, isSelected) => {
+                        //기본타입(할일) 인 경우 라임색으로 표시
                         let newStyle = {
                             backgroundColor: "#8aa82b",
                             color: 'white',
                             borderRadius: "0px",
                             border: "none"
                         };
-
+                        //타입이 휴가인 경우 색상 변경
                         if (event.resource.calType === '휴가'){
-                            newStyle.backgroundColor = "#3b99fc"
+                            newStyle.backgroundColor = "#66aefa"
                         }
+                        //타입이 공지인 경우 색상 변경
                         if (event.resource.calType === '공지'){
-                            newStyle.backgroundColor = "#fc753b"
+                            newStyle.backgroundColor = "#fda076"
                         }
 
                         return {

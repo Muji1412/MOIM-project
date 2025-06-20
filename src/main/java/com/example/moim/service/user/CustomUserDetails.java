@@ -15,15 +15,17 @@ public class CustomUserDetails implements UserDetails {
     private final String userPhone;
     private final String userImg;
     private final String userMsg;
+    private final String userNick;
 
     public CustomUserDetails(CustomUserInfoVO customUserInfoVO
                             , String userPhone
                             , String userImg
-                            , String userMsg) {
+                            , String userMsg, String userNick) {
         this.customUserInfoVO = customUserInfoVO;
         this.userPhone = userPhone;
         this.userImg = userImg;
         this.userMsg = userMsg;
+        this.userNick = userNick;
     }
 
     @Override

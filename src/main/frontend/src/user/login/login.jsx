@@ -5,25 +5,8 @@ export default function Login() {
   const [id, setId] = useState('');
   const [pw, setPw] = useState('');
   const [result, setResult] = useState('');
-  //const navigate = useNavigate();
 
-
-  useEffect(() => {
-    if ((id !=='') && (pw!=='')) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [id, pw]);
-
-  //엔터키로 로그인
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Enter') {
-      console.log('id: ', id, ' pw: ', pw)
-      handleLogin();
-    }
-  }, []);
-
-  const handleLogin = () => {
+   const handleLogin = () => {
     fetch('/api/user/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -101,6 +84,9 @@ export default function Login() {
             // placeholder="비밀번호"
             value={pw}
             onChange={e => setPw(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && id !== '') handleLogin();
+            }}
           />
         </div>
         {result && <div className="login-error">{result}</div>}
