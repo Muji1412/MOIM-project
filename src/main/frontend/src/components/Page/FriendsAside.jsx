@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './PageLayout.module.css'; // 4단계에서 만들 CSS
 
 export default function FriendsAside() {
-    const { dmRooms, selectDmRoom, activeDmRoom } = useDm();
+    const { dmRooms, selectDmRoom, activeDmRoom, returnToFriendsList } = useDm();
     const { currentUser } = useAuth();
 
     return (
@@ -17,8 +17,8 @@ export default function FriendsAside() {
 
             <div className={styles.menu_list}>
                 <div
-                    className={`${styles.menu_item} ${window.location.pathname.endsWith('/friends') ? styles.active : ''}`}
-                    onClick={() => { /* 친구 목록 페이지로 이동하는 로직 (선택사항) */ }}
+                    className={`${styles.menu_item} ${!activeDmRoom ? styles.active : ''}`}
+                    onClick={returnToFriendsList} // ✅ 함수를 직접 연결합니다.
                 >
                     <img src="/bundle/img/friend_ic.png" alt="friend_icon"/>
                     <p>Friend</p>

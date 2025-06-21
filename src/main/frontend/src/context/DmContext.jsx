@@ -85,6 +85,11 @@ export const DmProvider = ({ children }) => {
         setShowAddFriend(false);
     };
 
+    const returnToFriendsList = () => {
+        setActiveDmRoom(null);      // 활성화된 DM 채팅방을 닫습니다.
+        setShowAddFriend(false);    // 친구 추가 페이지를 닫습니다.
+    };
+
     // ⭐️ 알림 구독 함수 ⭐️
     const subscribeToNotifications = (client) => {
         if (!currentUser || !client || !client.connected) {
@@ -407,6 +412,9 @@ export const DmProvider = ({ children }) => {
         showAddFriend,
         openAddFriend,
         closeAddFriend,
+
+        // 친구창 띄워주는
+        returnToFriendsList
     };
 
     return <DmContext.Provider value={value}>{children}</DmContext.Provider>;

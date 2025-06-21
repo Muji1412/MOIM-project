@@ -24,7 +24,6 @@ export default function NewHeader() {
         const fetchMyInfo = async () => {
             const token = sessionStorage.getItem('accessToken');
 
-            console.log("NewHeader 테스트중입니다 NewHeader 테스트중입니다 NewHeader 테스트중입니다 NewHeader 테스트중입니다 ")
             if (!token) {
                 console.log('로그인이 필요합니다.');
                 return;
@@ -140,7 +139,7 @@ export default function NewHeader() {
             return (
                 <>
                     <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
-                    <p>Friend</p>
+                    <p>친구목록</p>
                 </>
             );
         }
@@ -149,19 +148,17 @@ export default function NewHeader() {
         return (
             <>
                 <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
-                <p>Friend</p>
+                <p>친구목록</p>
             </>
         );
     };
 
     return (
-        <div className={styles.wrap}>
             <header className={styles.header}>
                 <div className={styles.hr_box}>
                     {renderHeaderContent()}
                 </div>
             </header>
 
-        </div>
     );
 }
