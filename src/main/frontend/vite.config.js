@@ -26,10 +26,10 @@ export default defineConfig({
                 chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
                 //myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
-                calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
+                //calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
                 invite: path.resolve(__dirname, 'src/invite/Main.jsx'),
                 videocall: path.resolve(__dirname, 'src/videocall/Main.jsx'),
-                todoList: path.resolve(__dirname, 'src/todoList/Main.jsx')
+                //todolist: path.resolve(__dirname, 'src/todoList/Main.jsx')
 
             },
             output: {

@@ -1,14 +1,45 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './todoList.css';
 
-export default function todoList() {
+export default function todoList({groupNo}) {
 
     const [type, setType] = useState('전체보기');
     const types = ['전체보기', '완료된 할일만 보기', '미완료된 할일만 보기'];
     const [isTypeExpanded, setIsTypeExpanded] = useState(false);
+    const [userNo, setUserNo] = useState(7);
+    const [todos, SetTodos] = useState([]);
 
     useEffect(() => {
-        fetch()
+        console.log("씨이발");
+        fetch("/api/todoList", {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+                "Content-Type": "application/x-www-form-urlencoded"},
+            body: new URLSearchParams({ userNo })
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    console.log("죽고싶다 그냥");
+                    //window.location.href = '/login.do';
+                    return;
+                    //return Promise.reject('401 Unauthorized');
+                }
+                return res.json();
+            })
+            .then(data => {
+                const todos = data.map(item => ({
+                    todoTitle: item.todoTitle,
+                    todoStart: new Date(item.todoStart),
+                    todoEnd: new Date(item.todoEnd),
+                    resource: {
+                        todoContent: item.todoContent,
+                        todoIsDone: item.todoIsDone,
+                        userNo: item.userNo
+                    }
+                }));
+                SetTodos(todos);
+            });
     })
 
     const handleExpand = () => {
@@ -18,6 +49,12 @@ export default function todoList() {
     const typeHandler = (selectedType) => {
         setType(selectedType);
         setIsTypeExpanded(false); // 타입 선택 시 드롭다운 닫기
+    };
+
+    const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        // yyyy-MM-dd 포맷
+        return date.toISOString().split('T')[0];
     };
 
     return(
@@ -60,7 +97,18 @@ export default function todoList() {
                     </div>
                     {/* 할일들 */}
                     <div className="todo-section-things">
-
+                        <ul>
+                            {todos.map((item, idx) => (
+                                <li key={idx} style={{marginBottom: '16px', border: '1px solid #eee', padding: '8px'}}>
+                                    <div><b>제목:</b> {item.todoTitle}</div>
+                                    <div><b>시작일:</b> {formatDate(item.todoStart)}</div>
+                                    <div><b>종료일:</b> {formatDate(item.todoEnd)}</div>
+                                    <div><b>내용:</b> {item.resource?.todoContent}</div>
+                                    <div><b>완료여부:</b> {item.resource?.todoIsDone ? '완료' : '미완료'}</div>
+                                    <div><b>유저번호:</b> {item.resource?.userNo}</div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                     {/* 추가 버튼 */}
                     <div className="things-add-btn">

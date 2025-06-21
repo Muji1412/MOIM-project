@@ -23,7 +23,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     public JWTAuthenticationFilter(CustomUserDetailsService customUserDetailsService, JWTService jwtService) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtService = jwtService;
-        System.out.println("jwt필터");
+//        System.out.println("jwt필터");
     }
 
     //jwt 토큰을 검증한다.

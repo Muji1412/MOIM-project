@@ -82,8 +82,8 @@ public class SecurityConfig {
                         // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
                         //.anyRequest().permitAll()
                         .requestMatchers("/api/user/refresh","/login.do", "/user/login", "/signup.do", "/searchpassword.do",
-                                "/api/user/login", "/api/user/emailCheck", "/api/user/nickCheck",
-                                "/api/user/usernameCheck", "/api/user/signUp").permitAll()
+                                "/api/user/login", "/api/user/emailCheck", "/api/user/nickCheck","/todolist", "/calendar",
+                                "/api/user/usernameCheck", "/api/user/signUp", "/").permitAll()
                         .requestMatchers("/static/**", "/bundle/**", "/img/**").permitAll()
                         .anyRequest().authenticated()
                 );

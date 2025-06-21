@@ -108,6 +108,8 @@ export default function Header() {
         try {
             const response = await fetch(`/api/groups/${selectedServerId}/channels/${modifyChannelData.id}/update?chanName=${encodeURIComponent(modifyChannelData.name.trim())}`, {
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`}
             });
 
             if (response.ok) {
@@ -233,7 +235,8 @@ export default function Header() {
 
         try {
             const response = await fetch(`/api/groups/${selectedServerId}/channels?channel_name=${encodeURIComponent(newChannelName.trim())}`, {
-                method: 'POST',
+                method: 'POST', headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`}
             });
 
             console.log('응답 상태:', response.status);
@@ -291,6 +294,7 @@ export default function Header() {
             const token = sessionStorage.getItem('accessToken');
             if (!token) {
                 console.log('로그인이 필요합니다.');
+                window.location.href = '/login.do';
                 return;
             }
 
@@ -306,6 +310,8 @@ export default function Header() {
                     const data = await response.json();
                     setCurrentUser(data);
                     console.log('currentUser:', data);
+                } else if (response.status === 401){
+                    window.location.href = '/login.do';
                 } else {
                     console.error('사용자 정보 로딩 실패');
                 }
@@ -340,6 +346,7 @@ export default function Header() {
                     console.log('매핑된 서버 목록:', mappedServers);
                 } else if (response.status === 401) {
                     console.error('인증 실패: 로그인이 필요합니다');
+                    window.location.href = '/login.do';
                 } else {
                     console.error('서버 목록 불러오기 실패');
                 }
@@ -427,7 +434,14 @@ export default function Header() {
             const selectedServer = servers.find(s => s.id === serverId);
             if (selectedServer) {
                 try {
-                    const response = await fetch(`/api/groups/${serverId}/channels`);
+                    const response = await fetch(`/api/groups/${serverId}/channels`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+                                "Content-Type": "application/x-www-form-urlencoded"}
+                        }
+                        );
                     if (response.ok) {
                         const channelsData = await response.json(); // 변수명 변경
                         console.log('채널 데이터:', channelsData);
@@ -509,7 +523,9 @@ export default function Header() {
         try {
             const response = await fetch('/api/groupsInvite/create', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+                    'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     groupId: selectedServerForInvite,
                     days: inviteDays,
@@ -601,6 +617,9 @@ export default function Header() {
                 try {
                     const channelResponse = await fetch(`/api/groups/${createdServer.id}/channels?channel_name=${encodeURIComponent('일반채팅')}`, {
                         method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
+                        }
                     });
 
                     if (channelResponse.ok) {
@@ -633,7 +652,7 @@ export default function Header() {
             } else if (response.status === 401) {
                 alert('인증이 만료되었습니다. 다시 로그인해주세요.');
                 console.log('서버 및 기본 채널 생성 완료:', createdServer);
-
+                window.location.href = '/login.do';
             }  else {
 
                 let errorMessage = '서버 생성에 실패했습니다.';
@@ -703,6 +722,7 @@ export default function Header() {
                 console.log('서버 수정 성공:', updatedServer);
             } else if (response.status === 401) {
                 alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+                window.location.href = '/login.do';
             } else {
                 let errorMessage = '서버 수정에 실패했습니다.';
                 try {

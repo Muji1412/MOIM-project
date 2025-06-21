@@ -21,6 +21,7 @@ export default function MyCalendar() {
     //db의 데이터를 json 형태로 가져와서 events 객체에 넣는다.
     //이 events 객체가 달력에 표시되는 각각의 일정이다.
     useEffect(() => {
+        console.log(sessionStorage.getItem('accessToken')); // calendar.do 진입 직후 값 찍어보기!
         fetchEvents();
         if (modalOpen || detailModalOpen) {
             window.addEventListener('keydown', handleKeyDown);
@@ -30,7 +31,6 @@ export default function MyCalendar() {
         }, [modalOpen, detailModalOpen])
 
     const fetchEvents = () => {
-        console.log("아 ㅁㄴㅇㄹ")
         fetch('api/calendar', {
             method: 'POST',
             headers: {
@@ -40,10 +40,10 @@ export default function MyCalendar() {
         })
             //.then(res=>res.json())
             .then(res => {
-                console.log("dj TLqkf")
                 if (res.status === 401) {
                     window.location.href = '/login.do';
-                    return Promise.reject('401 Unauthorized');
+                    return;
+                    //return Promise.reject('401 Unauthorized');
                 }
                 return res.json();
             })

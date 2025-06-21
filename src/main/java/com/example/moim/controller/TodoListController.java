@@ -5,6 +5,7 @@ import com.example.moim.entity.TodolistEntity;
 import com.example.moim.repository.TodolistRepository;
 import com.example.moim.service.user.CustomUserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,11 +25,15 @@ public class TodoListController {
         this.todolistRepository = todolistRepository;
     }
 
+    //할일 불러오기
     @PostMapping
     public List<TodolistDTO> getTodoList(@AuthenticationPrincipal CustomUserDetails user,
                                             @RequestParam long userNo) {
+        System.out.println("씨발"+SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        System.out.println("여기까지 들어오긴 하는거임? "+user.getUsername());
         Date date = new Date();
         List<TodolistEntity> list = todolistRepository.getTodolistByUserNoAndTodoEndAfter(userNo, date.toString());
+        System.out.println("할일 리스트 DTO: "+list.stream().map(TodolistDTO::new).toList());
         return list.stream().map(TodolistDTO::new).collect(Collectors.toList());
     }
 

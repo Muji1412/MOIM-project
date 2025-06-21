@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import {useLocation,useNavigate} from "react-router-dom";
 import './login.css';
 
 export default function Login() {
@@ -16,17 +17,13 @@ export default function Login() {
       body: form.toString(),
     })
       .then(async res => {
-        console.log("어 씨발 돌았나")
       // status 별 분기
       if (res.status === 200) {
         // 성공: 토큰 응답 - 토큰 저장
         const data = await res.json();
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('refreshToken', data.refreshToken);
-        //window.location.href = "/main.html";
-        console.log(res.status, " 토큰")
-        window.location.href = "/";
-        console.log(res.status, " 왔는데 왜 줏어먹지를 못하니")
+        window.location.href = "/todolist";
       } else {
         // 실패: 에러 메시지 추출
         const data = await res.json();

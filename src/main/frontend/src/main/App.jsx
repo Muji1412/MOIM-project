@@ -11,6 +11,7 @@ import FriendPage from "../components/Page/FriendPage";
 import TestApp from "../popupTest/TestApp";
 import ChattingView from "../chatting/ChattingView";
 import MyCalendar from "../calendar/MyCalendar";
+import TodoList from "../todoList/todoList";
 
 
 // --- 페이지별 컴포넌트 정의 ---
@@ -63,6 +64,7 @@ export default function App() {
                     <Route path="/main" element={<PopupMain />} />
                     <Route path="/chat" element={<ChattingView />} />
                     <Route path="/calendar" element={<MyCalendar />} />
+                    <Route path="/todolist" element={<TodoList />} />
 
 
                     {/* 예시: /servers/123 같은 동적 경로도 가능 */}
