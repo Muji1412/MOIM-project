@@ -55,7 +55,7 @@ export default function PushNotificationSetup() {
 
             const token = sessionStorage.getItem('accessToken');
             if (!token) {
-                alert('푸시 알림을 구독하려면 로그인이 필요합니다.');
+                console.log('푸시 알림을 구독하려면 로그인이 필요합니다.');
                 return;
             }
 
@@ -69,12 +69,12 @@ export default function PushNotificationSetup() {
                 body: JSON.stringify(subscription)
             });
 
-            alert('푸시 알림이 구독되었습니다!');
+            console.log('푸시 알림이 구독되었습니다!');
             setIsSubscribed(true);
         } catch (error) {
             // 사용자가 권한을 거부한 경우 등
             console.error('❌ 푸시 구독 실패:', error);
-            alert('푸시 알림 구독에 실패했습니다. 브라우저 설정을 확인해주세요.');
+            console.log('푸시 알림 구독에 실패했습니다. 브라우저 설정을 확인해주세요.');
         }
     };
 
