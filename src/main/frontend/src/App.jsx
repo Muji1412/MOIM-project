@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '../context/AuthContext';
-import { DmProvider } from '../context/DmContext';
+import { AuthProvider } from './context/AuthContext';
+import { DmProvider } from './context/DmContext';
+import { ServerProvider } from './context/ServerContext';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import Header from './components/Header/Header';
 import FriendPage from './components/Page/FriendPage';
@@ -20,8 +21,8 @@ import Header from "../components/Header/Header";
 import Section from "../components/Section/Section"; // FriendPage를 포함하는 컴포넌트
 import ChattingView from "../chatting/ChattingView"; // 채널 채팅 뷰
 import DmChatView from '../chatting/DmChatView';     // DM 채팅 뷰
-import WhiteboardPage from '../components/Page/WhiteboardPage';
-import MyCalendar from "../calendar/MyCalendar";
+import WhiteboardPage from './components/Page/WhiteboardPage';
+import MyCalendar from "./calendar/MyCalendar";
 
 // 공통 레이아웃 컴포넌트
 function MainLayout({ children }) {
@@ -39,28 +40,31 @@ export default function App() {
     return (
         <AuthProvider>
             <DmProvider>
-                <BrowserRouter>
-                    <Routes>
-                        {/* 기본 경로 및 친구 페이지 */}
-                        <Route path="/" element={<MainLayout><Section /></MainLayout>} />
-                        <Route path="/home" element={<MainLayout><Section /></MainLayout>} />
+                <ServerProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            {/* 기본 경로 및 친구 페이지 */}
+                            <Route path="/" element={<MainLayout><Section /></MainLayout>} />
+                            <Route path="/home" element={<MainLayout><Section /></MainLayout>} />
 
-                        {/* 서버 채널 채팅 페이지 */}
-                        <Route path="/chat" element={<MainLayout><ChattingView /></MainLayout>} />
+                            {/* 서버 채널 채팅 페이지 */}
+                            <Route path="/chat" element={<MainLayout><ChattingView /></MainLayout>} />
 
-                        {/* DM 채팅 페이지 */}
-                        <Route path="/dm" element={<MainLayout><Section /></MainLayout>} />
+                            {/* DM 채팅 페이지 */}
+                            <Route path="/dm" element={<MainLayout><Section /></MainLayout>} />
 
-                        {/* 화이트보드 페이지 */}
-                        <Route path="/whiteboard" element={<MainLayout><WhiteboardPage /></MainLayout>} />
+                            {/* 화이트보드 페이지 */}
+                            <Route path="/whiteboard" element={<MainLayout><WhiteboardPage /></MainLayout>} />
 
-                        {/* 캘린더 페이지 */}
-                        <Route path="/calendar" element={<MainLayout><MyCalendar /></MainLayout>} />
+                            {/* 캘린더 페이지 */}
+                            <Route path="/calendar" element={<MainLayout><MyCalendar /></MainLayout>} />
 
-                        {/* 다른 독립적인 페이지들은 여기에 추가할 수 있습니다. */}
-                        {/* 예: <Route path="/login" element={<LoginPage />} /> */}
-                    </Routes>
-                </BrowserRouter>
+                            {/* 다른 독립적인 페이지들은 여기에 추가할 수 있습니다. */}
+                            {/* 예: <Route path="/login" element={<LoginPage />} /> */}
+                        </Routes>
+
+                    </BrowserRouter>
+                </ServerProvider>
             </DmProvider>
         </AuthProvider>
     );

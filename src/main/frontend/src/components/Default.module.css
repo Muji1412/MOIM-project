@@ -2,3 +2,49 @@
 ul, li {list-style: none;}
 a {text-decoration: none;}
 .wrap {width: 100vw; height: 100vh;}
+/* 기존 내용 아래에 이 코드를 추가하세요 */
+
+/* App 전체를 감싸는 최상위 컨테이너 */
+.app_container {
+    display: flex;
+    flex-direction: column; /* [수정] 헤더와 아래 컨텐츠를 세로로 쌓음 */
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* [수정] NewHeader에 적용할 스타일 */
+.new_header {
+    height: 50px;
+    width: 100%;
+    flex-shrink: 0;
+    background: #23272a; /* 이미지처럼 어두운 헤더 배경색으로 변경 */
+    color: #fff; /* 헤더 글자색 흰색으로 변경 */
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* [새 클래스] SideNav와 Page Content를 감싸는 새로운 래퍼 */
+.content_wrapper {
+    display: flex; /* 자식 요소(SideNav, page_content)를 가로로 배치 */
+    flex: 1; /* Header를 제외한 나머지 모든 세로 공간을 차지 */
+    overflow: hidden; /* 중요: 이 영역이 넘치는 것을 방지 */
+}
+
+/* SideNav는 거의 그대로 사용 */
+.side_nav {
+    width: 350px;
+    flex-shrink: 0;
+    display: flex;
+    background-color: #f3f3f4; /* 이미지에 맞는 밝은 회색 계열로 변경 */
+    border-right: 1px solid #e0e0e0;
+}
+
+/* Page Content는 너비가 남은 공간을 차지하도록 수정 */
+.page_content {
+    flex: 1; /* [수정] SideNav를 제외한 나머지 가로 공간을 모두 차지 */
+    overflow-y: auto;
+    background-color: #ffffff;
+}
