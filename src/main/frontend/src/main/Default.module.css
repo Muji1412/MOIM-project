@@ -1,47 +1,40 @@
-/* src/main/frontend/src/main/Default.module.css */
+/* Default.module.css 전체 코드 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-/* --- 레이아웃을 위한 CSS 코드 (아래 내용을 추가/수정) --- */
+ul, li {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
 
 .app_container {
     display: flex;
-    height: 100vh; /* 화면 전체 높이 */
-    width: 100vw;  /* 화면 전체 너비 */
-    overflow: hidden; /* 스크롤바가 body에 생기지 않도록 */
-    background-color: #f3f3f4; /* 전체적인 배경색 (필요시 수정) */
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: #36393f;
 }
 
-/* SideNav.jsx 컴포넌트에 적용될 스타일 */
-.side_nav {
-    width: 350px; /* 사이드바 전체 너비 */
-    flex-shrink: 0; /* 창 크기가 줄어도 너비가 줄어들지 않음 */
-    display: flex; /* 내부 요소(서버, 채널 목록)를 배치하기 위함 */
-    background-color: #23272a; /* 기존 aside 배경색 */
-}
-
-/* Header와 Page Content를 감싸는 오른쪽 전체 패널 */
 .main_panel {
-    flex-grow: 1; /* SideNav를 제외한 나머지 공간을 모두 차지 */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
 }
 
-/* NewHeader.jsx 컴포넌트에 적용될 스타일 */
-.new_header {
-    height: 50px;
-    flex-shrink: 0;
-    width: 100%;
-    background: #ffffff; /* 오른쪽 패널 헤더 배경색 */
-    border-bottom: 1px solid #e0e0e0; /* 콘텐츠와 구분선 */
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    box-sizing: border-box; /* 패딩이 너비에 영향을 주지 않도록 */
-}
-
-/* FriendPage.jsx, ChattingView.jsx 등이 표시될 영역 */
 .page_content {
-    flex-grow: 1;
-    overflow-y: auto; /* 내용이 길어지면 이 안에서만 스크롤 */
-    background-color: #ffffff;
+    flex: 1;
+    display: flex;
+    overflow-y: auto;
+}
+
+.page_content > * {
+    width: 100%;
+    height: 100%;
 }

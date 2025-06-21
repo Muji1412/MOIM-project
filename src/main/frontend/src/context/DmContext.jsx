@@ -33,7 +33,7 @@ export const DmProvider = ({ children }) => {
     const [subscription, setSubscription] = useState(null);
     const [notificationSubscription, setNotificationSubscription] = useState(null); // 추가
     const [notifications, setNotifications] = useState([]); // 추가
-    const [showAddFriend, setShowAddFriend] = useState(true);
+    const [showAddFriend, setShowAddFriend] = useState(false);
 
     // ⭐️ [추가된 로직 1] activeDmRoom의 최신 값을 담을 ref 생성
     const activeDmRoomRef = useRef(activeDmRoom); // [!code ++]

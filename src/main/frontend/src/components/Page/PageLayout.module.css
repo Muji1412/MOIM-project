@@ -1,171 +1,64 @@
-/* src/main/frontend/src/components/Page/PageLayout.module.css (신규 생성) */
-
+/* PageLayout.module.css 전체 코드 */
 .page_container {
     display: flex;
     width: 100%;
     height: 100%;
-    background-color: #f3f3f4; /* 배경색 통일 */
 }
 
+/* 왼쪽 친구/DM 목록 (FriendsAside) */
 .aside_menu {
-    width: 240px; /* 기존 Aside 메뉴 너비 */
+    width: 240px;
     flex-shrink: 0;
-    background-color: #f3f3f4; /* 기존 Aside 메뉴 배경색 */
-    border-right: 1px solid #d9d9d9; /* 구분선 */
+    background-color: #f2f3f5;
+    border-right: 1px solid #e3e5e8;
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    box-sizing: border-box;
 }
 
-.section_container {
-    flex-grow: 1;
-    background-color: #ffffff; /* 컨텐츠 영역 배경색 */
-    padding: 0; /* 내부 Section에서 패딩을 관리하도록 초기화 */
-    overflow-y: auto;
-}
-
-/* --- FriendsAside 내부 스타일 (기존 Header.module.css 등에서 가져옴) --- */
-
-.menu_top {
-    margin-bottom: 20px;
-}
-.search_button {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: none;
-    background-color: #e3e5e8;
-    text-align: left;
-    font-size: 14px;
-}
-.menu_list .menu_item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-}
-.menu_list .menu_item:hover {
-    background-color: #e0e0e0;
-}
-.menu_list .menu_item.active {
-    background-color: #d1d1d1;
-}
-.menu_list .menu_item img {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-}
-
-.dm_list {
-    margin-top: 20px;
-}
-.dm_list_title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-    margin-bottom: 5px;
-    font-size: 12px;
-    color: #6a737c;
-    text-transform: uppercase;
-}
-.dm_list_title img {
-    cursor: pointer;
-}
-.dm_user_box {
-    padding: 5px 10px;
-    border-radius: 4px;
-}
-.dm_user_box:hover {
-    background-color: #e0e0e0;
-}
-.dm_user_box.active {
-    background-color: #d1d1d1;
-}
-.dm_user_item {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-.dm_user_item img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.page_container {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* 컨테이너 넘침 방지 */
-}
-
-.aside_menu {
-    width: 300px;
-    min-width: 300px; /* 최소 너비 보장 */
-    height: 100%;
-    background-color: #2f3136;
-    border-right: 1px solid #40444b;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto; /* 사이드바 스크롤 가능 */
-}
-
-.section_container {
-    flex: 1; /* 남은 공간 모두 차지 */
-    min-width: 0; /* flex item overflow 방지 */
-    height: 100%;
-    overflow-y: auto; /* 메인 콘텐츠 스크롤 가능 */
-    background-color: #36393f;
-}
-
-/* 기존 스타일들도 여기에 추가 */
 .menu_top {
     padding: 16px;
-    border-bottom: 1px solid #40444b;
+    border-bottom: 1px solid #dcdcdc;
 }
 
 .search_button {
     width: 100%;
     padding: 8px 12px;
-    background-color: #40444b;
+    background-color: #e3e5e8;
     border: none;
     border-radius: 4px;
-    color: #b9bbbe;
+    color: #4f5660;
     cursor: pointer;
     font-size: 14px;
+    text-align: left;
 }
 
 .menu_list {
-    padding: 16px 8px;
+    padding: 8px;
 }
 
 .menu_item {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: 10px;
+    margin: 2px 0;
     border-radius: 4px;
     cursor: pointer;
-    color: #b9bbbe;
-    margin-bottom: 2px;
+    font-weight: 500;
+    color: #4f5660;
 }
 
 .menu_item:hover {
-    background-color: #40444b;
+    background-color: #dcdfe4;
+    color: #060607;
 }
 
 .menu_item.active {
-    background-color: #5865f2;
-    color: white;
+    background-color: #d1d1d1;
 }
 
 .menu_item img {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     margin-right: 12px;
 }
 
@@ -179,8 +72,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    color: #b9bbbe;
+    padding: 12px 10px 4px;
+    color: #6a737c;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -191,24 +84,25 @@
 }
 
 .dm_user_box {
-    padding: 8px 12px;
+    padding: 2px 8px;
     border-radius: 4px;
     cursor: pointer;
     margin-bottom: 2px;
 }
 
 .dm_user_box:hover {
-    background-color: #40444b;
+    background-color: #dcdfe4;
 }
 
 .dm_user_box.active {
-    background-color: #5865f2;
+    background-color: #d1d1d1;
 }
 
 .dm_user_item {
     display: flex;
     align-items: center;
-    color: #b9bbbe;
+    padding: 6px 0;
+    color: #4f5660;
 }
 
 .dm_user_item img {
@@ -216,4 +110,12 @@
     height: 32px;
     border-radius: 50%;
     margin-right: 12px;
+    background-color: #fff;
+}
+
+/* 오른쪽 메인 컨텐츠 영역 (FriendListPage / FriendAddPage) */
+.section_container {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: #ffffff;
 }

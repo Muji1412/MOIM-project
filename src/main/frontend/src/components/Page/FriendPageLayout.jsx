@@ -1,21 +1,22 @@
-// src/main/frontend/src/components/Page/FriendPageLayout.jsx
+// C:/Users/migma/Desktop/MOIM-project/src/main/frontend/src/components/Page/FriendPageLayout.jsx
 
 import React from 'react';
-import { useDm } from '../../context/DmContext'; // DmContext 사용
-import FriendsAside from './FriendsAside';
-import FriendListPage from './FriendListPage'; // 별도 컴포넌트 import
-import FriendAddPage from './FriendAddPage'; // 별도 컴포넌트 import
+import { useDm } from '../../context/DmContext';
+import FriendsAside from './FriendsAside';      // 친구/DM 목록 (왼쪽)
+import FriendListPage from './FriendListPage';  // 친구 목록 (오른쪽)
+import FriendAddPage from './FriendAddPage';    // 친구 추가 (오른쪽)
 import styles from './PageLayout.module.css';
 
 export default function FriendPageLayout() {
-    const { showAddFriend } = useDm(); // DmContext에서 상태 가져오기
-
-    console.log('=== FriendPageLayout 렌더링 ===');
-    console.log('showAddFriend:', showAddFriend);
+    const { showAddFriend } = useDm();
 
     return (
-        <div className={styles.page_container}>
+        <div className={styles.page_container}> {/* 이 컨테이너는 flex-direction: row를 가집니다. */}
+
+            {/* 왼쪽 섹션: 친구/DM 목록 */}
             <FriendsAside />
+
+            {/* 오른쪽 섹션: 실제 컨텐츠 */}
             <main className={styles.section_container}>
                 {showAddFriend ? <FriendAddPage /> : <FriendListPage />}
             </main>

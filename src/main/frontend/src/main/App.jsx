@@ -1,85 +1,64 @@
-// src/main/frontend/src/main/App.jsx
+// C:/Users/migma/Desktop/MOIM-project/src/main/frontend/src/main/App.jsx
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
-import { DmProvider, useDm } from '../context/DmContext';
+import { DmProvider } from '../context/DmContext';
+import { ServerProvider } from '../context/ServerContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// 컴포넌트 임포트
-import styles from '../components/Default.module.css';
-import Header from "../components/Header/Header";
-import NotificationComponent from "../components/Notifications";
-import TestApp from "../popupTest/TestApp";
-import ChattingView from "../chatting/ChattingView";
-import DmChatView from '../chatting/DmChatView';
+// 1. 역할이 분리된 레이아웃 컴포넌트들을 import 합니다.
+import SideNav from '../components/Header/SideNav';
+import NewHeader from '../components/Header/NewHeader';
 
-// 페이지 레이아웃 컴포넌트
+// 2. 페이지 레벨의 컴포넌트들을 import 합니다.
 import FriendPageLayout from "../components/Page/FriendPageLayout";
+import ChattingView from "../chatting/ChattingView";
+// ... 다른 페이지 컴포넌트들
 
-// --- 페이지별 컨텐츠 컴포넌트 정의 ---
-function ServerPageContent() {
-    return <div>서버 컨텐츠가 표시될 영역입니다.</div>;
-}
-
-function PopupMain() {
-    return <NotificationComponent userId={"user1234"} />;
-}
-
-// --- 공통 레이아웃 컴포넌트 ---
-function MainLayout({ children }) {
-    const { activeDmRoom } = useDm();
-
-    return (
-        <div className={styles.wrap}>
-            <Header />
-            <div className={styles.content_container}>
-                {activeDmRoom ? <DmChatView /> : (children || <FriendPageLayout />)}
-            </div>
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                style={{ zIndex: 9999 }}
-            />
-        </div>
-    );
-}
-
-function DmRoutes() {
-    return (
-        <DmProvider>
-            <Routes>
-                {/* 친구 관련 페이지들 - 기본적으로 FriendPageLayout 렌더링 */}
-                <Route path="/home" element={<MainLayout />} />
-                <Route path="/friends" element={<MainLayout />} />
-                <Route path="/" element={<MainLayout />} />
-
-                {/* 다른 페이지들 */}
-                <Route path="/servers" element={<MainLayout><ServerPageContent /></MainLayout>} />
-                <Route path="/chat" element={<MainLayout><ChattingView /></MainLayout>} />
-            </Routes>
-        </DmProvider>
-    );
-}
+// 3. 메인 레이아웃 CSS를 import 합니다.
+import styles from '../components/Default.module.css';
 
 export default function App() {
     return (
+        // 컨텍스트 프로바이더들이 최상단을 감싸도록 합니다.
         <AuthProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/*" element={<DmRoutes />} />
-                    <Route path="/popup" element={<TestApp />} />
-                    <Route path="/main" element={<PopupMain />} />
-                </Routes>
-            </BrowserRouter>
+            <ServerProvider>
+                <DmProvider>
+                    <BrowserRouter>
+                        {/* 전체 앱을 감싸는 컨테이너 */}
+                        <div className={styles.app_container}>
+
+                            {/* 왼쪽 고정: 서버 아이콘 목록 */}
+                            <SideNav />
+
+                            {/* 오른쪽 패널: 헤더와 컨텐츠 영역 */}
+                            <div className={styles.main_panel}>
+
+                                {/* 상단 고정: 현재 채널/친구 정보 표시 */}
+                                <NewHeader />
+
+                                {/* 컨텐츠 영역: URL 경로에 따라 페이지가 교체됨 */}
+                                <main className={styles.page_content}>
+                                    <Routes>
+                                        <Route path="/" element={<FriendPageLayout />} />
+                                        <Route path="/home" element={<FriendPageLayout />} />
+                                        <Route path="/friends" element={<FriendPageLayout />} />
+
+                                        {/* 서버 선택 시 채팅 뷰를 보여주는 예시 */}
+                                        <Route path="/servers/:serverId" element={<ChattingView />} />
+                                        <Route path="/chat" element={<ChattingView />} />
+
+                                        {/* 다른 라우트들도 이곳에 정의합니다. */}
+                                    </Routes>
+                                </main>
+                            </div>
+                        </div>
+                        <ToastContainer style={{ zIndex: 99999 }}/>
+                    </BrowserRouter>
+                </DmProvider>
+            </ServerProvider>
         </AuthProvider>
     );
 }

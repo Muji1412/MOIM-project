@@ -1,7 +1,7 @@
 // NewHeader.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import styles from "./Header.module.css";
+import styles from "./NewHeader.module.css";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useServer } from '../../context/ServerContext';
 
@@ -23,6 +23,8 @@ export default function NewHeader() {
     useEffect(() => {
         const fetchMyInfo = async () => {
             const token = sessionStorage.getItem('accessToken');
+
+            console.log("NewHeader 테스트중입니다 NewHeader 테스트중입니다 NewHeader 테스트중입니다 NewHeader 테스트중입니다 ")
             if (!token) {
                 console.log('로그인이 필요합니다.');
                 return;
