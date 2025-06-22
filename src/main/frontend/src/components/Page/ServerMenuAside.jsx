@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import styles from '../Header/Header.module.css';
+import styles from './ServerMenuAside.module.css';
 import modalStyles from '../Header/Modal.module.css';
 import { useServer } from "../../context/ServerContext";
 import { useAuth } from "../../context/AuthContext";
@@ -252,7 +252,7 @@ export default function ServerMenuAside() {
 
     return (
         <>
-            <aside className={styles.server_menu}>
+            <aside className={styles.server_menu_aside}>
                 <div className={styles.server_menu_top}>
                     <div className={styles.change_shild}>
                         <p className={styles.server_name}>{selectedServerName}</p>
