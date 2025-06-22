@@ -19,6 +19,7 @@ import ChattingView from "../chatting/ChattingView";
 
 // 3. 메인 레이아웃 CSS를 import 합니다.
 import styles from '../components/Default.module.css';
+import ServerPageLayout from "../components/Page/ServerPageLayout";
 
 export default function App() {
     return (
@@ -46,9 +47,7 @@ export default function App() {
                                         <Route path="/home" element={<FriendPageLayout />} />
                                         <Route path="/friends" element={<FriendPageLayout />} />
 
-                                        {/* 서버 선택 시 채팅 뷰를 보여주는 예시 */}
-                                        <Route path="/servers/:serverId" element={<ChattingView />} />
-                                        <Route path="/chat" element={<ChattingView />} />
+                                        <Route path="/servers/:serverId" element={<ServerPageLayout />} />
 
                                         {/* 다른 라우트들도 이곳에 정의합니다. */}
                                     </Routes>

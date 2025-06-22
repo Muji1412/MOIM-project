@@ -1,11 +1,10 @@
-/* PageLayout.module.css 전체 코드 */
 .page_container {
     display: flex;
     width: 100%;
     height: 100%;
 }
 
-/* 왼쪽 친구/DM 목록 (FriendsAside) */
+/* 왼쪽 친구/DM 목록 (FriendsAside) 및 서버 메뉴(ServerMenuAside) */
 .aside_menu {
     width: 240px;
     flex-shrink: 0;
@@ -15,6 +14,21 @@
     flex-direction: column;
 }
 
+/* 오른쪽 메인 컨텐츠 영역 (FriendListPage / FriendAddPage / ChattingView) */
+.section_container {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: #ffffff;
+    display: flex; /* 채팅창이 전체 높이를 차지하도록 추가 */
+    flex-direction: column; /* 채팅창이 전체 높이를 차지하도록 추가 */
+}
+
+.section_container > * { /* 채팅창이 전체 높이를 차지하도록 추가 */
+    flex-grow: 1;
+}
+
+
+/* FriendsAside.jsx에서 사용하는 스타일들 */
 .menu_top {
     padding: 16px;
     border-bottom: 1px solid #dcdcdc;
@@ -111,11 +125,4 @@
     border-radius: 50%;
     margin-right: 12px;
     background-color: #fff;
-}
-
-/* 오른쪽 메인 컨텐츠 영역 (FriendListPage / FriendAddPage) */
-.section_container {
-    flex-grow: 1;
-    overflow-y: auto;
-    background-color: #ffffff;
 }

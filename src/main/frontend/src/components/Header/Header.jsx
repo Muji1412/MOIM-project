@@ -1424,7 +1424,9 @@ export default function Header() {
                             </div>
                         </div>
 
-                        {/* 서버용 메뉴 */}
+                        {
+                            
+                        }
                         <div className={styles.server_menu}>
                             <div className={styles.server_menu_top}>
                                 {isFriendMenu ? (
