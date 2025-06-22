@@ -1,0 +1,59 @@
+/* NewHeader.module.css 전체 코드 */
+
+.header {
+    /* 1. 높이 지정 (가장 중요) */
+    /* 이 값이 없으면 높이가 0이 되어 보이지 않습니다. */
+    height: 50px;
+
+    /* 2. Flexbox 아이템으로서의 동작 설정 */
+    /* 부모(.main_panel)가 flex 컨테이너일 때, 다른 자식 요소가 커져도 이 요소는 줄어들지 않도록 합니다. */
+    flex-shrink: 0;
+
+    /* 3. 시각적 스타일 */
+    width: 100%;
+    background-color: #ffffff; /* 헤더 배경색 */
+    border-bottom: 1px solid #e0e0e0; /* 콘텐츠와 구분선 */
+    box-shadow: 0 1px 0 rgba(4,4,5,0.2), 0 1.5px 0 rgba(6,6,7,0.05), 0 2px 0 rgba(4,4,5,0.05);
+
+    /* 4. 내부 컨텐츠 정렬 */
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.hr_box {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+    font-size: 16px;
+    font-weight: 600;
+    color: #060607;
+}
+
+/* 아래는 NewHeader.jsx에서 사용할 수도 있는 아이콘 관련 스타일 예시입니다. */
+.hr_box img {
+    width: 24px;
+    height: 24px;
+}
+
+.server_icon_placeholder {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px; /* 헤더에 맞게 사각형에 가깝게 조정 */
+    background-color: #e0e0e0;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.server_icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px; /* 헤더에 맞게 사각형에 가깝게 조정 */
+    object-fit: cover;
+    flex-shrink: 0;
+}

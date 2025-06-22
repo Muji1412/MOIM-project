@@ -7,13 +7,19 @@ import { useAuth } from './AuthContext';
 import { toast } from 'react-toastify'; // 추가
 
 const DmContext = createContext({
+    // 기존 DM 관련
     dmRooms: [],
     activeDmRoom: null,
     dmMessages: [],
-    notifications: [], // 추가
+    notifications: [],
     selectDmRoom: () => {},
     sendMessage: () => {},
-    markNotificationAsRead: () => {}, // 추가
+    markNotificationAsRead: () => {},
+
+    // 친구 관련 추가
+    showAddFriend: false,
+    openAddFriend: () => {},
+    closeAddFriend: () => {},
 });
 
 export const useDm = () => useContext(DmContext);
@@ -27,6 +33,7 @@ export const DmProvider = ({ children }) => {
     const [subscription, setSubscription] = useState(null);
     const [notificationSubscription, setNotificationSubscription] = useState(null); // 추가
     const [notifications, setNotifications] = useState([]); // 추가
+    const [showAddFriend, setShowAddFriend] = useState(false);
 
     // ⭐️ [추가된 로직 1] activeDmRoom의 최신 값을 담을 ref 생성
     const activeDmRoomRef = useRef(activeDmRoom); // [!code ++]
@@ -66,6 +73,22 @@ export const DmProvider = ({ children }) => {
             client.deactivate();
         };
     }, []);
+
+    // 친구 관련 함수 추가
+    const openAddFriend = () => {
+        console.log('친구 추가 페이지 열기');
+        setShowAddFriend(true);
+    };
+
+    const closeAddFriend = () => {
+        console.log('친구 목록 페이지로 돌아가기');
+        setShowAddFriend(false);
+    };
+
+    const returnToFriendsList = () => {
+        setActiveDmRoom(null);      // 활성화된 DM 채팅방을 닫습니다.
+        setShowAddFriend(false);    // 친구 추가 페이지를 닫습니다.
+    };
 
     // ⭐️ 알림 구독 함수 ⭐️
     const subscribeToNotifications = (client) => {
@@ -376,13 +399,22 @@ export const DmProvider = ({ children }) => {
     };
 
     const value = {
+        // 기존 DM 관련
         dmRooms,
         activeDmRoom,
         dmMessages,
-        notifications, // 추가
+        notifications,
         selectDmRoom,
         sendMessage,
-        markNotificationAsRead, // 추가
+        markNotificationAsRead,
+
+        // 친구 관련 추가
+        showAddFriend,
+        openAddFriend,
+        closeAddFriend,
+
+        // 친구창 띄워주는
+        returnToFriendsList
     };
 
     return <DmContext.Provider value={value}>{children}</DmContext.Provider>;

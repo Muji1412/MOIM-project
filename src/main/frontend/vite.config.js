@@ -29,7 +29,8 @@ export default defineConfig({
                 calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
                 invite: path.resolve(__dirname, 'src/invite/Main.jsx'),
                 videocall: path.resolve(__dirname, 'src/videocall/Main.jsx'),
-                whiteboard: path.resolve(__dirname, 'src/whiteboard/Main.jsx'),
+                // whiteboard 사이즈때문에 매번 빌드 오래걸리니 일단 주석처리
+                // whiteboard: path.resolve(__dirname, 'src/whiteboard/Main.jsx'),
                 // todoList: path.resolve(__dirname, 'src/todoList/Main.jsx')
 
             },

@@ -20,17 +20,31 @@ public class ViewController {
             "/",
             "/main",
             "/home",
+            "/home/**",        // 추가
+            "/home/friends/**",    // 추가
+            "/friends",             // 추가 (직접 접근용)
+            "/friends/**",         // 추가 (직접 접근용)
             "/servers",
             "/servers/{serverId}", // 동적 경로도 포함
             "/popup",
             "/chat"
     })
+
+
     public String mainAppEntry(Model model) {
         // 모든 경로는 'main' 번들을 사용하도록 pageName을 설정합니다.
         model.addAttribute("pageName", "main");
         // 서비스 워커가 포함된 템플릿을 반환합니다.
         return "example_with_sw";
     }
+
+    // TODO API 요청은 제외하도록 설정하는거 고려하기
+//    @GetMapping(value = "/{path:^(?!api).*}/**",
+//            headers = "Accept=text/html")
+//    public String catchAllForSPA(Model model) {
+//        model.addAttribute("pageName", "main");
+//        return "example_with_sw";
+//    }
 
     @GetMapping("/{pageName}.do")
     public String separatePage(@PathVariable String pageName, Model model) {
