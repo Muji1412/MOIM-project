@@ -86,7 +86,7 @@
   cursor:pointer;
 }
 
-.add_server .server_ic{  background: #d9d9d9;}
+/*.add_server .server_ic{  background: #d9d9d9;}*/
 
 .home_ic img {
   width: 30px;
@@ -128,6 +128,7 @@
   background: #c3ee41 !important;
   transition: 0.2s;
   cursor: pointer;
+  color: #282c34;
 }
 
 /* .list_item:hover .fill {width: 5px;}
@@ -138,6 +139,8 @@
 }
 .list_item:hover .server_ic:not(.active_ic) {
   background: #c3ee41;
+  color: #282c34;
+/**/
 }
 
 /* server_menu */

@@ -6,7 +6,7 @@
 
 /* 왼쪽 친구/DM 목록 (FriendsAside) 및 서버 메뉴(ServerMenuAside) */
 .aside_menu {
-    width: 240px;
+    width: 280px;
     flex-shrink: 0;
     background-color: #f2f3f5;
     border-right: 1px solid #e3e5e8;
@@ -56,7 +56,7 @@
     align-items: center;
     padding: 10px;
     margin: 2px 0;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 500;
     color: #4f5660;
@@ -107,6 +107,7 @@
 
 .dm_user_box:hover {
     background-color: #dcdfe4;
+    border-radius: 10px;
 }
 
 .dm_user_box.active {
