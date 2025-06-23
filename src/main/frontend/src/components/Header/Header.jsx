@@ -11,6 +11,8 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 import { useDm } from '../../context/DmContext';
+import { usePushNotifications } from "../../hooks/usePushNotifications";
+import {useAuth} from "../../context/AuthContext";
 
 
 
@@ -84,8 +86,11 @@ export default function Header() {
     //웹소켓관
     const stompClient = useRef(null);
 
+
+
     // DM 관련 state
     const { dmRooms, selectDmRoom, activeDmRoom } = useDm();
+    const { subscribeToPush, isSubscribed, subscriptionError } = usePushNotifications();
 
 
     const [contextMenu, setContextMenu] = useState({
@@ -226,6 +231,7 @@ export default function Header() {
         setNewChannelName("");
     };
 
+
     // 채팅방 생성
     // 채널 생성을 API 호출로 변경
     const handleCreateChannel = async (e) => {
@@ -323,6 +329,24 @@ export default function Header() {
         fetchMyInfo();
 
     }, []);
+
+    useEffect(() => {
+        // currentUser 정보가 있고, 아직 푸시 구독이 되지 않은 경우에만 실행
+        if (currentUser && !isSubscribed) {
+            console.log('로그인 확인: 알림 권한을 확인하고 푸시 알림 구독을 시작합니다.');
+
+            // 먼저 알림 권한을 요청하고, 허용되면 푸시 구독 시작
+            requestNotificationPermission().then(hasPermission => {
+                if (hasPermission) {
+                    console.log('알림 권한 허용됨: 푸시 구독 시작');
+                    subscribeToPush();
+                } else {
+                    console.log('알림 권한이 거부되어 푸시 구독을 시작할 수 없습니다.');
+                }
+            });
+        }
+    }, [currentUser, isSubscribed, subscribeToPush]);
+
     // 서버 목록 불러오기 (컴포넌트 마운트 시)
     useEffect(() => {
         const fetchServers = async () => {
@@ -570,6 +594,31 @@ export default function Header() {
         navigator.clipboard.writeText(inviteLink).then(() => {
             alert('초대 링크가 복사되었습니다!');
         });
+    };
+
+    // 알림 권한 허용 핸들러
+    const requestNotificationPermission = async () => {
+        // 브라우저 지원 여부 확인
+        if (!("Notification" in window)) {
+            console.log("이 브라우저는 알림을 지원하지 않습니다.");
+            return false;
+        }
+
+        // 이미 권한이 허용되어 있는지 확인
+        if (Notification.permission === 'granted') {
+            console.log('이미 알림 권한이 허용되어 있음');
+            return true;
+        }
+
+        // 권한이 거부되지 않았다면 요청
+        if (Notification.permission !== 'denied') {
+            const permission = await Notification.requestPermission();
+            return permission === 'granted';
+        }
+
+        // 권한이 거부된 경우
+        console.log('알림 권한이 거부되어 있음');
+        return false;
     };
 
     const [openVoice, setOpenVoice] = useState(true);
@@ -1013,21 +1062,37 @@ export default function Header() {
                                         <div className={styles.menu_box}>
                                             <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
+                                                // 수정해야 할 코드
                                                 onClick={() => {
                                                     setSelectedMenuItem("board");
 
-
-                                                    //현재 url에서 projectId 가져오기
-                                                    const urlParams = new URLSearchParams(window.location.search);
-                                                    const currentProjectId = urlParams.get('projectId');
-
-                                                    if (currentProjectId) {
-                                                        // navigate 사용 (권장)
-                                                        navigate(`/whiteboard?projectId=${currentProjectId}`);
-                                                    } else {
+                                                    if (selectedServerId === "default") {
                                                         alert("먼저 서버를 선택해주세요!");
+                                                        return;
                                                     }
+
+                                                    const whiteboardData = {
+                                                        roomId: `group-${selectedServerId}-whiteboard`,
+                                                        userName: currentUser?.userNick || "User",
+                                                        userId: currentUser?.userNo || "unknown",
+                                                        groupId: selectedServerId,
+                                                        timestamp: Date.now()
+                                                    };
+
+                                                    sessionStorage.setItem('whiteboardData', JSON.stringify(whiteboardData));
+
+                                                    const popupWidth = 1400;
+                                                    const popupHeight = 900;
+                                                    const left = (window.screen.width / 2) - (popupWidth / 2);
+                                                    const top = (window.screen.height / 2) - (popupHeight / 2);
+
+                                                    window.open(
+                                                        '/whiteboard.do',
+                                                        'whiteboardPopup',
+                                                        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes`
+                                                    );
                                                 }}
+
                                                 style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/board_ic.png" alt="cal_ic"/>
@@ -1360,7 +1425,9 @@ export default function Header() {
                             </div>
                         </div>
 
-                        {/* 서버용 메뉴 */}
+                        {
+                            
+                        }
                         <div className={styles.server_menu}>
                             <div className={styles.server_menu_top}>
                                 {isFriendMenu ? (
@@ -1395,18 +1462,38 @@ export default function Header() {
                                         </div>
                                         <div className={styles.menu_box}>
                                             <div
-                                                className={`${styles.menu_item} ${selectedMenuItem === "todo" ? styles.active_menu_item : ""}`}
-                                                onClick={() => setSelectedMenuItem("todo")}
-                                                style={{cursor: "pointer"}}
-                                            >
-                                                <img src="/bundle/img/todo_ic.png" alt="cal_ic"/>
-                                                <p>Todo List</p>
-                                            </div>
-                                        </div>
-                                        <div className={styles.menu_box}>
-                                            <div
                                                 className={`${styles.menu_item} ${selectedMenuItem === "board" ? styles.active_menu_item : ""}`}
-                                                onClick={() => setSelectedMenuItem("board")}
+                                                 // 수정해야 할 코드
+                                                onClick={() => {
+                                                    setSelectedMenuItem("board");
+
+                                                    if (selectedServerId === "default") {
+                                                        alert("먼저 서버를 선택해주세요!");
+                                                        return;
+                                                    }
+
+                                                    const whiteboardData = {
+                                                        roomId: `group-${selectedServerId}-whiteboard`,
+                                                        userName: currentUser?.userNick || "User",
+                                                        userId: currentUser?.userNo || "unknown",
+                                                        groupId: selectedServerId,
+                                                        timestamp: Date.now()
+                                                    };
+
+                                                    sessionStorage.setItem('whiteboardData', JSON.stringify(whiteboardData));
+
+                                                    const popupWidth = 1400;
+                                                    const popupHeight = 900;
+                                                    const left = (window.screen.width / 2) - (popupWidth / 2);
+                                                    const top = (window.screen.height / 2) - (popupHeight / 2);
+
+                                                    window.open(
+                                                        '/whiteboard.do',
+                                                        'whiteboardPopup',
+                                                        `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes`
+                                                    );
+                                                }}
+
                                                 style={{cursor: "pointer"}}
                                             >
                                                 <img src="/bundle/img/board_ic.png" alt="cal_ic"/>

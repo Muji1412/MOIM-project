@@ -1,4 +1,3 @@
-// src/main/frontend/src/components/Section/Section.jsx
 
 import { useState } from 'react';
 import styles from './Section.module.css';
