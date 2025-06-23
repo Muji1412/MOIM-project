@@ -2,6 +2,7 @@ package com.example.moim.controller;
 
 import com.example.moim.chatting.ChatMessage;
 import com.example.moim.chatting.ChatService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -15,10 +16,12 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // 생성자 주입 방식
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, RedisTemplate<String, Object> redisTemplate) {
         this.chatService = chatService;
+        this.redisTemplate = redisTemplate;
     }
 
     // 1. 실시간 채팅 메시지 저장 (채널별)
@@ -47,6 +50,13 @@ public class ChatController {
     @GetMapping("/api/chat/{groupName}/{channelName}/all")
     @ResponseBody
     public List<ChatMessage> getAllChats(@PathVariable String groupName, @PathVariable String channelName) {
+
+        String key = "chat:" + groupName + ":" + channelName;
+        System.out.println("조회 키: " + key);
+
+        List<Object> result = redisTemplate.opsForList().range(key, 0, -1);
+        System.out.println("조회 결과: " + result);
+
         return chatService.getChatsByChannel(groupName, channelName);
     }
 
