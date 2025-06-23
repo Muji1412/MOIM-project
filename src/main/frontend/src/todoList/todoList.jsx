@@ -47,6 +47,7 @@ export default function todoList({groupNo}) {
                     }
                 }));
                 SetTodos(todos);
+                console.log(todos);
             });
     }, [checkModified])
 
