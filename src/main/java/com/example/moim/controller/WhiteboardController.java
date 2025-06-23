@@ -27,6 +27,9 @@ public class WhiteboardController {
     // 서버별 화이트보드 상태 저장
     private static final ConcurrentHashMap<String, String> serverWhiteboardState = new ConcurrentHashMap<>();
 
+    // 서버별 assets 상태 저장
+    private static final ConcurrentHashMap<String, String> serverWhiteboardAssets = new ConcurrentHashMap<>();
+
     @MessageMapping("/whiteboard/{serverId}")
     public void handleWhiteboardMessage(@DestinationVariable String serverId, WhiteboardMessage message) {
         System.out.println("=== 서버 " + serverId + " 화이트보드 메시지 수신 ===");
@@ -54,7 +57,17 @@ public class WhiteboardController {
 
                     addConnectionToServer(serverId, message.getConnectionId(), message.getUserId());
                     addUserToServer(serverId, message.getUserId());
-                    sendCurrentWhiteboardState(serverId, message.getConnectionId());
+
+                    // 상태 복원을 위해 약간의 지연 후 전송
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(500); // 클라이언트 초기화 대기
+                            sendCurrentWhiteboardState(serverId, message.getConnectionId());
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }).start();
+
                     sendUserCount(serverId);
                     break;
 
@@ -75,13 +88,34 @@ public class WhiteboardController {
                     System.out.println(">>> 연결 ID: " + message.getConnectionId() + "에서 변경");
                     System.out.println(">>> 데이터 크기: " + (message.getData() != null ? message.getData().length() : 0));
 
-                    // 서버의 화이트보드 상태 업데이트
-                    if (message.getData() != null && !message.getData().isEmpty()) {
-                        serverWhiteboardState.put(serverId, message.getData());
-                        System.out.println(">>> 서버 " + serverId + " 상태 업데이트 완료");
+                    // assets 정보 확인
+                    if (message.getAssets() != null && !message.getAssets().isEmpty()) {
+                        System.out.println(">>> Assets 포함: " + message.getAssets().length() + " bytes");
                     }
 
-                    // 모든 연결에 브로드캐스트 (프론트엔드에서 자신의 연결 필터링)
+                    // 서버의 화이트보드 상태 업데이트 (assets 포함)
+                    if (message.getData() != null && !message.getData().isEmpty()) {
+                        try {
+                            // JSON 유효성 검사
+                            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                            mapper.readTree(message.getData());
+
+                            // 상태 저장
+                            serverWhiteboardState.put(serverId, message.getData());
+
+                            // assets 별도 저장
+                            if (message.getAssets() != null && !message.getAssets().isEmpty()) {
+                                serverWhiteboardAssets.put(serverId, message.getAssets());
+                            }
+
+                            System.out.println(">>> 서버 " + serverId + " 상태 저장 완료 (assets 포함)");
+
+                        } catch (Exception e) {
+                            System.err.println(">>> 잘못된 데이터 형식, 저장 건너뜀: " + e.getMessage());
+                        }
+                    }
+
+                    // 모든 연결에 브로드캐스트 (assets 포함)
                     messagingTemplate.convertAndSend("/sub/whiteboard/" + serverId, message);
                     System.out.println(">>> 서버 " + serverId + "의 모든 연결에 변경사항 브로드캐스트 완료");
 
@@ -90,13 +124,34 @@ public class WhiteboardController {
                     System.out.println(">>> 브로드캐스트 대상 연결 수: " + (connections != null ? connections.size() : 0));
                     break;
 
+                case "cursor-move":
+                    System.out.println(">>> 서버 " + serverId + " 커서 이동 처리");
+                    System.out.println(">>> 사용자: " + message.getUserName() + " (연결 ID: " + message.getConnectionId() + ")");
+
+                    // 커서 위치를 모든 연결에 브로드캐스트
+                    messagingTemplate.convertAndSend("/sub/whiteboard/" + serverId, message);
+                    System.out.println(">>> 커서 위치 브로드캐스트 완료");
+
+                    // 연결된 모든 클라이언트 수 확인
+                    Set<String> cursorConnections = serverConnections.get(serverId);
+                    System.out.println(">>> 커서 브로드캐스트 대상 연결 수: " + (cursorConnections != null ? cursorConnections.size() : 0));
+                    break;
+
+                case "request-current-state":
+                    System.out.println(">>> 서버 " + serverId + " 현재 상태 요청 처리");
+                    System.out.println(">>> 요청자: " + message.getUserName() + " (연결 ID: " + message.getConnectionId() + ")");
+                    sendCurrentWhiteboardState(serverId, message.getConnectionId());
+                    break;
+
                 default:
                     System.out.println(">>> 알 수 없는 메시지 타입: " + message.getType());
                     break;
             }
 
-            // change 메시지는 이미 위에서 브로드캐스트했으므로 중복 방지
-            if (!"change".equals(message.getType())) {
+            // change, cursor-move, request-current-state 메시지는 이미 위에서 처리했으므로 중복 방지
+            if (!"change".equals(message.getType()) &&
+                    !"cursor-move".equals(message.getType()) &&
+                    !"request-current-state".equals(message.getType())) {
                 messagingTemplate.convertAndSend("/sub/whiteboard/" + serverId, message);
             }
 
@@ -146,6 +201,7 @@ public class WhiteboardController {
             if (users.isEmpty()) {
                 serverUsers.remove(serverId);
                 serverWhiteboardState.remove(serverId);
+                serverWhiteboardAssets.remove(serverId);
                 System.out.println(">>> 빈 서버 " + serverId + " 정리 완료");
             }
         }
@@ -177,17 +233,33 @@ public class WhiteboardController {
 
     private void sendCurrentWhiteboardState(String serverId, String connectionId) {
         String currentState = serverWhiteboardState.get(serverId);
-        if (currentState != null) {
+        String currentAssets = serverWhiteboardAssets.get(serverId);
+
+        if (currentState != null && !currentState.isEmpty()) {
             WhiteboardMessage stateMessage = new WhiteboardMessage();
             stateMessage.setType("current-state");
             stateMessage.setGroupId(serverId);
             stateMessage.setData(currentState);
+            stateMessage.setAssets(currentAssets);
             stateMessage.setConnectionId("server-state");
 
             messagingTemplate.convertAndSend("/sub/whiteboard/" + serverId, stateMessage);
-            System.out.println(">>> 서버 " + serverId + "의 현재 화이트보드 상태 전송 (크기: " + currentState.length() + ")");
+            System.out.println(">>> 서버 " + serverId + "의 현재 화이트보드 상태 전송 완료");
+            System.out.println(">>> 대상 연결: " + connectionId);
+            System.out.println(">>> 상태 크기: " + currentState.length() + " bytes");
+            System.out.println(">>> Assets 크기: " + (currentAssets != null ? currentAssets.length() : 0) + " bytes");
         } else {
-            System.out.println(">>> 서버 " + serverId + "에 저장된 화이트보드 상태 없음");
+            System.out.println(">>> 서버 " + serverId + "에 저장된 화이트보드 상태 없음 (새 화이트보드)");
+
+            // 빈 상태라도 알림 전송
+            WhiteboardMessage emptyStateMessage = new WhiteboardMessage();
+            emptyStateMessage.setType("empty-state");
+            emptyStateMessage.setGroupId(serverId);
+            emptyStateMessage.setData("{}");
+            emptyStateMessage.setConnectionId("server-state");
+
+            messagingTemplate.convertAndSend("/sub/whiteboard/" + serverId, emptyStateMessage);
+            System.out.println(">>> 빈 상태 알림 전송 완료");
         }
     }
 }

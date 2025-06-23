@@ -8,12 +8,13 @@ public class WhiteboardMessage {
     private String userName;
     private String data;        // JSON 문자열로 저장
     private String connectionId; // 연결 ID 추가
+    private String assets;      // assets 정보 추가
 
     // 기본 생성자
     public WhiteboardMessage() {}
 
-    // 생성자 수정 (connectionId 포함)
-    public WhiteboardMessage(String type, String roomId, String groupId, String userId, String userName, String data, String connectionId) {
+    // 생성자 수정 (assets 포함)
+    public WhiteboardMessage(String type, String roomId, String groupId, String userId, String userName, String data, String connectionId, String assets) {
         this.type = type;
         this.roomId = roomId;
         this.groupId = groupId;
@@ -21,6 +22,7 @@ public class WhiteboardMessage {
         this.userName = userName;
         this.data = data;
         this.connectionId = connectionId;
+        this.assets = assets;
     }
 
     // Getters and Setters
@@ -45,6 +47,9 @@ public class WhiteboardMessage {
     public String getConnectionId() { return connectionId; }
     public void setConnectionId(String connectionId) { this.connectionId = connectionId; }
 
+    public String getAssets() { return assets; }
+    public void setAssets(String assets) { this.assets = assets; }
+
     @Override
     public String toString() {
         return "WhiteboardMessage{" +
@@ -55,6 +60,7 @@ public class WhiteboardMessage {
                 ", userName='" + userName + '\'' +
                 ", connectionId='" + connectionId + '\'' +
                 ", dataLength=" + (data != null ? data.length() : 0) +
+                ", assetsLength=" + (assets != null ? assets.length() : 0) +
                 '}';
     }
 }
