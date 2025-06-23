@@ -15,7 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 @Slf4j
@@ -100,6 +103,8 @@ public class GroupsController {
         return ResponseEntity.ok(group);
     }
 
+
+
     @PutMapping("/{groupNo}")
     public ResponseEntity<Groups> updateGroup(
             @PathVariable Long groupNo,
@@ -171,5 +176,31 @@ public class GroupsController {
 
         List<Users> members = groupsService.getGroupMembers(groupNo);
         return ResponseEntity.ok(members);
+    }
+
+
+
+    // 태원 추가 - 채팅뷰용
+    @GetMapping("/getServer/{serverId}")
+    public ResponseEntity<Map<String, String>> getServerName(@PathVariable Long serverId) {
+        try {
+            Groups group = groupsService.getGroup(serverId);
+
+            if (group == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // JSON 형태로 반환
+            Map<String, String> response = new HashMap<>();
+            response.put("groupName", group.getGroupName());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "서버 정보를 찾을 수 없습니다");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse);
+        }
     }
 }

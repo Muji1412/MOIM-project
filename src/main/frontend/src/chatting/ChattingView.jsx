@@ -29,17 +29,22 @@ function ChattingView() {
             console.log("서버 정보 로딩 시작:", serverId);
 
             const token = sessionStorage.getItem('accessToken');
-            fetch(`${APPLICATION_SERVER_URL}/api/groups/${serverId}`, {
+            fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
                 .then(data => {
                     console.log("서버 정보 응답:", data);
-                    setServerName(data.groupName || data.name);
+                    setServerName(data.groupName);  // data.groupName으로 접근
                 })
                 .catch(err => {
                     console.error("서버 정보 로드 실패:", err);
