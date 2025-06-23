@@ -7,6 +7,11 @@ import { DmProvider } from '../context/DmContext';
 import { ServerProvider } from '../context/ServerContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import '../calendar/MyCalendar.css'
+import '../calendar/AddCalendarModal.css'
+import '../calendar/DetailCalendarModal.css'
+import '../todoList/todoList'
 
 // 1. 역할이 분리된 레이아웃 컴포넌트들을 import 합니다.
 import SideNav from '../components/Header/SideNav';
@@ -20,6 +25,8 @@ import ChattingView from "../chatting/ChattingView";
 // 3. 메인 레이아웃 CSS를 import 합니다.
 import styles from '../components/Default.module.css';
 import ServerPageLayout from "../components/Page/ServerPageLayout";
+import CalendarPageLayout from "../components/Page/CalendarPageLayout";
+import TodoListPageLayout from "../components/Page/TodoListPageLayout";
 
 export default function App() {
     return (
@@ -46,6 +53,8 @@ export default function App() {
                                         <Route path="/" element={<FriendPageLayout />} />
                                         <Route path="/home" element={<FriendPageLayout />} />
                                         <Route path="/friends" element={<FriendPageLayout />} />
+                                        <Route path="/todo" element={<TodoListPageLayout />} />
+                                        <Route path="/calendar" element={<CalendarPageLayout />} />
 
                                         <Route path="/servers/:serverId" element={<ServerPageLayout />} />
 

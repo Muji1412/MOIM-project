@@ -2,7 +2,7 @@ import {Calendar, dateFnsLocalizer} from "react-big-calendar";
 import {useCallback, useEffect, useState} from "react";
 import koLocale from 'date-fns/locale/ko';
 import {format,parse,startOfWeek,getDay} from "date-fns";
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+//import 'react-big-calendar/lib/css/react-big-calendar.css';
 import AddCalendarModal from './AddCalendarModal';
 import './MyCalendar.css';
 import DetailCalendarModal from "./DetailCalendarModal";
@@ -37,7 +37,14 @@ export default function MyCalendar() {
                 "Content-Type": "application/x-www-form-urlencoded"},
             body: new URLSearchParams({ groupNo })
         })
-            .then(res=>res.json())
+            //.then(res=>res.json())
+            .then(res => {
+                if (res.status === 401) {
+                    window.location.href = '/login.do';
+                    return;
+                    //return Promise.reject('401 Unauthorized');
+                }return res.json();
+            })
             .then(data => {
                 const events = data.map(item => ({
                     id: item.calNo,
@@ -77,13 +84,12 @@ export default function MyCalendar() {
     }
 
     return (
-        <div>
+        <div className="background">
             <Calendar
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
-                style={{height:800}}
                 onSelectSlot={(slotInfo) => {
                     setSelectedSlot(slotInfo);
                     setModalOpen(true);
@@ -99,7 +105,8 @@ export default function MyCalendar() {
                             backgroundColor: "#8aa82b",
                             color: 'white',
                             borderRadius: "0px",
-                            border: "none"
+                            border: "none",
+                            opacity: 0.5
                         };
                         //타입이 휴가인 경우 색상 변경
                         if (event.resource.calType === '휴가'){

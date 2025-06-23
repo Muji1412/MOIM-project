@@ -3,7 +3,7 @@
 /* 1. 전체 배경 */
 .signup-background {
   min-height: 100vh;
-  background-image: url('/img/loginBg.png');
+  background-image: url('/img/bg_1920.png');
   background-repeat: no-repeat;
   background-position: center;
   display: flex;

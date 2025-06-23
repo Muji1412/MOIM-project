@@ -9,13 +9,20 @@
     align-items: center;
 }
 
+.rbc-calendar {
+    padding: 20px;
+    width: 90%;
+}
+
 /*월,년 (June 2025)*/
 .rbc-toolbar-label{
     font-weight: bold;
+    font-size: 30px;
 }
 
 /*달력 가장 바깥 테두리*/
 .rbc-month-view{
+    margin-top: 20px;
     border-radius: 5px;
 }
 

@@ -32,9 +32,10 @@ public class CalendarController {
 
     //달력 불러오기
     @PostMapping
-    public List<CalendarDTO> getCalendar(@AuthenticationPrincipal CustomUserDetails user,
-                                         @RequestParam long groupNo) {
-        List<CalendarEntity> list = calendarRepository.getCalendarsByGroupNo(groupNo);
+    public List<CalendarDTO> getCalendar(@AuthenticationPrincipal CustomUserDetails user
+                                         //, @RequestParam long groupNo
+    ) {
+        List<CalendarEntity> list = calendarRepository.getCalendarsByGroupNo(14);
         return list.stream().filter(cal -> !cal.isCalIsDeleted())
                 .map(CalendarDTO::new).collect(Collectors.toList());
     }

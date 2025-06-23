@@ -49,8 +49,8 @@
 /*일정 내용*/
 .head-content{
     background: #cccccc;
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 2px;
+    padding: 10px;
     font-size: 18px;
     width: 410px;
     color: #373a3c;
@@ -92,21 +92,21 @@
 .input-text {
     display: block;
     background: #cccccc;
-    border-radius: 8px;
+    border-radius: 3px;
     padding: 5px;
-    height: 20px;
+    height: 30px;
     border: none;
     width: 100%;
 }
 
 /*input 박스 포커싱*/
 .input-text {
-    outline: 2px solid #8aa82b;
+    outline: none;
     display: block;
     background: #cccccc;
     border-radius: 8px;
-    padding: 5px;
-    height: 20px;
+    /*padding: 5px;*/
+    /*height: 20px;*/
 }
 
 .label-dropdown{
@@ -153,7 +153,8 @@
 /*완료여부 라디오 버튼 */
 .label-radio{
     display: inline-block;
-    font-size: 12px;
+    font-size: 15px;
+    margin-right: 5px;
 }
 
 /*수정 버튼*/

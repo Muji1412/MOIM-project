@@ -26,7 +26,7 @@ export default defineConfig({
                 //chattingView: path.resolve(__dirname, 'src/chatting/Main.jsx'),
                 popupTest: path.resolve(__dirname, 'src/popupTest/Main.jsx'),
                 //myAccount: path.resolve(__dirname, 'src/user/myAccount/Main.jsx')
-                calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
+                //calendar: path.resolve(__dirname, 'src/calendar/Main.jsx'),
                 invite: path.resolve(__dirname, 'src/invite/Main.jsx'),
                 videocall: path.resolve(__dirname, 'src/videocall/Main.jsx'),
                 // whiteboard 사이즈때문에 매번 빌드 오래걸리니 일단 주석처리
