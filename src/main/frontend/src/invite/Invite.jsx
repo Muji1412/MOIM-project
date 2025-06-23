@@ -15,7 +15,7 @@ export default function Invite() {
 
             if (!token) {
                 alert('로그인이 필요합니다.');
-                window.location.href = '/user/login.do'; // 로그인 페이지로 리다이렉트
+                window.location.href = '/login.do'; // 로그인 페이지로 리다이렉트
                 return;
             }
 
@@ -36,7 +36,7 @@ export default function Invite() {
                 if (response.ok) {
                     setStatus('success');
                     alert('서버 참여에 성공했습니다! 메인 페이지로 이동합니다.');
-                    window.location.href = '/';
+                    window.location.href = '/home';
                 } else {
                     const errorText = await response.text();
                     setErrorMessage(errorText || '서버 참여에 실패했습니다. 링크가 만료되었거나 유효하지 않습니다.');

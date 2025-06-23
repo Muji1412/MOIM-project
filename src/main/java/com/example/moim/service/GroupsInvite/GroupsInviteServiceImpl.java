@@ -54,6 +54,13 @@ public class GroupsInviteServiceImpl implements GroupsInviteService{
     @Transactional
     public void addUserToGroup(String inviteCode, Users users) {
         GroupsInvite groupsInvite = groupsInviteRepository.findGroupsInviteByInviteCode(inviteCode);
+
+//        System.out.println("서비스단 에러체크");
+//        System.out.println(groupsInvite.getInviteNo());
+//        System.out.println(groupsInvite.getGroup().getGroupNo());
+//        System.out.println(groupsInvite.getGroup().getGroupName());
+//        System.out.println(groupsInvite.getInviteCode());
+//        System.out.println(groupsInvite.getTimeLimit());
         // 시간 초과된지 아닌지 조회
         if (!groupsInvite.getTimeLimit().after(new Timestamp(System.currentTimeMillis()))) {
             throw new RuntimeException("만료된 초대입니다");

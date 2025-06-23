@@ -37,7 +37,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // ⭐️ 메시지 브로커 설정 개선 ⭐️
-        config.enableSimpleBroker("/sub", "/topic", "/user", "/queue") // /user 추가
+        config.enableSimpleBroker("/sub", "/topic", "/queue") // /user 추가
                 .setTaskScheduler(null); // 기본 스케줄러 사용
 
         config.setApplicationDestinationPrefixes("/app", "/pub");
