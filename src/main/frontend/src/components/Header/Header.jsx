@@ -351,7 +351,8 @@ export default function Header() {
         const fetchServers = async () => {
             try {
                 const token = sessionStorage.getItem('accessToken'); // localStorage → sessionStorage
-                const response = await fetch('/api/groups', {
+                // const response = await fetch('/api/groups', {
+                const response = await fetch('/api/groups/user', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가
@@ -665,7 +666,8 @@ export default function Header() {
             if (imageFile) {
                 formData.append('image', imageFile);
             }
-            const response = await fetch('/api/groups', {
+            // const response = await fetch('/api/groups', {
+            const response = await fetch('/api/groups/user', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`, // JWT 토큰 헤더 추가

@@ -1,8 +1,14 @@
 package com.example.moim.service.groups;
 
 import com.example.moim.entity.Groups;
+import com.example.moim.entity.UserGroup;
+import com.example.moim.entity.Users;
 import com.example.moim.repository.GroupsRepository;
+import com.example.moim.repository.UserGroupRepository;
+import com.example.moim.repository.UsersRepository;
+import com.example.moim.util.UserGroupId;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.sql.Timestamp;
 import java.util.List;
@@ -12,49 +18,106 @@ import java.util.List;
 public class GroupsService {
 
     private final GroupsRepository groupsRepository;
+    private final UserGroupRepository userGroupRepository;
+    private final UsersRepository usersRepository;
 
-    // 서버 생성 시 소유자 정보 포함
-    public Groups createGroup(Groups groups, String ownerId) {
-        groups.setGroupOwnerId(ownerId);
+    // 서버 생성 시 생성자를 UserGroup에도 추가
+    @Transactional
+    public Groups createGroup(Groups groups, String username) {
+        groups.setGroupOwnerId(username);
         groups.setGroupCreatedAt(new Timestamp(System.currentTimeMillis()));
-        return groupsRepository.save(groups);
+
+        // 1. 그룹 저장
+        Groups savedGroup = groupsRepository.save(groups);
+
+        // 2. 생성자를 UserGroup 테이블에 추가
+        Users owner = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        UserGroup ownerGroup = UserGroup.builder()
+                .id(new UserGroupId(savedGroup.getGroupNo(), owner.getUserNo()))
+                .group(savedGroup)
+                .user(owner)
+                .build();
+
+        userGroupRepository.save(ownerGroup);
+
+        return savedGroup;
     }
 
-    // 기존 메서드 (임시 호환성 유지)
-    public Groups createGroup(Groups groups) {
-        groups.setGroupCreatedAt(new Timestamp(System.currentTimeMillis()));
-        return groupsRepository.save(groups);
+    // 사용자별 서버 조회 (간단한 방법)
+    public List<Groups> getUserGroups(String username) {
+        if (username == null || username.isEmpty()) {
+            return List.of();
+        }
+
+        // 1. 사용자 정보 조회
+        Users user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        // 2. 사용자가 속한 그룹 번호들 조회
+        List<Long> groupNos = userGroupRepository.findGroupNosByUserNo(user.getUserNo());
+
+        // 3. 그룹 번호들로 실제 그룹 정보 조회
+        return groupsRepository.findAllById(groupNos);
     }
 
+    // 서버에 사용자 초대 (간단한 방법)
+    @Transactional
+    public void inviteUserToGroup(Long groupNo, String username) {
+        Groups group = getGroup(groupNo);
+        Users user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        // 이미 그룹에 속해있는지 확인 (간단한 방법)
+        if (userGroupRepository.existsByUserNoAndGroupNo(user.getUserNo(), groupNo)) {
+            throw new RuntimeException("User is already a member of this group");
+        }
+
+        UserGroup userGroup = UserGroup.builder()
+                .id(new UserGroupId(groupNo, user.getUserNo()))
+                .group(group)
+                .user(user)
+                .build();
+
+        userGroupRepository.save(userGroup);
+    }
+
+    // 서버 멤버 조회 (추가된 메서드)
+    public List<Users> getGroupMembers(Long groupNo) {
+        return userGroupRepository.findUsersByGroupNo(groupNo);
+    }
+
+    // 기존 메서드들...
     public Groups getGroup(Long groupNo) {
         return groupsRepository.findById(groupNo)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
     }
 
-    // 모든 서버 조회 대신 사용자별 서버 조회
-    public List<Groups> getUserGroups(String userId) {
-        if (userId == null || userId.isEmpty()) {
-            return List.of(); // 빈 리스트 반환
-        }
-        return groupsRepository.findByGroupOwnerId(userId);
-    }
-
-    // 전체 서버 조회 (관리자용 또는 테스트용)
-    public List<Groups> getAllGroups() {
-        return groupsRepository.findAll();
+    public boolean isOwner(Long groupNo, String username) {
+        Groups group = getGroup(groupNo);
+        return group.getGroupOwnerId() != null && group.getGroupOwnerId().equals(username);
     }
 
     public Groups updateGroup(Long groupNo, Groups groups) {
         return groupsRepository.save(groups);
     }
 
+    @Transactional
     public void deleteGroup(Long groupNo) {
+        // UserGroup 관계 먼저 삭제 (간단한 방법)
+        List<Users> members = userGroupRepository.findUsersByGroupNo(groupNo);
+        for (Users member : members) {
+            UserGroupId userGroupId = new UserGroupId(groupNo, member.getUserNo());
+            userGroupRepository.deleteById(userGroupId);
+        }
+
+        // 그룹 삭제
         groupsRepository.deleteById(groupNo);
     }
 
-    // 서버 소유자 확인
-    public boolean isOwner(Long groupNo, String userId) {
-        Groups group = getGroup(groupNo);
-        return group.getGroupOwnerId() != null && group.getGroupOwnerId().equals(userId);
-    }
+    // 전체 서버 조회 (관리자용)
+//    public List<Groups> getAllGroups() {
+//        return groupsRepository.findAll();
+//    }
 }
