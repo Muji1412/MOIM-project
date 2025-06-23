@@ -3,6 +3,7 @@ package com.example.moim.config;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.service.user.CustomUserDetailsService;
 import com.example.moim.util.JWTAuthenticationFilter;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import com.example.moim.util.CustomAuthenticationEntryPoint;
 import com.example.moim.util.CustomLoginFilter;
@@ -76,17 +77,23 @@ public class SecurityConfig {
         //customLoginFilter.setAuthenticationManager(authenticationManager);
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/ws/**")  // 웹소켓 CSRF 비활성화 추가
+                        .disable())
                 // ✅ 이 부분을 수정합니다.
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) //웹소켓 헤더 설정
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
-                        //.anyRequest().permitAll()
-                        .requestMatchers("/api/user/refresh","/login.do", "/user/login", "/signup.do", "/searchpassword.do",
-                                "/api/user/login", "/api/user/emailCheck", "/api/user/nickCheck","/todolist", "/calendar",
-                                "/api/user/usernameCheck", "/api/user/signUp", "/", "/img/favicon.ico", "/bundle/js/**",
-                                "/bundle/css/**", "/ws/**", "/todo").permitAll()
-                        .requestMatchers("/static/**", "/bundle/**", "/img/**", "/img/favicon.ico").permitAll()
-                        .anyRequest().authenticated()
+                       .anyRequest().permitAll()
+//                        .requestMatchers("/api/user/refresh","/login.do", "/user/login", "/signup.do", "/searchpassword.do",
+//                                "/api/user/login", "/api/user/emailCheck", "/api/user/nickCheck","/todolist", "/calendar",
+//                                "/api/user/usernameCheck", "/api/user/signUp", "/", "/img/favicon.ico", "/bundle/js/**",
+//                                "/bundle/css/**", "/ws/**", "/todo", "/api/chat/**", "/videocall", "/servers/**",
+//                                "/whiteboard/**", "/whiteboard").permitAll()
+//                        .requestMatchers("/static/**", "/bundle/**", "/img/**", "/img/favicon.ico").permitAll()
+//                        .anyRequest().authenticated()
                 );
 
         http.formLogin(AbstractHttpConfigurer::disable);
