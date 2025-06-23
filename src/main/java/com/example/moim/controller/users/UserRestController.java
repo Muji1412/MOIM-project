@@ -76,21 +76,21 @@ public class UserRestController {
     }
 
     //로그인
-    @PostMapping("/login")
-    public ResponseEntity<?> getMemberProfile(
-            @Valid @RequestBody LoginDTO loginDTO
-    ) {
-//        log.info(String.valueOf(loginDTO));
-        try {
-            TokenResponseVO tokenResponseVO = this.userService.login(loginDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(tokenResponseVO);
-        } catch (IllegalArgumentException e) {
-            //throw new RuntimeException(e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
-        } catch (EntityNotFoundException e) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "탈퇴한 사용자입니다"));
-        }
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<?> getMemberProfile(
+//            @Valid @RequestBody LoginDTO loginDTO
+//    ) {
+////        log.info(String.valueOf(loginDTO));
+//        try {
+//            TokenResponseVO tokenResponseVO = this.userService.login(loginDTO);
+//            return ResponseEntity.status(HttpStatus.OK).body(tokenResponseVO);
+//        } catch (IllegalArgumentException e) {
+//            //throw new RuntimeException(e);
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+//        } catch (EntityNotFoundException e) {
+//            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "탈퇴한 사용자입니다"));
+//        }
+//    }
 
     //액세스 토큰 만료 시 리프레쉬 토큰 확인해 액세스 토큰 재발급되는 곳
     @PostMapping("/refresh")

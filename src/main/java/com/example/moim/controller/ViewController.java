@@ -27,7 +27,9 @@ public class ViewController {
             "/servers",
             "/servers/{serverId}", // 동적 경로도 포함
             "/popup",
-            "/chat"
+            "/chat",
+            "/calendar",
+            "/todolist"
     })
 
 

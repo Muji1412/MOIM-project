@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import './AddCalendarModal.css';
 
 export default function MyModal({ group_No, onClose, slotInfo }) {
@@ -12,6 +12,11 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
     const types = ['할일', '휴가', '공지'];
     const [isTypeExpanded, setIsTypeExpanded] = useState(false);
     const [isDone, setIsDone] = useState("");
+
+    useEffect(() => {
+        const day = new Date().toISOString().slice(0,10);
+        setStartDate(day);
+    }, []);
 
 
     const handleSubmit = () => {

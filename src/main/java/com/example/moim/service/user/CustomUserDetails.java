@@ -4,6 +4,7 @@ import com.example.moim.command.CustomUserInfoVO;
 import com.example.moim.entity.Users;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,7 +50,6 @@ public class CustomUserDetails implements UserDetails {
         return customUserInfoVO.getPassword();
     }
 
-    @Override
     public long getUserNo() {
         return customUserInfoVO.getUserNo();
     }

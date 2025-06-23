@@ -36,7 +36,11 @@ export default function ServerMenuAside() {
         const fetchChannels = async () => {
             if (serverId && serverId !== "default") {
                 try {
-                    const response = await fetch(`/api/groups/${serverId}/channels`);
+                    const response = await fetch(`/api/groups/${serverId}/channels`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`
+                            }});
                     if (response.ok) {
                         const channels = await response.json();
                         const mappedChannels = channels.map(channel => ({

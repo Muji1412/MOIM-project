@@ -1,95 +1,278 @@
 /* Todo list 페이지 */
 
-/*가장 바깥쪽*/
-.full-background{
-    text-align: center;
-}
 
-/*todo list 박스*/
-.todo-outer-box{
+.todo-container {
     width: 80%;
+    margin: 30px auto;
+    background: #fff;
     border: 2px solid #777777;
-    border-radius: 18px;
-    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    padding: 30px 30px 50px 30px;
 }
 
-/*제목 박스 */
-.todo-header-box{
-    width: 80%;
-    margin: 30px 10%;
-    overflow: hidden;
-}
-
-/*제목(TODO LIST)*/
-.todo-title{
-    display: inline-block;
-    float: left;
-    margin-left: 40%;
-    width: 20%;
+.todo-title {
     text-align: center;
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 32px;
+    letter-spacing: 2px;
 }
 
-/*검색 드롭박스*/
-.search-dropbox{
-    float: right;
+.todo-filter {
+    text-align: right;
+    margin-bottom: 18px;
 }
 
-/*할일 박스*/
-.todo-section{
-    text-align: center;
-    padding: 15px;
-}
-
-/*할일박스 위 제목*/
-.todo-section-title{
+/*드롭다운 안되어있는 기본 버튼 상태 */
+.typeBtn{
+    display: block;
+    background: #777777;
+    color: #fff;
     height: 30px;
+    width: 100px;
+    border-radius: 8px;
+}
+
+/*드롭다운 된 상태*/
+.typeBtn-drop{
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #777777;
+    z-Index: 1000;
+    color: #fff;
+    height: 30px;
+    width: 100px;
+    border-radius: 8px;
+}
+
+/*드롭다운 된 아래 버튼들*/
+.typeBtn-drop-inner{
+    display: block;
+    background: #777777;
+    color: #fff;
+    height: 30px;
+    width: 100px;
+    border: none;
+    border-bottom: 1px solid #a7a7a7;
+    border-radius: 8px;
+}
+
+/*.todo-filter select {*/
+/*    font-size: 1rem;*/
+/*    padding: 6px 16px;*/
+/*    border-radius: 7px;*/
+/*    border: 1px solid #bbb;*/
+/*}*/
+
+.todo-table {
     width: 100%;
-    border-bottom: #777777;
+    border-collapse: collapse;
+    font-size: 1.08rem;
 }
 
-/*#*/
-.section-label-move{
-    width: 5%;
+.todo-table th, .todo-table td {
+    border-bottom: 1px solid #e7e7e7;
+    padding: 10px 14px;
     text-align: center;
 }
 
-/*항목*/
-.section-label-cont{
-    width: 65%;
+.todo-table th {
+    color: #444;
+    background: #fafafa;
+    font-weight: 500;
+}
+
+.drag-icon {
+    cursor: grab;
+    font-size: 1.2em;
+    opacity: 0.7;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.checkmark {
+    display: inline-block;
+    width: 23px; height: 23px;
+    background: #181818;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    line-height: 23px;
     text-align: center;
 }
-
-/*완료여부*/
-.section-label-progress{
-    width: 10%;
-    text-align: center;
+.empty {
+    display: inline-block;
+    width: 23px; height: 23px;
+    border: 2px solid #bbb;
+    border-radius: 50%;
 }
 
-/*마감일*/
-.section-label-end-date{
-    width: 10%;
-    text-align: center;
+.badge {
+    display: inline-block;
+    padding: 3px 16px;
+    border-radius: 13px;
+    font-size: 0.98em;
+    font-weight: 500;
+    min-width: 70px;
+}
+.badge.today {
+    background: #ffb3a3;
+    color: #4a312c;
+}
+.badge.tomorrow {
+    background: #ffe983;
+    color: #4a4a2e;
+}
+.badge.other {
+    background: #e1ffcb;
+    color: #34532c;
 }
 
-/*수정/삭제*/
-.section-label-modify-delete{
-    width: 10%;
-    text-align: center;
+.edit-btn, .delete-btn, .add-btn {
+    background: none;
+    border: none;
+    font-size: 1.19rem;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: background 0.15s;
+    padding: 2px 7px;
+    border-radius: 5px;
+}
+.edit-btn:hover {
+    background: #eaf2fc;
+}
+.delete-btn:hover {
+    background: #ffe1e1;
+}
+.add-btn {
+    background: #f5f5f5;
+    font-size: 1.25rem;
+}
+.add-btn:hover {
+    background: #dcffe2;
 }
 
-/*할일들*/
-.todo-section-things{
-
+.add-input {
+    width: 98%;
+    font-size: 1.07rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 5px 7px;
+}
+.date-input {
+    width: 92%;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    padding: 4px 5px;
 }
 
-/*할일 추가 버튼*/
-.things-add-btn{
-    overflow: hidden;
-}
 
-.add-btn{
-    width: 24px;
-    height: 24px;
-    float: right;
-}
+/*!*가장 바깥쪽*!*/
+/*.full-background{*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*todo list 박스*!*/
+/*.todo-outer-box{*/
+/*    width: 80%;*/
+/*    border: 2px solid #777777;*/
+/*    border-radius: 18px;*/
+/*    padding: 20px;*/
+/*}*/
+
+/*!*제목 박스 *!*/
+/*.todo-header-box{*/
+/*    width: 80%;*/
+/*    margin: 30px 10%;*/
+/*    overflow: hidden;*/
+/*}*/
+
+/*!*제목(TODO LIST)*!*/
+/*.todo-title{*/
+/*    display: inline-block;*/
+/*    float: left;*/
+/*    margin-left: 40%;*/
+/*    width: 20%;*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*검색 드롭박스*!*/
+/*.search-dropbox{*/
+/*    float: right;*/
+/*}*/
+
+/*!*할일 박스*!*/
+/*.todo-section{*/
+/*    text-align: center;*/
+/*    padding: 15px;*/
+/*}*/
+
+/*!*할일박스 위 제목*!*/
+/*.todo-section-title{*/
+/*    height: 30px;*/
+/*    width: 100%;*/
+/*    border-bottom: #777777;*/
+/*    overflow: hidden;*/
+/*}*/
+
+/*!*#*!*/
+/*.section-label-move{*/
+/*    float: left;*/
+/*    width: 5%;*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*항목*!*/
+/*.section-label-cont{*/
+/*    float: left;*/
+/*    width: 60%;*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*완료여부*!*/
+/*.section-label-progress{*/
+/*    float: left;*/
+/*    width: 10%;*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*마감일*!*/
+/*.section-label-end-date{*/
+/*    float: left;*/
+/*    width: 10%;*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*수정/삭제*!*/
+/*.section-label-modify-delete{*/
+/*    float: left;*/
+/*    width: 10%;*/
+/*    text-align: center;*/
+/*}*/
+
+/*!*할일들*!*/
+/*.todo-section-things{*/
+
+/*}*/
+
+/*.tdlist > div{*/
+/*    display: inline-block;*/
+/*}*/
+
+/*!*할일 추가 버튼*!*/
+/*.things-add-btn{*/
+/*    overflow: hidden;*/
+/*}*/
+
+/*.add-btn{*/
+/*    width: 24px;*/
+/*    height: 24px;*/
+/*    float: right;*/
+/*}*/
 

@@ -11,7 +11,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 500;
+    z-index: 999;
 }
 
 /*모달 박스*/
@@ -59,19 +59,22 @@
     background: #cccccc;
     border-radius: 8px;
     padding: 5px;
-    height: 20px;
+    height: 25px;
     border: none;
     width: 100%;
+    font-size: 16px;
 }
 
 /*input 박스 포커싱*/
-.label > input:focus {
+.input-text:focus {
     outline: 2px solid #8aa82b;
     display: block;
     background: #cccccc;
     border-radius: 8px;
     padding: 5px;
-    height: 20px;
+    height: 25px;
+    width: 100%;
+    font-size: 16px;
 }
 
 .label-dropdown{
