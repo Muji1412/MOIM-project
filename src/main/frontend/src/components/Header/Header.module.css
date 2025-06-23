@@ -128,7 +128,7 @@
   background: #c3ee41 !important;
   transition: 0.2s;
   cursor: pointer;
-  color: #282c34;
+  color: #282c34 !important;
 }
 
 /* .list_item:hover .fill {width: 5px;}

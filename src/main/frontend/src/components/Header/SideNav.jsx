@@ -59,7 +59,7 @@ export default function SideNav() {
         const fetchServers = async () => {
             try {
                 const token = sessionStorage.getItem('accessToken');
-                const response = await fetch('/api/groups', {
+                const response = await fetch('/api/groups/user', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -410,7 +410,7 @@ export default function SideNav() {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        color: "#d9d9d9",
+                                        // color: "#d9d9d9",
                                         fontWeight: "bold"
                                     }}
                                 >
