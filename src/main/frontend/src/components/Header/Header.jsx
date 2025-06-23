@@ -15,6 +15,7 @@ import { usePushNotifications } from "../../hooks/usePushNotifications";
 import {useAuth} from "../../context/AuthContext";
 
 
+
 export default function Header() {
 
 
@@ -202,9 +203,8 @@ export default function Header() {
         if (selectedServerId !== "default") {
             const selectedServer = servers.find(s => s.id === selectedServerId);
             if (selectedServer) {
-                // URL 파라미터로 서버명과 채널명을 전달하여 채팅 페이지로 이동
-                // 이 navigate 함수가 App.jsx의 <Route path="/chat" ...>를 활성화시킵니다.
-                navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${encodeURIComponent(channelName)}`);
+                // 새로운 방식: URL 파라미터 + 쿼리 파라미터 조합
+                navigate(`/servers/${selectedServerId}?channelName=${encodeURIComponent(channelName)}`);
             }
         }
     };
@@ -452,7 +452,7 @@ export default function Header() {
 
         // 홈 서버 선택 시 - 웹소켓 연결 해제하고 메인 페이지로 이동
         if (serverId === "default") {
-            navigate("/main");
+            navigate("/");
             setChatChannels([]);
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
@@ -476,7 +476,7 @@ export default function Header() {
                         if (mappedChannels.length > 0) {
                             const firstChannel = mappedChannels[0];
                             setSelectedChannel(firstChannel.name);
-                            navigate(`/chat?groupName=${encodeURIComponent(selectedServer.name)}&channelName=${encodeURIComponent(firstChannel.name)}`);
+                            navigate(`/servers/${serverId}?channelName=${encodeURIComponent(firstChannel.name)}`);
                         }
                     }
                 } catch (error) {
