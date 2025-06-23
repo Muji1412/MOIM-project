@@ -5,9 +5,13 @@ import { useNavigate } from "react-router-dom";
 import styles from "./SideNav.module.css";
 import modalStyles from "./Modal.module.css";
 import { useServer } from '../../context/ServerContext';
+import { useServerChat } from '../../context/ServerChatContext';
+
+
 
 export default function SideNav() {
     const navigate = useNavigate();
+    const { connectToServer } = useServerChat()
 
     const {
         servers,
@@ -98,18 +102,29 @@ export default function SideNav() {
     }, [contextMenu.visible]);
 
     // 서버 클릭 핸들러
-    const handleServerClick = (serverId) => {
-        setSelectedServerId(serverId); // 컨텍스트 상태 업데이트는 그대로 유지
+    const handleServerClick = async (serverId) => {
+        setSelectedServerId(serverId);
 
         if (serverId === "default") {
-            // '친구' 페이지의 새로운 경로인 /home 으로 이동시킵니다.
             navigate("/home");
         } else {
-            // '서버' 페이지의 경로는 원래 구조와 동일하게 유지합니다.
-            // ViewController가 /servers/:id 형태를 이미 알고 있기 때문입니다.
-            navigate(`/servers/${serverId}`);
+            const selectedServer = servers.find(s => s.id === serverId);
+            if (selectedServer) {
+                try {
+                    console.log("서버 연결 시도:", selectedServer);
+                    await connectToServer(selectedServer);
+                    console.log("웹소켓 연결 완료, 페이지 이동");
+                    navigate(`/servers/${serverId}`);
+                } catch (error) {
+                    console.error("웹소켓 연결 실패:", error);
+                    alert("서버 연결에 실패했습니다. 다시 시도해주세요.");
+                }
+            } else {
+                console.error("서버를 찾을 수 없습니다:", serverId);
+            }
         }
     };
+
 
     // 서버 컨텍스트 메뉴 핸들러
     const handleServerContextMenu = (e, serverId) => {
