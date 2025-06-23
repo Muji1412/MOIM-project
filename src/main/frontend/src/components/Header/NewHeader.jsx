@@ -138,7 +138,7 @@ export default function NewHeader() {
             }
             return (
                 <>
-                    <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
+                    <img className={styles.title_img} src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
                     <p>친구목록</p>
                 </>
             );
@@ -147,7 +147,7 @@ export default function NewHeader() {
         // 기본값
         return (
             <>
-                <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
+                <img className={styles.title_img} src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
                 <p>친구목록</p>
             </>
         );
