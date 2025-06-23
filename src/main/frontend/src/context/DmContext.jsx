@@ -52,6 +52,8 @@ export const DmProvider = ({ children }) => {
                 // ⭐️ 연결 완료 후 알림 구독 ⭐️
                 if (currentUser) {
                     subscribeToNotifications(client);
+                    //에러 구독
+                    subscribeToErrors(client);
                 }
             },
             onStompError: (frame) => {
@@ -366,6 +368,7 @@ export const DmProvider = ({ children }) => {
 
             console.log('DM 방 생성/조회 API 응답:', response.data);
             setActiveDmRoom(response.data);
+            console.log(response.data)
 
             if (!dmRooms.find(room => room.id === response.data.id)) {
                 console.log('새로운 DM 방이므로 목록 새로고침');
@@ -385,6 +388,8 @@ export const DmProvider = ({ children }) => {
                 channel: activeDmRoom.id.toString(),
                 user: currentUser.userNick,
                 text: content,
+                user1No: activeDmRoom.user1No,
+                user2No: activeDmRoom.user2No
             };
             console.log('전송할 메시지:', chatMessage);
 
@@ -396,6 +401,21 @@ export const DmProvider = ({ children }) => {
 
             fetchDmRooms();
         }
+    };
+
+    const subscribeToErrors = (client) => {
+        if (!currentUser || !client || !client.connected) return;
+
+        client.subscribe('/user/queue/errors', (error) => {
+            const errorData = JSON.parse(error.body);
+            console.log('WebSocket 에러 수신:', errorData);
+
+            // 토스트 알림으로 사용자에게 알리기
+            toast.error(errorData.message, {
+                autoClose: 3000
+            });
+
+        });
     };
 
     const value = {
@@ -414,7 +434,8 @@ export const DmProvider = ({ children }) => {
         closeAddFriend,
 
         // 친구창 띄워주는
-        returnToFriendsList
+        returnToFriendsList,
+
     };
 
     return <DmContext.Provider value={value}>{children}</DmContext.Provider>;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 
 // Context 생성
 const ServerContext = createContext();
@@ -35,12 +35,18 @@ export const ServerProvider = ({ children }) => {
                     name: group.groupName,
                     image: group.groupImage || ""
                 }));
+                console.log("받아온서버리스트");
+                console.log(mappedServers)
                 setServers(mappedServers);
             }
         } catch (error) {
             console.error('서버 목록 불러오기 중 오류:', error);
         }
     };
+
+    useEffect(() => {
+        fetchServers();
+    }, []);
 
     // 서버 선택 핸들러
     const handleServerSelect = (serverId) => {

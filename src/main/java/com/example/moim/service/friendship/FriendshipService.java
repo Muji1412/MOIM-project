@@ -13,4 +13,5 @@ public interface FriendshipService {
     void blockFriendship(Long accepterId, Long requesterId);
     List<FriendDTO> getFriends(Long userId);
     List<FriendDTO> getPendingRequests(Long userId);
+    boolean areFriends(Long userA, Long userB);
 }

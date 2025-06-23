@@ -152,6 +152,14 @@ public class FriendshipServiceImpl implements FriendshipService{
         }
         return pendingDTOs;
     }
+    public boolean areFriends(Long userA, Long userB) {
+        // 같은 사용자면 true 반환 (자기 자신에게는 메시지 보낼 수 있음)
+        if (userA.equals(userB)) {
+            return true;
+        }
+
+        return friendshipRepository.areFriends(userA, userB);
+    }
 
 
 }
