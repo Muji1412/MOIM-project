@@ -45,7 +45,7 @@
 .list_item:hover .fill:not(.active_fill) {height: 30px;width: 5px;}
 .list_item:hover .server_ic:not(.active_ic) {background-color: #c3ee41;border-radius: 15px;}
 
-.active_ic {border-radius: 15px !important;background-color: #c3ee41 !important;}
+.active_ic {border-radius: 15px !important;background-color: #c3ee41 !important; color: #36393f !important;}
 
 .home_ic img {width: 30px;height: 30px;}
 
