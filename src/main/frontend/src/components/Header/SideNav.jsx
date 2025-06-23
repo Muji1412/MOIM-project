@@ -512,6 +512,33 @@ export default function SideNav() {
                             </button>
                         </div>
                         <form onSubmit={handleAddServer} className={modalStyles.modal_form}>
+                            <div className={modalStyles.modal_upload_area}>
+
+                                <label className={modalStyles.upload_label}>
+                                        {imagePreview ? (
+                                            <img
+                                                src={imagePreview}
+                                                alt="preview"
+                                                className={modalStyles.modal_img_preview}
+                                            />
+                                        ) : (
+                                            <img src="/bundle/img/upload_ic.png" alt="upload"/>
+                                        )}
+                                    <input
+                                        ref={inputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        style={{display: "none"}}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={modalStyles.modal_img_btn}
+                                        onClick={() => inputRef.current?.click()}
+                                    >
+                                    </button>
+                                </label>
+                            </div>
                             <div className={modalStyles.modal_input_area}>
                                 <label className={modalStyles.modal_title_label} htmlFor="serverName">
                                     서버 이름
@@ -528,40 +555,6 @@ export default function SideNav() {
                                         required
                                         autoFocus
                                     />
-                                </div>
-                            </div>
-                            <div className={modalStyles.modal_input_area}>
-                                <label className={modalStyles.modal_title_label}>
-                                    서버 이미지
-                                </label>
-                                <div className={modalStyles.modal_img_area}>
-                                    <div className={modalStyles.modal_img_box}>
-                                        {imagePreview ? (
-                                            <img
-                                                src={imagePreview}
-                                                alt="preview"
-                                                className={modalStyles.modal_img_preview}
-                                            />
-                                        ) : (
-                                            <div className={modalStyles.modal_img_placeholder}>
-                                                <span>이미지 선택</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <input
-                                        ref={inputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        style={{display: "none"}}
-                                    />
-                                    <button
-                                        type="button"
-                                        className={modalStyles.modal_img_btn}
-                                        onClick={() => inputRef.current?.click()}
-                                    >
-                                        이미지 업로드
-                                    </button>
                                 </div>
                             </div>
                             <div className={modalStyles.modal_btn_area}>
