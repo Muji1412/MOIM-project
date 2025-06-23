@@ -18,7 +18,7 @@ function ChattingView() {
 
     // 파라미터 추출
     const serverId = params.serverId;
-    const channelName = searchParams.get("channelName");
+    const channelName = searchParams.get("channelName") || "일반채팅";
     const groupName = serverName;
 
     const APPLICATION_SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:8089' : 'https://moim.o-r.kr';
