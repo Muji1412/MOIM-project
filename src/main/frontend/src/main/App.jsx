@@ -13,12 +13,15 @@ import '../calendar/AddCalendarModal.css'
 import '../calendar/DetailCalendarModal.css'
 import '../todoList/todoList'
 
+import { ServerChatProvider } from '../context/ServerChatContext';
+
 // 1. 역할이 분리된 레이아웃 컴포넌트들을 import 합니다.
 import SideNav from '../components/Header/SideNav';
 import NewHeader from '../components/Header/NewHeader';
 
 // 2. 페이지 레벨의 컴포넌트들을 import 합니다.
 import FriendPageLayout from "../components/Page/FriendPageLayout";
+
 import ChattingView from "../chatting/ChattingView";
 // ... 다른 페이지 컴포넌트들
 
@@ -34,6 +37,7 @@ export default function App() {
         <AuthProvider>
             <ServerProvider>
                 <DmProvider>
+                    <ServerChatProvider>
                     <BrowserRouter>
                         {/* 전체 앱을 감싸는 컨테이너 */}
                         <div className={styles.app_container}>
@@ -65,6 +69,7 @@ export default function App() {
                         </div>
                         <ToastContainer style={{ zIndex: 99999 }}/>
                     </BrowserRouter>
+                    </ServerChatProvider>
                 </DmProvider>
             </ServerProvider>
         </AuthProvider>

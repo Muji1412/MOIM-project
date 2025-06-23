@@ -448,79 +448,71 @@ export default function Header() {
     // 서버(홈/일반) 클릭 핸들러
     // 서버 클릭 시 채널 목록도 함께 로드
     const handleServerClick = async (serverId) => {
-        setSelectedServerId(serverId);
+        // 안전한 로깅
+        console.log("----------------serverId:", serverId);
+        console.log("----------------servers:", servers);
 
-        // 홈 서버 선택 시 - 웹소켓 연결 해제하고 메인 페이지로 이동
+        const selectedServer = servers.find(s => s.id === serverId);
+        console.log("----------------selectedServer:", selectedServer);
         if (serverId === "default") {
             navigate("/");
             setChatChannels([]);
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
+
             if (selectedServer) {
-                // 1. 먼저 해당 서버의 채널 목록을 API로 로드
-                try {
-                    const response = await fetch(`/api/groups/${serverId}/channels`);
-                    if (response.ok) {
-                        const channels = await response.json();
-                        // 백엔드 데이터를 프론트엔드 형식으로 변환
-                        const mappedChannels = channels.map(channel => ({
-                            id: channel.chanNo,
-                            name: channel.chanName,
-                            type: "chat",
-                            isDeletable: channel.chanName !== "일반채팅"
-                        }));
-
-                        setChatChannels(mappedChannels);
-
-                        // 첫 번째 채널(일반적으로 "일반채팅")로 자동 이동
-                        if (mappedChannels.length > 0) {
-                            const firstChannel = mappedChannels[0];
-                            setSelectedChannel(firstChannel.name);
-                            navigate(`/servers/${serverId}?channelName=${encodeURIComponent(firstChannel.name)}`);
-                        }
-                    }
-                } catch (error) {
-                    console.error('채널 목록 로드 실패:', error);
-                }
-
-                // 2. 기존 웹소켓 연결이 있다면 해제 (다른 서버로 이동 시)
+                // 기존 연결 해제
                 if (stompClient.current) {
                     console.log("기존 웹소켓 연결 해제");
                     stompClient.current.deactivate();
+                    window.globalStompClient = null; // 초기화 추가
                 }
 
                 const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
                     ? 'http://localhost:8089'
                     : 'https://moim.o-r.kr';
 
-                // STOMP 클라이언트 생성 (SockJS 사용)
                 const client = new Client({
                     webSocketFactory: () => new SockJS(`${APPLICATION_SERVER_URL}/ws`),
                     reconnectDelay: 5000
                 });
 
-                // 웹소켓 연결 성공 시 실행되는 콜백
-                client.onConnect = () => {
-                    console.log(`서버 ${selectedServer.name}에 웹소켓 연결됨`);
-                    window.globalStompClient = client; // 전역에서 접근 가능하도록 설정
+                // Promise를 사용한 연결 대기
+                const connectPromise = new Promise((resolve, reject) => {
+                    client.onConnect = () => {
+                        console.log(`서버 ${selectedServer.name}에 웹소켓 연결됨`);
+                        window.globalStompClient = client;
+                        resolve(client);
 
-                    // 해당 서버의 채팅 토픽 구독 (실시간 메시지 수신)
-                    client.subscribe(`/topic/chat/${selectedServer.name}`, (msg) => {
-                        const payload = JSON.parse(msg.body);
-                        // 새 메시지를 다른 컴포넌트에 전달하기 위한 커스텀 이벤트 발생
-                        window.dispatchEvent(new CustomEvent('newChatMessage', {
-                            detail: payload
-                        }));
-                    });
-                };
+                        // 채팅 토픽 구독
+                        client.subscribe(`/topic/chat/${selectedServer.name}`, (msg) => {
+                            const payload = JSON.parse(msg.body);
+                            window.dispatchEvent(new CustomEvent('newChatMessage', {
+                                detail: payload
+                            }));
+                        });
+                    };
 
-                // 웹소켓 연결 활성화
+                    client.onStompError = (frame) => {
+                        console.error('STOMP 연결 오류:', frame);
+                        reject(frame);
+                    };
+                });
+
                 client.activate();
                 stompClient.current = client;
+
+                // 연결 완료 대기 후 상태 확인
+                try {
+                    await connectPromise;
+                    console.log("웹소켓 연결 상태:", window.globalStompClient?.connected);
+                    // 이제 여기서는 true가 출력됩니다
+                } catch (error) {
+                    console.error("웹소켓 연결 실패:", error);
+                }
             }
         }
     };
-
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => {
         setIsModalOpen(false);

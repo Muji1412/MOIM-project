@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import chatStyles from './ChattingView.module.css';
 import { useLocation, useParams } from "react-router-dom";
+import { useServerChat } from '../context/ServerChatContext';
 
 function ChattingView() {
+    const { isConnected, sendMessage, currentServer } = useServerChat(); // Context 사용
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const fileInputRef = useRef(null);
@@ -15,9 +17,9 @@ function ChattingView() {
     const searchParams = new URLSearchParams(location.search);
 
     // 파라미터 추출
-    const serverId = params.serverId; // /servers/:serverId에서 가져옴
-    const channelName = searchParams.get("channelName"); // ?channelName=채널명에서 가져옴
-    const groupName = serverName; // 서버명은 API로 가져올 예정
+    const serverId = params.serverId;
+    const channelName = searchParams.get("channelName");
+    const groupName = serverName;
 
     const APPLICATION_SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:8089' : 'https://moim.o-r.kr';
 
@@ -41,11 +43,18 @@ function ChattingView() {
                 })
                 .catch(err => {
                     console.error("서버 정보 로드 실패:", err);
-                    // 실패 시 serverId를 groupName으로 사용
                     setServerName(serverId);
                 });
         }
     }, [serverId, APPLICATION_SERVER_URL]);
+
+    // Context에서 현재 서버 정보 가져오기
+    useEffect(() => {
+        if (currentServer) {
+            console.log("Context에서 서버 정보 받음:", currentServer);
+            setServerName(currentServer.name);
+        }
+    }, [currentServer]);
 
     // 메시지 스크롤
     useEffect(() => {
@@ -92,9 +101,15 @@ function ChattingView() {
         };
     }, [groupName, channelName, APPLICATION_SERVER_URL]);
 
-    // 메시지 전송
+    // 메시지 전송 - Context 방식으로 변경
     const handleSend = () => {
         if (!inputValue.trim()) return;
+
+        // Context 연결 상태 확인
+        if (!isConnected) {
+            alert("채팅 서버에 연결되지 않았습니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
 
         if (!groupName) {
             console.error("그룹명이 없습니다.");
@@ -111,24 +126,23 @@ function ChattingView() {
         };
 
         console.log("메시지 전송 시도:", newMsg);
-        console.log("웹소켓 연결 상태:", window.globalStompClient?.connected);
+        console.log("Context 연결 상태:", isConnected);
+        console.log("현재 서버:", currentServer);
 
-        if (window.globalStompClient && window.globalStompClient.connected) {
-            window.globalStompClient.publish({
-                destination: `/app/chat/${groupName}`,
-                body: JSON.stringify(newMsg)
-            });
+        // Context의 sendMessage 사용
+        const success = sendMessage(`/app/chat/${groupName}`, newMsg);
+        if (success) {
             setInputValue('');
             console.log("메시지 전송 완료");
         } else {
-            console.error("웹소켓 연결이 없습니다.");
-            alert("채팅 서버에 연결되지 않았습니다. 잠시 후 다시 시도해주세요.");
+            alert("메시지 전송에 실패했습니다.");
         }
     };
 
-    // 이미지 업로드
+    // 이미지 업로드 - Context 방식으로 변경
     const handleImageUpload = async (file) => {
-        if (!window.globalStompClient || !window.globalStompClient.connected) {
+        // Context 연결 상태 확인
+        if (!isConnected) {
             console.error("웹소켓 연결이 없습니다.");
             alert("채팅 서버에 연결되지 않았습니다.");
             return;
@@ -158,10 +172,11 @@ function ChattingView() {
                 channel: channelName
             };
 
-            window.globalStompClient.publish({
-                destination: `/app/chat/${groupName}`,
-                body: JSON.stringify(newMsg)
-            });
+            // Context의 sendMessage 사용
+            const success = sendMessage(`/app/chat/${groupName}`, newMsg);
+            if (!success) {
+                alert("이미지 메시지 전송에 실패했습니다.");
+            }
         } catch (error) {
             console.error("이미지 업로드 실패:", error);
             alert("이미지 업로드에 실패했습니다.");
@@ -188,6 +203,14 @@ function ChattingView() {
         }
     };
 
+    // Context 상태 확인 로그
+    useEffect(() => {
+        console.log("=== Context 상태 확인 ===");
+        console.log("연결 상태:", isConnected);
+        console.log("현재 서버:", currentServer);
+        console.log("서버명:", serverName);
+    }, [isConnected, currentServer, serverName]);
+
     // 날짜별 메시지 그룹화
     const groupByDate = messages.reduce((acc, msg) => {
         const date = msg.date ? msg.date.slice(0, 10) : '';
@@ -198,6 +221,11 @@ function ChattingView() {
 
     return (
         <section className={chatStyles.chat_view_container}>
+            {/* 연결 상태 표시 (개발용) */}
+            <div style={{padding: '5px', background: isConnected ? '#d4edda' : '#f8d7da', fontSize: '12px'}}>
+                웹소켓 상태: {isConnected ? '연결됨' : '연결 안됨'} | 서버: {serverName || '없음'}
+            </div>
+
             <div className={chatStyles.channel_header}>
                 <div className={chatStyles.channel_title}># {channelName || 'Channel'}</div>
                 <div className={chatStyles.channel_desc}>This is the start of the #{channelName || 'Channel'} channel.</div>
