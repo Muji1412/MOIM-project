@@ -930,13 +930,13 @@ export default function Header() {
                                             className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                             style={{
                                                 background: !server.image
-                                                    ? selectedServerId === server.id ? "#c3ee41" : "#d9d9d9"
+                                                    ? selectedServerId === server.id ? "#c3ee41" : ""
                                                     : "transparent",
                                                 overflow: "hidden",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
-                                                color: "#333",
+                                                color: "#fff",
                                                 fontWeight: "bold"
                                             }}
                                         >
@@ -1344,13 +1344,13 @@ export default function Header() {
                                             className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                             style={{
                                                 background: !server.image
-                                                    ? selectedServerId === server.id ? "#c3ee41" : "#d9d9d9"
+                                                    ? selectedServerId === server.id ? "#c3ee41" : ""
                                                     : "transparent",
                                                 overflow: "hidden",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
-                                                color: "#333",
+                                                color: "#fff",
                                                 fontWeight: "bold"
                                             }}
                                         >
