@@ -1,4 +1,4 @@
-// C:/Users/migma/Desktop/MOIM-project/src/main/frontend/src/main/App.jsx
+
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';

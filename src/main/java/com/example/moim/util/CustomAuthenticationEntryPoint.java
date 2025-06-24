@@ -25,10 +25,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        log.error("Not Authenticated", authException);
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"code\":\"401\",\"message\":\"Unauthorized\"}");
+        log.error("Not Authenticated: {}", authException.getMessage());
+
+        // JSON 응답 대신 리다이렉트
+        response.sendRedirect("/login.do");
     }
 }

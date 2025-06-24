@@ -4,6 +4,7 @@ import com.example.moim.jwt.JWTService;
 import com.example.moim.service.user.CustomUserDetailsService;
 import com.example.moim.util.JWTAuthenticationFilter;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import com.example.moim.util.CustomAuthenticationEntryPoint;
 import com.example.moim.util.CustomLoginFilter;
@@ -72,34 +73,38 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomLoginFilter customLoginFilter) throws Exception {
-        //AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        //CustomLoginFilter customLoginFilter = new CustomLoginFilter(jwtService);
-        //customLoginFilter.setAuthenticationManager(authenticationManager);
         http
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // 이 줄 추가
+                )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/ws/**")  // 웹소켓 CSRF 비활성화 추가
+                        .ignoringRequestMatchers("/ws/**")
                         .disable())
-                // ✅ 이 부분을 수정합니다.
                 .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) //웹소켓 헤더 설정
-                )
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(authorize -> authorize
-                        // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
-                       .anyRequest().permitAll()
-//                        .requestMatchers("/login.do", "/user/login", "/signup.do", "/searchpassword.do",
-//                                 "/todolist", "/calendar", "/", "/img/favicon.ico", "/bundle/js/**",
-//                                "/ws/**", "/todo", "/videocall", "/servers/**",
-//                                "/whiteboard/**", "/whiteboard", "/videocall.do", "/home", "/chat/**").permitAll()
-//                        .requestMatchers("/api/user/refresh","/api/user/login","/api/user/emailCheck", "/api/user/nickCheck",
-//                                "/api/user/usernameCheck", "/api/user/signUp", "/api/chat/**").permitAll()
-//                        .requestMatchers("/bundle/css/**", "/static/**", "/bundle/**", "/img/**", "/img/favicon.ico").permitAll()
-//                        .anyRequest().authenticated()
+                        .requestMatchers("/login.do",
+                                "/api/user/login",
+                                "/api/user/signUp",
+                                "/api/user/usernameCheck",
+                                "/api/user/emailCheck",
+                                "/api/user/nickCheck",
+                                "/api/mail/searchPw",
+                                "/bundle/**",
+                                "/img/**",
+                                "/css/**",
+                                "/js/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login.do")
+                        .permitAll()
                 );
 
-        http.formLogin(AbstractHttpConfigurer::disable);
+//        http.formLogin(AbstractHttpConfigurer::disable); // 이 줄은 제거하거나 주석처리
 
-        // CustomLoginFilter는 토큰이 있을 때만 동작하므로 그대로 두어도 괜찮습니다.
         http.addFilterBefore(new JWTAuthenticationFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
         http.exceptionHandling((exceptionhandler) -> exceptionhandler

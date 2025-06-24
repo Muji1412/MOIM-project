@@ -12,7 +12,6 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-// 이 컴포넌트를 앱의 최상단(e.g., App.jsx)에 한 번만 포함시켜 주세요.
 export default function PushNotificationSetup() {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const VAPID_PUBLIC_KEY = "BDgnhdO6oZ0uD0vA9YlsOi_1FcMkxUUXOqbBQrscEctZGpvIszTkuQk99LR06fkQvejdwlbYvlDSoaEwvg91bwI"; //
