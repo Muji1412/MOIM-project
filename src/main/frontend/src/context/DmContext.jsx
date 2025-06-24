@@ -114,27 +114,17 @@ export const DmProvider = ({ children }) => {
         try {
             // ⭐️ 여러 구독 방식으로 테스트 ⭐️
 
-            // 방법 1: 기본 구독
-            const subscription1 = client.subscribe(
-                `/sub/notification/${currentUser.username}`,
-                (message) => {
-                    console.log('=== 방법1 알림 수신 ===', message.body);
-                    const notificationData = JSON.parse(message.body);
-                    handleNewNotification(notificationData);
-                }
-            );
-
-            // 방법 2: user prefix 사용 (Spring Boot 2.4+ 권장)
-            const subscription2 = client.subscribe(
+            const subscription = client.subscribe(
                 `/user/queue/notification`,
                 (message) => {
-                    console.log('=== 방법2 알림 수신 ===', message.body);
+                    console.log('=== 알림 수신 ===', message.body);
                     const notificationData = JSON.parse(message.body);
                     handleNewNotification(notificationData);
                 }
             );
 
-            setNotificationSubscription(subscription1); // 기본 구독 사용
+
+            setNotificationSubscription(subscription);
             console.log('✅ 알림 구독 성공!');
 
             // ⭐️ 구독 성공 확인을 위한 테스트 메시지 요청 ⭐️

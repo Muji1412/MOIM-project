@@ -42,11 +42,6 @@
                     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                 });
 
-                const token = sessionStorage.getItem('accessToken');
-                if (!token) {
-                    alert('로그인이 필요합니다.');
-                    return;
-                }
 
                 const response = await fetch('/api/subscribe', { //
                     method: 'POST',
