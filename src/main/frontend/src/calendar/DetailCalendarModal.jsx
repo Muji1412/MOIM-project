@@ -13,7 +13,6 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
         fetch("api/user/getInfo", {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -34,7 +33,6 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
         fetch(("/api/calendar/deleteEvent"), {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -90,6 +88,27 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
         })
     };
 
+    //달력 일정 투두리스트로 가져오기
+    const handleAddTodo =() => {
+        fetch("api/todoList/add", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }, body: JSON.stringify({
+                "todoTitle" : event?.title,
+                "todoEnd" : endDate,
+                "todoIsDone" : isDone
+            })
+        }).then(res => {
+            if(res.status === 200) {
+                console.log('가져오기 잘됨')
+                onClose();
+            } else {
+                console.log("가져오기 실패")
+            }
+        })
+    }
+
     return (
         <div className='modal-background'>
             <div className='modal-content'>
@@ -119,6 +138,8 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
                 {/*일정 담당자*/}
                 <div className='label'>
                      Event Owner : {userNick}
+                    <button className='todoAddBtn' type='button'
+                            onClick={handleAddTodo}>TodoList로 가져오기</button>
                 </div>
                 {/*일정 완료 여부*/}
                 <div className='label'>

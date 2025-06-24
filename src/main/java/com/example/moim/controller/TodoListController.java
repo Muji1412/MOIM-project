@@ -73,7 +73,6 @@ public class TodoListController {
     @PostMapping("/delete")
     public ResponseEntity<?> deleteTodoList(@AuthenticationPrincipal CustomUserDetails user,
                                             @RequestBody TodolistDTO dto) {
-        System.out.println("왜 또 안되냐");
         TodolistEntity entity = todolistRepository.getByTodoNo(dto.getTodoNo());
         try {
             todolistRepository.delete(entity);

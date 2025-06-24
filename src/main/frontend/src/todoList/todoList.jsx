@@ -270,50 +270,54 @@ export default function todoList({groupNo }) {
                 </thead>
                 <tbody>
                 {getFilteredTodos().map((todo, idx) => (
-                    <tr key={todo.todoNo}>
-                        <td>
-                            <span className="drag-icon">☰</span>
-                        </td>
-                        <td>{todo.todoTitle}</td>
-                        <td className='middle'>
-                            <div style={{textAlign: "center"}}>
-                           <button
-                                onClick={() => handleToggleDone(todo.todoNo)}
-                                style={{
-                                    width: 18, height: 18,
-                                    borderRadius: '50%',
-                                    background: '#fff',
-                                    border: '1.5px solid #222',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    marginLeft: '45%'
-                                    }}
-                                                aria-label="완료 체크"
-                                            >
-                                  {todo.todoIsDone === 'done' && (
-                                      <img src='/bundle/img/checked_fill.png' alt='checked'/>
-                                  )}
-                           </button></div>
-                        </td>
-                        <td>{formatDueLabel(todo.todoEnd)}</td>
-                        <td>
-                            <button className="edit-btn" title="수정">
-                              <span role="img" aria-label="edit">
-                                <img src="/bundle/img/pen_black.png" alt="todo_modify"
-                                    onClick={() => handleEditClick(todo)}/>
-                              </span>
-                            </button>
-                            <button className="delete-btn" title="삭제">
-                                  <span role="img" aria-label="delete">
-                                    <img src="/bundle/img/delete_xo_resize.png" alt="todo_delete"
-                                            onClick={() => handleTodoDelete(todo.todoNo)}/>
-                                  </span>
-                            </button>
-                        </td>
+                    <React.Fragment key={todo.todoNo}>
+                        <tr>
+                            <td>
+                                <span className="drag-icon">☰</span>
+                            </td>
+                            <td className='todo-title-for-hover'>{todo.todoTitle}</td>
+                            <td className='middle'>
+                                <div style={{textAlign: "center"}}>
+                                    <button
+                                        onClick={() => handleToggleDone(todo.todoNo)}
+                                        style={{
+                                            width: 18, height: 18,
+                                            borderRadius: '50%',
+                                            background: '#fff',
+                                            border: '1.5px solid #222',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginLeft: '45%'
+                                        }}
+                                        aria-label="완료 체크"
+                                    >
+                                        {todo.todoIsDone === 'done' && (
+                                            <img src='/bundle/img/checked_fill.png' alt='checked'/>
+                                        )}
+                                    </button>
+                                </div>
+                            </td>
+                            <td>{formatDueLabel(todo.todoEnd)}</td>
+                            <td>
+                                <button className="edit-btn" title="수정">
+                        <span role="img" aria-label="edit">
+                            <img src="/bundle/img/pen_black.png" alt="todo_modify"
+                                 onClick={() => handleEditClick(todo)}/>
+                        </span>
+                                </button>
+                                <button className="delete-btn" title="삭제">
+                        <span role="img" aria-label="delete">
+                            <img src="/bundle/img/delete_xo_resize.png" alt="todo_delete"
+                                 onClick={() => handleTodoDelete(todo.todoNo)}/>
+                        </span>
+                                </button>
+                            </td>
+                        </tr>
                         {/* 수정 모드일 때 인풋 렌더 */}
                         {editTodoNo === todo.todoNo && (
                             <tr>
+                                <td></td>
                                 <td>
                                     <input
                                         name="title"
@@ -321,13 +325,13 @@ export default function todoList({groupNo }) {
                                         onChange={handleInputChange}
                                     />
                                 </td>
-                                <td>
-                                    <input
-                                        name="content"
-                                        value={editData.content}
-                                        onChange={handleInputChange}
-                                    />
-                                </td>
+                                {/*<td>*/}
+                                {/*    <input*/}
+                                {/*        name="content"*/}
+                                {/*        value={editData.content}*/}
+                                {/*        onChange={handleInputChange}*/}
+                                {/*    />*/}
+                                {/*</td>*/}
                                 <td>
                                     <input
                                         name="end"
@@ -337,29 +341,30 @@ export default function todoList({groupNo }) {
                                     />
                                 </td>
                                 <td>
-                                    <button onClick={handleSave}>확인</button>
+                                    <button onClick={handleSave}>수정</button>
                                     <button onClick={handleCancel}>취소</button>
                                 </td>
                             </tr>
                         )}
-                    </tr>
+                    </React.Fragment>
                 ))}
+                {/* 할일 추가 행 */}
                 <tr>
                     <td>
                         <span className="drag-icon">☰</span>
                     </td>
                     <td>
                         <input className="add-input" placeholder="추가하기"
-                            onChange={(e) => setNewTodo(e.target.value)}/>
+                               onChange={(e) => setNewTodo(e.target.value)}/>
                     </td>
                     <td />
                     <td>
                         <input className="date-input" type="date" value={newTodoEnd}
-                            onChange={(e) => setNewTodoEnd(e.target.value)}/>
+                               onChange={(e) => setNewTodoEnd(e.target.value)}/>
                     </td>
                     <td>
                         <button className="add-btn" title="추가"
-                         onClick={handleTodoAdd}>＋</button>
+                                onClick={handleTodoAdd}>＋</button>
                     </td>
                 </tr>
                 </tbody>

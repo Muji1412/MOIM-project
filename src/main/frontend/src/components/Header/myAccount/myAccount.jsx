@@ -25,8 +25,7 @@ export default function MyAccount ({isOpen, onClose}) {
         fetch("/user/myAccount", {
             method: "GET",
             headers: {
-                Authorization : `Bearer ${token}`, // JWT 포함
-                "Content-Type" : "application/json"
+               "Content-Type" : "application/json"
             }
         })
             .then(res => res.json())
