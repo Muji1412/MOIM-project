@@ -235,7 +235,7 @@ function ChattingView() {
 
             <div className={chatStyles.channel_header}>
                 <div className={chatStyles.channel_title}># {channelName || 'Channel'}</div>
-                <div className={chatStyles.channel_desc}>This is the start of the #{channelName || 'Channel'} channel.</div>
+                {/*<div className={chatStyles.channel_desc}>This is the start of the #{channelName || 'Channel'} channel.</div>*/}
             </div>
             <div className={chatStyles.messages_container}>
                 {Object.entries(groupByDate).map(([date, msgs]) => (
