@@ -83,25 +83,25 @@ public class GroupsController {
 
     // 전체 서버 조회 (관리자용) - 제거됨
 
-    @GetMapping("/{groupNo}")
-    public ResponseEntity<Groups> getGroup(
-            @PathVariable Long groupNo,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String username = userDetails.getUsername();
-        Groups group = groupsService.getGroup(groupNo);
-
-        // 소유자만 접근 가능
-        if (!groupsService.isOwner(groupNo, username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.ok(group);
-    }
+//    @GetMapping("/{groupNo}")
+//    public ResponseEntity<Groups> getGroup(
+//            @PathVariable Long groupNo,
+//            @AuthenticationPrincipal CustomUserDetails userDetails
+//    ) {
+//        if (userDetails == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        String username = userDetails.getUsername();
+//        Groups group = groupsService.getGroup(groupNo);
+//
+//        // 소유자만 접근 가능
+//        if (!groupsService.isOwner(groupNo, username)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//
+//        return ResponseEntity.ok(group);
+//    }
 
 
 
@@ -167,6 +167,13 @@ public class GroupsController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        String username = userDetails.getUsername();
+
+        // 소유자만 멤버 조회 가능
+        if (!groupsService.isMember(groupNo, username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
 
         List<Users> members = groupsService.getGroupMembers(groupNo);
         return ResponseEntity.ok(members);
@@ -197,4 +204,28 @@ public class GroupsController {
                     .body(errorResponse);
         }
     }
+
+    // 서버 나가기 API (새로 추가)
+    @DeleteMapping("/{groupNo}/leave")
+    public ResponseEntity<?> leaveServer(
+            @PathVariable Long groupNo,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            String username = userDetails.getUsername();
+            // usergroup 테이블에서 해당 사용자의 멤버십만 삭제
+            groupsService.leaveGroup(groupNo, username);
+
+            return ResponseEntity.ok()
+                    .body(Map.of("message", "서버에서 성공적으로 나갔습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "서버 나가기 실패"));
+        }
+    }
+
 }
