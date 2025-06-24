@@ -46,6 +46,9 @@ function ChattingView() {
 // 친구추가 처리
     const handleAddFriend = async (member) => {
         try {
+            // 컨텍스트 먼저 닫음
+            setMemberContextMenu(prev => ({...prev, visible: false}));
+
             // 여기에 친구추가 API 호출 로직 구현
             console.log('친구추가:', member);
             // 멤버에 찍히는거
@@ -74,10 +77,11 @@ function ChattingView() {
         } catch (error) {
             console.error('친구추가 중 오류:', error);
             alert('친구추가 중 오류가 발생했습니다.');
+            setMemberContextMenu(prev => ({...prev, visible: false}));
         }
 
         // TODO 종수 이거 친구추가 끝나고나면 에러 안터지게 컨텍스트 창 꺼지게 설정, 이대로 쓰면 언디파인드 터짐
-        // setMemberContextMenu(prev => ({...prev, visible: false}));
+
     };
 
 
@@ -428,8 +432,7 @@ function ChattingView() {
                     </div>
                 </div>
                 {/* 서버멤버 리스트를 보여 줄 부분 */}
-                <div
-                    className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : ''}`}>
+                <div className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : chatStyles.mem_list_hidden}`}>
                     <div className={chatStyles.mem_list_header}>
                         멤버 - {members.length}
                     </div>

@@ -134,7 +134,7 @@
 
 /* mem_list_area */
 .mem_list_area {
-  width: 0;
+  width: 240px;
   height: 100%;
   background-color: #f2f3f5;
   border-left: 1px solid #e3e5e8;
@@ -146,11 +146,9 @@
 }
 
 /* 멤버 리스트가 열고 닫힐 때 chat_sub_wrap 너비 조정 */
-.mem_list_visible ~ .chat_sub_wrap,
 .chat_wrap_area:has(.mem_list_visible) .chat_sub_wrap {width: calc(100% - 240px);}
 
-.chat_wrap_area:has(.mem_list_hidden) .chat_sub_wrap,
-.mem_list_hidden ~ .chat_sub_wrap {width: 100%;}
+.chat_wrap_area:has(.mem_list_hidden) .chat_sub_wrap{width: 100%;}
 
 /* 토글로 멤버 리스트를 열고 닫을 때 가로 너비 */
 .mem_list_visible {width: 240px;}
