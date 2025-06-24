@@ -4,6 +4,7 @@ import './DetailCalendarModal.css';
 export default function DetailCalendarModal ({event, group_No, onClose}) {
     const [userNick, setUserNick] = useState('');
     const [groupNo, setGroupNo] = useState(group_No);
+    const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [endDate, setEndDate] = useState('');
     const [isDone, setIsDone] = useState("");
@@ -64,6 +65,9 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
 
     //일정 수정
     const handleModify  = () => {
+        if (endDate === '') {
+            return;
+        }
         fetch('/api/calendar/modifyEvent', {
             method: 'POST',
             headers: {

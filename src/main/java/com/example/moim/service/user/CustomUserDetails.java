@@ -1,7 +1,6 @@
 package com.example.moim.service.user;
 
 import com.example.moim.command.CustomUserInfoVO;
-import com.example.moim.entity.Users;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
