@@ -2,9 +2,12 @@ import React, { useEffect, useState, useRef } from "react";
 import chatStyles from './ChattingView.module.css';
 import { useLocation, useParams } from "react-router-dom";
 import { useServerChat } from '../context/ServerChatContext';
+import { useAuth } from '../context/AuthContext';
 
 function ChattingView() {
+
     const { isConnected, sendMessage, currentServer } = useServerChat(); // Context 사용
+    const { currentUser } = useAuth(); // 현재 사용자 정보 가져오기
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const fileInputRef = useRef(null);
@@ -124,7 +127,7 @@ function ChattingView() {
 
         const newMsg = {
             date: new Date().toISOString(),
-            user: '박종범',
+            user: currentUser?.userNick,
             color: 'purple',
             text: inputValue,
             channel: channelName
