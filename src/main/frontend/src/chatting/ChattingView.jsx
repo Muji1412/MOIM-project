@@ -287,6 +287,7 @@ function ChattingView() {
             </div>
 
             <div className={chatStyles.channel_header}>
+
                 {/* 서버 접속 시 서버에 있는 멤버 리스트 부분 추가 */}
                 <div className={chatStyles.channel_header_title}>
                     <div className={chatStyles.channel_title}># {channelName || 'Channel'}</div>

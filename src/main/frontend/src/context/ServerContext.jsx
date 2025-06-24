@@ -16,37 +16,35 @@ export const ServerProvider = ({ children }) => {
     // 웹소켓 관련
     const stompClient = useRef(null);
 
-    // 서버 목록 불러오기
-    const fetchServers = async () => {
-        try {
-            const token = sessionStorage.getItem('accessToken');
-            const response = await fetch('/api/groups', {
-                method: 'GET',
-                headers: {
-                    // 'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+    // 서버 목록 불러오기 - sideNav에서 개별적으로 돌리고있음
+    // const fetchServers = async () => {
+    //     try {
+    //         const response = await fetch('/api/groups', {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         });
+    //
+    //         if (response.ok) {
+    //             const serverList = await response.json();
+    //             const mappedServers = serverList.map(group => ({
+    //                 id: group.groupNo.toString(),
+    //                 name: group.groupName,
+    //                 image: group.groupImage || ""
+    //             }));
+    //             console.log("받아온서버리스트");
+    //             console.log(mappedServers)
+    //             setServers(mappedServers);
+    //         }
+    //     } catch (error) {
+    //         console.error('서버 목록 불러오기 중 오류:', error);
+    //     }
+    // };
 
-            if (response.ok) {
-                const serverList = await response.json();
-                const mappedServers = serverList.map(group => ({
-                    id: group.groupNo.toString(),
-                    name: group.groupName,
-                    image: group.groupImage || ""
-                }));
-                console.log("받아온서버리스트");
-                console.log(mappedServers)
-                setServers(mappedServers);
-            }
-        } catch (error) {
-            console.error('서버 목록 불러오기 중 오류:', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchServers();
-    }, []);
+    // useEffect(() => {
+    //     fetchServers();
+    // }, []);
 
     // 서버 선택 핸들러
     const handleServerSelect = (serverId) => {
@@ -68,7 +66,7 @@ export const ServerProvider = ({ children }) => {
 
 
         // 함수들
-        fetchServers,
+        // fetchServers,
         handleServerSelect
     };
 
