@@ -34,6 +34,8 @@ export const DmProvider = ({ children }) => {
     const [notificationSubscription, setNotificationSubscription] = useState(null); // 추가
     const [notifications, setNotifications] = useState([]); // 추가
     const [showAddFriend, setShowAddFriend] = useState(false);
+    const [friendRequestSubscription, setFriendRequestSubscription] = useState(null);
+
 
     // ⭐️ [추가된 로직 1] activeDmRoom의 최신 값을 담을 ref 생성
     const activeDmRoomRef = useRef(activeDmRoom); // [!code ++]
@@ -111,6 +113,10 @@ export const DmProvider = ({ children }) => {
             notificationSubscription.unsubscribe();
         }
 
+        if (friendRequestSubscription) {
+            friendRequestSubscription.unsubscribe();
+        }
+
         try {
             // ⭐️ 여러 구독 방식으로 테스트 ⭐️
 
@@ -123,8 +129,18 @@ export const DmProvider = ({ children }) => {
                 }
             );
 
+            const friendSubscription = client.subscribe(
+                `/user/queue/friend-request`,
+                (message) => {
+                    console.log('=== 친구 요청 알림 수신 ===', message.body);
+                    const friendData = JSON.parse(message.body);
+                    handleFriendRequestNotification(friendData);
+                }
+            );
+
 
             setNotificationSubscription(subscription);
+            setFriendRequestSubscription(friendSubscription);
             console.log('✅ 알림 구독 성공!');
 
             // ⭐️ 구독 성공 확인을 위한 테스트 메시지 요청 ⭐️
@@ -149,19 +165,48 @@ export const DmProvider = ({ children }) => {
             return; // 함수 종료
         }
 
+        const NotificationToast = ({ notificationData, onToastClick }) => (
+            <div
+                onClick={onToastClick}
+                style={{
+                    cursor: 'pointer',
+                    whiteSpace: 'pre-wrap'
+                }}
+            >
+        <span style={{ fontWeight: 'bold', color: '#333' }}>
+            {notificationData.senderNick}
+        </span>
+                <span style={{ fontWeight: 'normal' }}>
+            님의 메세지
+        </span>
+                <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginTop: '4px'
+                }}>
+                    {notificationData.message}
+                </div>
+            </div>
+        );
+
         // 토스트 알림 표시
         toast.info(
-            `${notificationData.senderNick}님이 메시지를 보냈습니다`,
-            {
-                onClick: () => {
-                    // 알림 클릭 시 해당 DM방으로 이동
-                    const targetRoom = dmRooms.find(room => room.id === notificationData.roomId);
-                    if (targetRoom) {
-                        setActiveDmRoom(targetRoom);
+            <NotificationToast
+                notificationData={notificationData}
+                onToastClick={() => {
+                    console.log('토스트 알람클릭');
+                    console.log(notificationData)
+                    const friend ={
+                        userNick : notificationData.senderNick
                     }
+                    console.log(friend)
+                    selectDmRoom(friend)
                     markNotificationAsRead(notificationData.id);
-                },
-                autoClose: 5000
+                }}
+            />,
+            {
+                autoClose: 5000,
+                closeOnClick: false // 이걸 false로 설정해야 커스텀 onClick이 작동해요
             }
         );
 
@@ -179,37 +224,47 @@ export const DmProvider = ({ children }) => {
         // DM 방 목록 새로고침 (새 메시지 표시용)
         fetchDmRooms();
     };
-    // const handleNewNotification = (notificationData) => {
-    //     // 토스트 알림 표시
-    //     toast.info(
-    //         `${notificationData.senderNick}님이 메시지를 보냈습니다`,
-    //         {
-    //             onClick: () => {
-    //                 // 알림 클릭 시 해당 DM방으로 이동
-    //                 const targetRoom = dmRooms.find(room => room.id === notificationData.roomId);
-    //                 if (targetRoom) {
-    //                     setActiveDmRoom(targetRoom);
-    //                 }
-    //                 markNotificationAsRead(notificationData.id);
-    //             },
-    //             autoClose: 5000
-    //         }
-    //     );
-    //
-    //     // 알림 목록에 추가
-    //     setNotifications(prev => [{
-    //         id: notificationData.id,
-    //         type: 'DM',
-    //         senderNick: notificationData.senderNick,
-    //         message: notificationData.message,
-    //         roomId: notificationData.roomId,
-    //         timestamp: notificationData.sentAt,
-    //         isRead: false
-    //     }, ...prev]);
-    //
-    //     // DM 방 목록 새로고침 (새 메시지 표시용)
-    //     fetchDmRooms();
-    // };
+    const FriendRequestToast = ({ friendData, onToastClick }) => (
+        <div
+            onClick={onToastClick}
+            style={{
+                cursor: 'pointer',
+                whiteSpace: 'pre-wrap'
+            }}
+        >
+        <span style={{ fontWeight: 'bold', color: '#333' }}>
+            {friendData.requesterUsername} 님이
+        </span>
+            <br />
+            <span style={{ fontWeight: 'normal' }}>
+            친구 요청을 보냈습니다
+        </span>
+        </div>
+    );
+
+    const handleFriendRequestNotification = (friendData) => {
+        console.log('친구 요청 받음:', friendData);
+
+        toast.info(
+            <FriendRequestToast
+                friendData={friendData}
+                onToastClick={() => {
+                    console.log('친구 요청 토스트 클릭');
+                    openAddFriend();
+                }}
+            />,
+            {
+                autoClose: 20000,
+                closeOnClick: false
+            }
+        );
+
+        // 알림 목록에 추가
+        setNotifications(prev => [{
+            senderNick: friendData.requesterUsername,
+            message: '친구 요청'
+        }, ...prev]);
+    };
 
     // ⭐️ currentUser 변경 시 알림도 다시 구독 ⭐️
     useEffect(() => {
@@ -232,6 +287,11 @@ export const DmProvider = ({ children }) => {
             if (notificationSubscription) {
                 notificationSubscription.unsubscribe();
                 setNotificationSubscription(null);
+            }
+
+            if (friendRequestSubscription) {
+                friendRequestSubscription.unsubscribe();
+                setFriendRequestSubscription(null);
             }
         }
     }, [currentUser, stompClient?.state]);

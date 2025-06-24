@@ -2,6 +2,7 @@ package com.example.moim.service.notification;
 
 
 import com.example.moim.command.DirectMessageDTO;
+import com.example.moim.command.FriendRequestDTO;
 import com.example.moim.command.PushSubscriptionDto;
 import com.example.moim.entity.DirectMessage;
 import com.example.moim.entity.DirectMessageRoom;
@@ -12,6 +13,7 @@ import com.example.moim.repository.UsersRepository;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor; // Lombok 사용
@@ -133,6 +135,7 @@ public class PushNotificationService {
 //            messagingTemplate.convertAndSend("/sub/notification/" + recipientUserId, messageDTO);
 
             // 방법 2: 사용자별 방식 (Spring Boot 2.4+ 권장)
+            System.out.println("dm노티 테스트 받는사람 아이디" + recipientUserId);
             messagingTemplate.convertAndSendToUser(recipientUserId, "/queue/notification", messageDTO);
 
 
@@ -140,6 +143,23 @@ public class PushNotificationService {
             String body = savedMessage.getMessage(); //
             sendNotificationToUser(recipientUserId, title, body);
             System.out.println("DM 알림 전송 완료: " + recipientUserId);
+        }
+    }
+
+    // 친구추가 신청 노티
+    public void sendFriendRequestNotification(FriendRequestDTO requestDTO) {
+        String recipientUserId = requestDTO.getReceiverUsername();
+
+        
+        // 유저 NO가 아니라 아이디를 넣어줘야함
+
+
+        if (recipientUserId != null) {
+
+            // 방법 2: 사용자별 방식 (Spring Boot 2.4+ 권장)
+            messagingTemplate.convertAndSendToUser(recipientUserId, "/queue/friend-request", requestDTO);
+            System.out.println("메세지템플릿 전송," + recipientUserId);
+            System.out.println("메세지템플릿 전송," + requestDTO.getRequesterUsername());
         }
     }
 
