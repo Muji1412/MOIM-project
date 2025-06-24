@@ -167,12 +167,6 @@ public class GroupsController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String username = userDetails.getUsername();
-
-        // 소유자만 멤버 조회 가능
-        if (!groupsService.isOwner(groupNo, username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
 
         List<Users> members = groupsService.getGroupMembers(groupNo);
         return ResponseEntity.ok(members);

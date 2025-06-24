@@ -65,6 +65,7 @@ export default function FriendAddPage() {
         }
     };
 
+    // 친구신청, 상대한테.
     const handleRequestSubmit = async (event) => {
         event.preventDefault();
 
