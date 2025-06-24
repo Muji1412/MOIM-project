@@ -11,18 +11,12 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const fetchMyInfo = async () => {
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                console.log('로그인이 필요합니다.');
-                setLoading(false);
-                return;
-            }
 
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        // 'Authorization': `Bearer ${token}`
                     }
                 });
 

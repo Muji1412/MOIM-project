@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDm } from '../../context/DmContext'; // DmContext 사용
-import styles from '../Section/Section.module.css';
+import styles from './Section.module.css';
 
 export default function FriendAddPage() {
     const { closeAddFriend } = useDm(); // DmContext에서 함수 가져오기
@@ -14,15 +14,10 @@ export default function FriendAddPage() {
     // 사용자 정보 가져오기
     useEffect(() => {
         const fetchMyInfo = async () => {
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                console.log('로그인이 필요합니다.');
-                return;
-            }
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
@@ -46,15 +41,14 @@ export default function FriendAddPage() {
     }, [currentUser]);
 
     const fetchPendingRequests = async () => {
-        const token = sessionStorage.getItem('accessToken');
-        if (!token || !currentUser) return;
+        if (!currentUser) return;
 
         try {
             const response = await fetch('/api/friendship/pending', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({userId: currentUser.userNo})
             });
@@ -78,14 +72,13 @@ export default function FriendAddPage() {
 
         const requesterUsername = currentUser.username;
         const receiverUsername = friendId.trim();
-        const token = sessionStorage.getItem('accessToken');
 
         try {
             const response = await fetch('/api/friendship/request', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({requesterUsername, receiverUsername})
             });
@@ -105,13 +98,12 @@ export default function FriendAddPage() {
     };
 
     const handleAcceptRequest = async (request) => {
-        const token = sessionStorage.getItem('accessToken');
         try {
             const response = await fetch(`/api/friendship/accept`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     userA: request.friendshipUserA,
@@ -130,13 +122,12 @@ export default function FriendAddPage() {
     };
 
     const handleCancelRequest = async (request) => {
-        const token = sessionStorage.getItem('accessToken');
         try {
-            const response = await fetch(`/api/friendship/reject`, {
+            const response = await sessionStoragefetch(`/api/friendship/reject`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     userA: request.friendshipUserA,

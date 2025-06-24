@@ -14,4 +14,7 @@ public class ChatMessage {
     private String text;
     private String imageUrl;
     private String channel;
+    // 친구 검증용
+    private Long user1No;
+    private Long user2No;
 }

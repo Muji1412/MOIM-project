@@ -8,50 +8,34 @@ export default function Login() {
   const [result, setResult] = useState('');
   const form = new URLSearchParams();
 
-   const handleLogin = () => {
-     form.append("username", id);
-     form.append("password", pw);
+  const handleLogin = () => {
+    form.append("username", id);
+    form.append("password", pw);
     fetch('/api/user/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: form.toString(),
     })
-      .then(async res => {
-      // status 별 분기
-      if (res.status === 200) {
-        // 성공: 토큰 응답 - 토큰 저장
-        const data = await res.json();
-        sessionStorage.setItem('accessToken', data.accessToken);
-        sessionStorage.setItem('refreshToken', data.refreshToken);
-        window.location.href = "/";
-      } else {
-        // 실패: 에러 메시지 추출
-        const data = await res.json();
-        if (res.status === 401) {
-          setResult("ID or Password doesn't match");
-        } else if (res.status === 404) {
-          setResult(data.error || "This account has been deactivated.");
-        } else {
-          setResult("알 수 없는 오류가 발생했습니다");
-        }
-      }
-    })
-    .catch(err => {
-      console.log(err);
-      setResult("서버와의 연결에 문제가 있습니다");
-    });
-      //.then(res => res.json())
-      // .then(data => {
-      //   // 14. 로그인 성공 여부에 따라 main 이동 혹은 로그인 실패 
-      //   if (data.success) {
-      //     window.location.href = "/main.html";
-      //     setResult("");
-      //   } if (data.) {
+        .then(async res => {
+          // ✅ status가 200이면 성공으로 간주하고, 토큰을 저장하는 로직을 제거합니다.
+          if (res.ok) { // res.status === 200 과 동일
+            window.location.href = "/"; // 메인 페이지로 리다이렉트
+          } else {
+            // 실패 시 에러 메시지 처리
+            const data = await res.json().catch(() => ({error: "An unknown error occurred"}));
+            if (res.status === 401 || res.status === 404) {
+              setResult(data.error || "ID or Password doesn't match");
+            } else {
+              setResult("An unknown error occurred");
+            }
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          setResult("There was a problem connecting to the server.");
+        });
+  }
 
-      //   }
-      //     else setResult("ID or Password doesn't match");
-      // });
-  };
 
   return (
     <div className="login-background">

@@ -28,7 +28,7 @@ const FriendContextMenu = ({ contextMenu, handleCloseContextMenu, handleDeleteFr
         handleCloseContextMenu();
     };
 
-    return (
+    `return (
         <div
             ref={menuRef}
             className={styles.contextMenu}
@@ -36,10 +36,10 @@ const FriendContextMenu = ({ contextMenu, handleCloseContextMenu, handleDeleteFr
         >
             <ul>
                 <li onClick={onDelete}>친구 삭제</li>
-                {/* 필요에 따라 다른 메뉴 항목을 여기에 추가할 수 있습니다. */}
+                <li onClick={onDelete}>친구 차단</li>
             </ul>
         </div>
-    );
+    );`
 };
 
 export default FriendContextMenu;

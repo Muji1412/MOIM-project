@@ -57,6 +57,11 @@ public class GroupsInviteController {
         try {
             Users currentUser = usersRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다"));
+//            System.out.println("에러 체크중, joinInvite 컨트롤러 메서드");
+//            System.out.println("currentUser: " + currentUser);
+//            System.out.println("inviteCode: " + inviteCode);
+//            System.out.println(currentUser.getUserNo());
+//            System.out.println(currentUser.getUsername());
 
             groupsInviteService.addUserToGroup(inviteCode, currentUser);
 

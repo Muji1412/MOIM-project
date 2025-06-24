@@ -3,6 +3,10 @@ package com.example.moim.util;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.jwt.TokenType;
 import com.example.moim.service.user.CustomUserDetailsService;
+import jakarta.servlet.http.Cookie;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     //private final AuthenticationManager authenticationManager;
@@ -26,38 +31,114 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 //        System.out.println("jwt필터");
     }
 
-    //jwt 토큰을 검증한다.
+    // 디버깅용 코드
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //httpRequest에서 헤더부분을 가져옴
-        String header = request.getHeader("Authorization");
         String servletPath = request.getServletPath();
-        if (servletPath.equals("/api/user/login")||servletPath.equals("/login.do")||
-                servletPath.equals("/user/login")) {filterChain.doFilter(request, response); // 로그인은 JWT체크 X
+        log.info("🔍 JWT Filter - Request Path: {}", servletPath);
+
+        // 정적 리소스와 로그인 경로는 JWT 체크 제외
+        if (servletPath.equals("/api/user/login") || servletPath.equals("/login.do") ||
+                servletPath.equals("/user/login") ||
+                servletPath.startsWith("/bundle/") ||
+                servletPath.startsWith("/img/") ||
+                servletPath.startsWith("/css/") ||
+                servletPath.startsWith("/js/") ||
+                servletPath.startsWith("/sw.js") ||
+                servletPath.startsWith("/.well-known/")) {
+
+            filterChain.doFilter(request, response);
             return;
         }
-        //헤더에 jwt가 있는지 확인
-        if(header != null && header.startsWith("Bearer ")){
-            String token = header.substring(7); //Bearer 떼고 토큰만 가져옴
-            String tokenTypeStr = jwtService.parseClaims(token).get("tokenType", String.class);
-            TokenType tokenType = TokenType.valueOf(tokenTypeStr);
-            //TokenType tokenType = jwtService.parseClaims(token).get("tokenType", TokenType.class);
-            //jwt 유효성 검증
-            if(jwtService.validateToken(token, tokenType)){
-                String username = jwtService.getUsername(token);
-                //유저와 토큰이 일치하면 userDetails 생성
-                UserDetails userDetails = (UserDetails) customUserDetailsService.loadUserByUsername(username);
 
-                if(userDetails != null) {
-                    //userDetails, password, Role 넣어서 토큰 생성
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    //현재 request의 security context에 접근권한 설정
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 더이상 세션에서 받아오지 않으므로 헤더관련 코드 삭제
+
+        String token = null;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
                 }
             }
         }
 
-        filterChain.doFilter(request, response);    //다음 필터로 넘김
+        if (token != null) {
+
+            try {
+                String tokenTypeStr = jwtService.parseClaims(token).get("tokenType", String.class);
+                TokenType tokenType = TokenType.valueOf(tokenTypeStr);
+                if(jwtService.validateToken(token, tokenType)){
+
+                    String username = jwtService.getUsername(token);
+
+                    UserDetails userDetails = (UserDetails) customUserDetailsService.loadUserByUsername(username);
+
+                    if(userDetails != null) {
+                        log.info("✅ JWT Filter - UserDetails loaded successfully for user: {}", username);
+
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    } else {
+                        log.error("❌ JWT Filter - UserDetails is null for username: {}", username);
+                    }
+                } else {
+                    log.error("❌ JWT Filter - Token validation failed");
+                }
+            } catch (Exception e) {
+                log.error("❌ JWT Filter - Error processing token: {}", e.getMessage(), e);
+            }
+        } else {
+            log.info("❌ JWT Filter - No token found in header or cookie");
+        }
+
+        // SecurityContext 상태 확인
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            log.info("✅ JWT Filter - User is authenticated: {}", auth.getName());
+        } else {
+            log.info("❌ JWT Filter - User is NOT authenticated");
+        }
+
+        filterChain.doFilter(request, response);
     }
+
+    //jwt 토큰을 검증한다.
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//        //httpRequest에서 헤더부분을 가져옴
+//        String header = request.getHeader("Authorization");
+//        String servletPath = request.getServletPath();
+//        if (servletPath.equals("/api/user/login")||servletPath.equals("/login.do")||
+//                servletPath.equals("/user/login")) {filterChain.doFilter(request, response); // 로그인은 JWT체크 X
+//            return;
+//        }
+//        //헤더에 jwt가 있는지 확인
+//        if(header != null && header.startsWith("Bearer ")){
+//            String token = header.substring(7); //Bearer 떼고 토큰만 가져옴
+//            String tokenTypeStr = jwtService.parseClaims(token).get("tokenType", String.class);
+//            TokenType tokenType = TokenType.valueOf(tokenTypeStr);
+//            //TokenType tokenType = jwtService.parseClaims(token).get("tokenType", TokenType.class);
+//            //jwt 유효성 검증
+//            if(jwtService.validateToken(token, tokenType)){
+//                String username = jwtService.getUsername(token);
+//                //유저와 토큰이 일치하면 userDetails 생성
+//                UserDetails userDetails = (UserDetails) customUserDetailsService.loadUserByUsername(username);
+//
+//                if(userDetails != null) {
+//                    //userDetails, password, Role 넣어서 토큰 생성
+//                    UsernamePasswordAuthenticationToken authentication =
+//                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                    //현재 request의 security context에 접근권한 설정
+//                    SecurityContextHolder.getContext().setAuthentication(authentication);
+//                }
+//            }
+//        }
+//
+//        filterChain.doFilter(request, response);    //다음 필터로 넘김
+//    }
 }

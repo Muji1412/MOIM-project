@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDm } from '../context/DmContext';
 import { useAuth } from '../context/AuthContext';
-import styles from './ChattingView.module.css';
+import styles from './DmChatView.module.css';
 
 const DmChatView = () => {
     const { activeDmRoom, dmMessages, sendMessage } = useDm();
@@ -32,29 +32,33 @@ const DmChatView = () => {
         : { userNick: activeDmRoom.user1Nick, userImg: activeDmRoom.user1Img };
 
     return (
-        <div className="chat-container">
-            <div className="chat-header">
-                <h2>{opponent.userNick}</h2>
+        <div className={styles.chat_view_container}> {/* 수정 */}
+            <div className={styles.channel_header}>
+                <h2 className={styles.channel_title}>{opponent.userNick}</h2>
             </div>
-            <div className="messages-area">
+            <div className={styles.messages_container}> {/* 수정 */}
                 {dmMessages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.user === currentUser.userNick ? 'sent' : 'received'}`}>
-                        <div className="message-sender">{msg.user}</div>
-                        <div className="message-content">{msg.text}</div>
-                        <div className="message-timestamp">{new Date(msg.timestamp).toLocaleTimeString()}</div>
+                    <div key={index} className={styles.chat_message_row}>
+                        <div className={styles.chat_avatar}></div>
+                        <div className={styles.chat_message_bubble}>
+                            <div className={styles.chat_message_user}>{msg.user}</div>
+                            <div className={styles.chat_message_text}>{msg.text}</div>
+                        </div>
                     </div>
                 ))}
-                <div ref={messagesEndRef} />
             </div>
-            <form className="message-input-form" onSubmit={handleSendMessage}>
-                <input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="메시지를 입력하세요..."
-                />
-                <button type="submit">전송</button>
-            </form>
+            <div className={styles.chat_input_row}>
+                <form onSubmit={handleSendMessage} style={{display: 'flex', width: '100%'}}>
+                    <input
+                        className={styles.chat_input}
+                        type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="메시지를 입력하세요..."
+                    />
+                    <button type="submit">전송</button>
+                </form>
+            </div>
         </div>
     );
 };

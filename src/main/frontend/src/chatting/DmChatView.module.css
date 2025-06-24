@@ -1,0 +1,157 @@
+/* 전체 채팅 뷰 컨테이너 */
+.chat_view_container {
+    flex-grow: 1; /* PageLayout에서 남은 공간을 모두 차지 */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    box-sizing: border-box;
+}
+
+/* 채널 헤더 */
+.channel_header {
+    flex-shrink: 0; /* 높이가 줄어들지 않도록 고정 */
+    padding: 20px 24px;
+    border-bottom: 1px solid #e3e5e8;
+}
+
+.channel_title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #060607;
+}
+
+.channel_desc {
+    font-size: 14px;
+    color: #4f5660;
+    margin-top: 4px;
+}
+
+/* 메시지 목록 (스크롤 영역) */
+.messages_container {
+    flex-grow: 1; /* 핵심: 헤더와 입력창을 제외한 모든 수직 공간 차지 */
+    overflow-y: auto; /* 내용이 많아지면 스크롤바 생성 */
+    padding: 0 24px;
+}
+
+.chat_date_divider {
+    position: relative;
+    text-align: center;
+    color: #6a737c;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 24px 0 16px 0;
+}
+
+.chat_date_divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background-color: #e3e5e8;
+    z-index: 1;
+}
+
+.chat_date_divider span {
+    position: relative;
+    background-color: #ffffff;
+    padding: 0 10px;
+    z-index: 2;
+}
+
+
+/* 개별 메시지 행 */
+.chat_message_row {
+    display: flex;
+    padding: 8px 4px;
+    border-radius: 8px;
+}
+
+.chat_message_row:hover {
+    background-color: #f2f3f5;
+}
+
+.chat_avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.avatar_purple { background: #b92ff7; }
+.avatar_blue   { background: #1cc9e2; }
+.avatar_green  { background: #b6e63e; }
+.avatar_yellow { background: #ffe14a; }
+
+.chat_message_bubble {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat_message_user {
+    font-size: 15px;
+    font-weight: 600;
+    color: #060607;
+    margin-bottom: 4px;
+}
+
+.chat_message_text {
+    font-size: 15px;
+    color: #313338;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.chat_message_image img {
+    margin-top: 4px;
+    max-width: 320px;
+    max-height: 320px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 하단 메시지 입력창 */
+.chat_input_row {
+    flex-shrink: 0; /* 높이가 줄어들지 않도록 고정 */
+    margin: 0 24px 24px 24px;
+    display: flex;
+    align-items: center;
+    background: #ebedef;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.chat_plus_icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.chat_plus_icon span {
+    color: #4f5660;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.chat_input {
+    border: none;
+    outline: none;
+    font-size: 15px;
+    flex: 1;
+    background: transparent;
+    padding: 10px;
+    color: #060607;
+}
+
+.chat_input::placeholder {
+    color: #6a737c;
+}

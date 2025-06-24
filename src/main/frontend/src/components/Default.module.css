@@ -23,6 +23,6 @@
 .page_content {
     flex: 1; /* NewHeader를 제외한 나머지 공간을 차지합니다. */
     display: flex;
-    background-color: #ffffff;
+    background-color: #23272a;
     overflow-y: auto;
 }
