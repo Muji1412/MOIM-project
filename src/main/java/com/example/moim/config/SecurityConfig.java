@@ -87,12 +87,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
                        .anyRequest().permitAll()
-//                        .requestMatchers("/api/user/refresh","/login.do", "/user/login", "/signup.do", "/searchpassword.do",
-//                                "/api/user/login", "/api/user/emailCheck", "/api/user/nickCheck","/todolist", "/calendar",
-//                                "/api/user/usernameCheck", "/api/user/signUp", "/", "/img/favicon.ico", "/bundle/js/**",
-//                                "/bundle/css/**", "/ws/**", "/todo", "/api/chat/**", "/videocall", "/servers/**",
-//                                "/whiteboard/**", "/whiteboard").permitAll()
-//                        .requestMatchers("/static/**", "/bundle/**", "/img/**", "/img/favicon.ico").permitAll()
+//                        .requestMatchers("/login.do", "/user/login", "/signup.do", "/searchpassword.do",
+//                                 "/todolist", "/calendar", "/", "/img/favicon.ico", "/bundle/js/**",
+//                                "/ws/**", "/todo", "/videocall", "/servers/**",
+//                                "/whiteboard/**", "/whiteboard", "/videocall.do", "/home", "/chat/**").permitAll()
+//                        .requestMatchers("/api/user/refresh","/api/user/login","/api/user/emailCheck", "/api/user/nickCheck",
+//                                "/api/user/usernameCheck", "/api/user/signUp", "/api/chat/**").permitAll()
+//                        .requestMatchers("/bundle/css/**", "/static/**", "/bundle/**", "/img/**", "/img/favicon.ico").permitAll()
 //                        .anyRequest().authenticated()
                 );
 
