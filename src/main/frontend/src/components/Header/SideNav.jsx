@@ -368,6 +368,63 @@ export default function SideNav() {
         });
     };
 
+    // 서버 나가기 함수
+    const handleLeaveServer = async (serverId) => {
+        if (!serverId || serverId === "default") {
+            alert("서버를 선택해주세요.");
+            return;
+        }
+
+        const serverToLeave = servers.find(s => s.id === serverId);
+        const confirmLeave = window.confirm(`정말로 "${serverToLeave?.name}" 서버에서 나가시겠습니까?`);
+        if (!confirmLeave) return;
+
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            const response = await fetch(`/api/groups/${serverId}/leave`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert("서버에서 나갔습니다.");
+
+                // 서버 목록에서 해당 서버 제거
+                setServers(prev => prev.filter(server => server.id !== serverId));
+
+                // 현재 선택된 서버가 나간 서버라면 홈으로 이동
+                if (selectedServerId === serverId) {
+                    setSelectedServerId("default");
+                    setChatChannels([]);
+                    setSelectedChannel(null);
+                    navigate('/home');
+                }
+
+                // 컨텍스트 메뉴 닫기
+                setContextMenu(prev => ({...prev, visible: false}));
+
+            } else if (response.status === 401) {
+                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+            } else {
+                let errorMessage = '서버 나가기에 실패했습니다.';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    console.error('응답 파싱 실패:', e);
+                }
+                alert(`${errorMessage} (${response.status})`);
+            }
+        } catch (error) {
+            console.error('서버 나가기 중 오류:', error);
+            alert('서버 나가기 중 오류가 발생했습니다: ' + error.message);
+        }
+    };
+
+
     return (
         <aside className={styles.aside}>
             <div className={styles.aside_container}>
@@ -479,7 +536,12 @@ export default function SideNav() {
                         </div>
                     </li>
                     <li className={styles.context_menu_list}>
-                        <div className={`${styles.context_box} ${styles.context_quit}`}>
+                        <div className={`${styles.context_box} ${styles.context_quit}`}
+                             onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleLeaveServer(contextMenu.serverId);
+                             }}
+                        >
                             <span>서버 나가기</span>
                         </div>
                     </li>

@@ -37,7 +37,7 @@
 
 /* user_profile_area */
 /* aside_user_box */
-.server_menu_user_profile {width: 95%;height: 60px;background: #fff;position: absolute;bottom: 1%;left: 50%;transform: translate(-50%, 0%);border-radius: 10px;}
+.server_menu_user_profile {width: 95%;height: 60px;background: #fff;position: absolute;bottom: 1%;left: 50%;transform: translate(-50%, 0%);border-radius: 8px;}
 .user_box_area {width: 93%;height: 100%;display: flex;justify-content: space-between;align-items: center;margin: 0 auto;}
 
 .user_lbox {display: flex;height: 100%;flex-direction: row;align-items: center;justify-content: flex-start;gap: 5px;}
@@ -52,13 +52,15 @@
 
 
 /* 컨텍스트 메뉴 */
-.channel_context_menu {position: fixed;background: #fff;border: 1px solid #ccc;border-radius: 4px;box-shadow: 0 2px 8px rgba(0,0,0,0.15);z-index: 9999;list-style: none;padding: 0;margin: 0;min-width: 90px;}
-.channel_context_box {width: 140px;height: 40px;display: flex;justify-content: center;align-items: center;cursor: pointer;}
-.channel_context_box:hover .channel_context_item {background: #d9d9d9;transition: 0.2s;}
+.channel_context_menu {position: fixed;background: #fff;border: 1px solid #ccc;border-radius: 8px;box-shadow: 0 4px 12px rgba(0,0,0,0.15);z-index: 9999;list-style: none;padding: 6;margin: 0;min-width: 180px;}
+.channel_context_box {width: 100%; height: 45px;display: flex;justify-content: center;align-items: center;cursor: pointer;}
+.channel_context_default:hover {background: #d9d9d9;}
+.channel_context_delete:hover {background: #f24822;}
+.channel_context_delete:hover .context_del{color: #fff;}
 
-.channel_context_item {width: 130px;height: 30px;display: flex;align-items: center;border-radius: 5px;}
-.channel_context_item span {margin-left: 7px;}
+.channel_context_item {width: 90%; height: 80%;display: flex;align-items: center;border-radius: 5px;}
+.channel_context_item span {margin-left: 7px;font-size: 14px;}
 
-.context_del {margin-left: 7px;color: #f24822;}
+.context_del {color: #f24822;}
+/*.context_divider {height: 1px;background-color: #e3e5e8;margin: 4px 8px;}*/
 
-.context_divider {height: 1px;background-color: #e3e5e8;margin: 4px 8px;}

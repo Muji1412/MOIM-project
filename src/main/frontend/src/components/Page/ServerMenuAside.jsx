@@ -393,7 +393,7 @@ export default function ServerMenuAside() {
                         style={{top: channelContextMenu.y, left: channelContextMenu.x}}
                         onClick={() => setChannelContextMenu(prev => ({...prev, visible: false}))}>
                         <li className={styles.channel_context_box}>
-                            <div className={styles.channel_context_item}
+                            <div className={`${styles.channel_context_item} ${styles.channel_context_default}`}
                                  onClick={(e) => {
                                      e.stopPropagation();
                                      handleOpenChannelModifyModal(channelContextMenu.channelId);
@@ -401,7 +401,7 @@ export default function ServerMenuAside() {
                                 <span>채팅방 이름 변경</span>
                             </div>
                         </li>
-                        <li className={styles.context_divider}></li>
+                        {/*<li className={styles.context_divider}></li>*/}
                         <li className={styles.channel_context_box}>
                             <div className={`${styles.channel_context_item} ${styles.channel_context_delete}`}
                                  onClick={(e) => {
