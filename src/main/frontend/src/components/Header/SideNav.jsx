@@ -1,17 +1,16 @@
 //SideNav
 
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {useState, useEffect, useRef} from "react";
+import {useNavigate} from "react-router-dom";
 import styles from "./SideNav.module.css";
 import modalStyles from "./Modal.module.css";
-import { useServer } from '../../context/ServerContext';
-import { useServerChat } from '../../context/ServerChatContext';
-
+import {useServer} from '../../context/ServerContext';
+import {useServerChat} from '../../context/ServerChatContext';
 
 
 export default function SideNav() {
     const navigate = useNavigate();
-    const { connectToServer } = useServerChat()
+    const {connectToServer} = useServerChat()
 
     const {
         servers,
@@ -196,7 +195,7 @@ export default function SideNav() {
     const openInviteModal = (serverId) => {
         setSelectedServerForInvite(serverId);
         setIsInviteModalOpen(true);
-        setContextMenu({ visible: false });
+        setContextMenu({visible: false});
     };
 
     const closeInviteModal = () => {
@@ -346,7 +345,7 @@ export default function SideNav() {
         try {
             const response = await fetch('/api/groupsInvite/create', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     groupId: selectedServerForInvite,
                     days: inviteDays,
@@ -384,12 +383,14 @@ export default function SideNav() {
         if (!confirmLeave) return;
 
         try {
-            const token = sessionStorage.getItem('accessToken');
+            // const token = sessionStorage.getItem('accessToken');
             const response = await fetch(`/api/groups/${serverId}/leave`, {
                 method: 'DELETE',
+                credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    // 'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
@@ -404,27 +405,22 @@ export default function SideNav() {
                     setSelectedServerId("default");
                     setChatChannels([]);
                     setSelectedChannel(null);
-                    navigate('/home');
+                    navigate('/');
                 }
 
                 // 컨텍스트 메뉴 닫기
                 setContextMenu(prev => ({...prev, visible: false}));
 
             } else if (response.status === 401) {
-                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+                alert('로그인이 필요합니다. 다시 로그인해주세요.');
+                // 로그인 페이지로 리다이렉트
+                navigate('/login');
             } else {
-                let errorMessage = '서버 나가기에 실패했습니다.';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (e) {
-                    console.error('응답 파싱 실패:', e);
-                }
-                alert(`${errorMessage} (${response.status})`);
+                alert('서버 나가기에 실패했습니다.');
             }
         } catch (error) {
             console.error('서버 나가기 중 오류:', error);
-            alert('서버 나가기 중 오류가 발생했습니다: ' + error.message);
+            alert('서버 나가기 중 오류가 발생했습니다.');
         }
     };
 
@@ -581,15 +577,15 @@ export default function SideNav() {
                             <div className={modalStyles.modal_upload_area}>
 
                                 <label className={modalStyles.upload_label}>
-                                        {imagePreview ? (
-                                            <img
-                                                src={imagePreview}
-                                                alt="preview"
-                                                className={modalStyles.modal_img_preview}
-                                            />
-                                        ) : (
-                                            <img src="/bundle/img/upload_ic.png" alt="upload"/>
-                                        )}
+                                    {imagePreview ? (
+                                        <img
+                                            src={imagePreview}
+                                            alt="preview"
+                                            className={modalStyles.modal_img_preview}
+                                        />
+                                    ) : (
+                                        <img src="/bundle/img/upload_ic.png" alt="upload"/>
+                                    )}
                                     <input
                                         ref={inputRef}
                                         type="file"
@@ -814,11 +810,13 @@ export default function SideNav() {
                                         닫기
                                     </button>
                                     {inviteLink ? (
-                                        <button type="button" className={modalStyles.createBtn} onClick={handleCopyLink}>
+                                        <button type="button" className={modalStyles.createBtn}
+                                                onClick={handleCopyLink}>
                                             링크 복사
                                         </button>
                                     ) : (
-                                        <button type="button" className={modalStyles.createBtn} onClick={handleCreateInviteLink}>
+                                        <button type="button" className={modalStyles.createBtn}
+                                                onClick={handleCreateInviteLink}>
                                             링크 생성
                                         </button>
                                     )}
