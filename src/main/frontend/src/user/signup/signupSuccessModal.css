@@ -1,17 +1,17 @@
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+.modal-overlay-signup {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 999999 !important;
 }
 
-.modal {
+.modal-signup {
     background: white;
     border-radius: 12px;
     padding: 32px;
@@ -20,7 +20,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-.modal-btn {
+.modal-btn-signup {
     background-color: #97b82d;
     color: white;
     border: none;
@@ -31,6 +31,6 @@
     cursor: pointer;
 }
 
-.modal-btn:hover {
+.modal-btn-signup:hover {
     background-color: #8aa82b;
 }

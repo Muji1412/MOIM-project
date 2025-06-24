@@ -6,6 +6,7 @@ const LogoutModal = ({ isOpen, onClose }) => {
 
     const handleLogout = () => {
         sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("refreshToken");
         window.location.href = "login.do";
     }
 

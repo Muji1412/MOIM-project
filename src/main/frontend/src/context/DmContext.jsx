@@ -149,19 +149,48 @@ export const DmProvider = ({ children }) => {
             return; // 함수 종료
         }
 
+        const NotificationToast = ({ notificationData, onToastClick }) => (
+            <div
+                onClick={onToastClick}
+                style={{
+                    cursor: 'pointer',
+                    whiteSpace: 'pre-wrap'
+                }}
+            >
+        <span style={{ fontWeight: 'bold', color: '#333' }}>
+            {notificationData.senderNick}
+        </span>
+                <span style={{ fontWeight: 'normal' }}>
+            님의 메세지
+        </span>
+                <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginTop: '4px'
+                }}>
+                    {notificationData.message}
+                </div>
+            </div>
+        );
+
         // 토스트 알림 표시
         toast.info(
-            `${notificationData.senderNick}님이 메시지를 보냈습니다`,
-            {
-                onClick: () => {
-                    // 알림 클릭 시 해당 DM방으로 이동
-                    const targetRoom = dmRooms.find(room => room.id === notificationData.roomId);
-                    if (targetRoom) {
-                        setActiveDmRoom(targetRoom);
+            <NotificationToast
+                notificationData={notificationData}
+                onToastClick={() => {
+                    console.log('토스트 알람클릭');
+                    console.log(notificationData)
+                    const friend ={
+                        userNick : notificationData.senderNick
                     }
+                    console.log(friend)
+                    selectDmRoom(friend)
                     markNotificationAsRead(notificationData.id);
-                },
-                autoClose: 5000
+                }}
+            />,
+            {
+                autoClose: 5000,
+                closeOnClick: false // 이걸 false로 설정해야 커스텀 onClick이 작동해요
             }
         );
 

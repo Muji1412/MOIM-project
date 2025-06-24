@@ -174,6 +174,7 @@ public class GroupsController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+
         List<Users> members = groupsService.getGroupMembers(groupNo);
         return ResponseEntity.ok(members);
     }

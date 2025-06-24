@@ -23,7 +23,7 @@
     text-align: right;
     margin-bottom: 18px;
     position: fixed;
-    width: 100%;
+    width: 80%;
 }
 
 /*드롭다운 안되어있는 기본 버튼 상태 */
@@ -99,6 +99,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.todo-title-for-hover:hover{
+
 }
 
 .middle {

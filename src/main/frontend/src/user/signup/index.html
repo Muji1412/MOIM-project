@@ -4,7 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MOIM::sign up</title>
-<!--    <link rel="stylesheet" href="/css/signup.css" />-->
+    <link rel="stylesheet" href="/bundle/css/signup.css" />
+    <link rel="stylesheet" href="/bundle/css/signupSuccessModal.css" />
+    <style>
+        .modal-overlay-signup {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background-color: rgba(0, 0, 0, 0.4) !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            z-index: 9000 !important;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>

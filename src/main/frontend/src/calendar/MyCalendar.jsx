@@ -10,11 +10,11 @@ import DetailCalendarModal from "./DetailCalendarModal";
 const locales = {'ko' : koLocale };
 const localizer = dateFnsLocalizer({format, parse, startOfWeek, getDay, locales});
 
-export default function MyCalendar() {
+export default function MyCalendar({group_No}) {
     const [events, setEvents] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [groupNo, setGroupNo] = useState(14);
+    const [groupNo, setGroupNo] = useState(group_No);
     const [detailEvent, setDetailEvent] = useState('');
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
@@ -30,10 +30,11 @@ export default function MyCalendar() {
         }, [modalOpen, detailModalOpen])
 
     const fetchEvents = () => {
+        const groupNo = JSON.parse(sessionStorage.getItem("calendarData")).groupNo;
+        setGroupNo(groupNo);
         fetch('api/calendar', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/x-www-form-urlencoded"},
             body: new URLSearchParams({ groupNo })
         })
@@ -106,7 +107,7 @@ export default function MyCalendar() {
                             color: 'white',
                             borderRadius: "0px",
                             border: "none",
-                            opacity: 0.5
+                            opacity: 0.8
                         };
                         //타입이 휴가인 경우 색상 변경
                         if (event.resource.calType === '휴가'){
