@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, {useState, useEffect, useRef} from "react";
+import {useNavigate, useParams} from "react-router-dom";
 import styles from './ServerMenuAside.module.css';
 import modalStyles from '../Header/Modal.module.css';
-import { useServer } from "../../context/ServerContext";
-import { useAuth } from "../../context/AuthContext";
+import {useServer} from "../../context/ServerContext";
+import {useAuth} from "../../context/AuthContext";
+import MyAccount from "../Header/myAccount/myAccount";
 
 export default function ServerMenuAside() {
+
+
     const navigate = useNavigate();
-    const { serverId } = useParams();
+    const {serverId} = useParams();
 
     const {
         servers,
@@ -18,15 +21,16 @@ export default function ServerMenuAside() {
         setSelectedChannel,
     } = useServer();
 
-    const { currentUser } = useAuth();
+    const {currentUser} = useAuth();
 
     const [openVoice, setOpenVoice] = useState(true);
     const [openChat, setOpenChat] = useState(true);
     const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
     const [newChannelName, setNewChannelName] = useState("");
-    const [channelContextMenu, setChannelContextMenu] = useState({ visible: false, x: 0, y: 0, channelId: null });
+    const [channelContextMenu, setChannelContextMenu] = useState({visible: false, x: 0, y: 0, channelId: null});
     const [isChannelModifyModalOpen, setIsChannelModifyModalOpen] = useState(false);
-    const [modifyChannelData, setModifyChannelData] = useState({ id: "", name: "" });
+    const [modifyChannelData, setModifyChannelData] = useState({id: "", name: ""});
+    const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
 
     const selectedServer = servers.find((s) => s.id === selectedServerId);
     const selectedServerName = selectedServer ? selectedServer.name : "서버 선택";
@@ -39,6 +43,7 @@ export default function ServerMenuAside() {
                     const response = await fetch(`/api/groups/${serverId}/channels`,
                         {
                             headers: {
+
                                 // Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`
                             }});
                     if (response.ok) {
@@ -218,6 +223,16 @@ export default function ServerMenuAside() {
         }
     };
 
+    //myAccount 모달창 켜기
+    const openAccountModifyModal = () => {
+        setIsAccountModifyModalOpen(true);
+    }
+
+    //myAccount 모달창 끄기
+    const closeAccountModifyModal = () => {
+        setIsAccountModifyModalOpen(false);
+    }
+
     const openVideoChatPopup = () => {
         const popupWidth = 1024;
         const popupHeight = 768;
@@ -290,15 +305,19 @@ export default function ServerMenuAside() {
                             <div className={styles.chat_box} onClick={() => setOpenVoice(prev => !prev)}>
                                 <p>voice</p>
                                 <img src="/bundle/img/arrow_ic.png" alt="arrow"
-                                     style={{ transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.2s" }}/>
+                                     style={{
+                                         transform: openVoice ? "rotate(0deg)" : "rotate(-90deg)",
+                                         transition: "transform 0.2s"
+                                     }}/>
                             </div>
                         </div>
-                        <div className={styles.channel_list} style={{ maxHeight: openVoice ? "500px" : "0" }}>
+                        <div className={styles.channel_list} style={{maxHeight: openVoice ? "500px" : "0"}}>
                             {openVoice && (
-                                <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                                <ul style={{listStyle: "none", margin: 0, padding: 0}}>
                                     <li className={styles.channel_item}>
-                                        <div className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
-                                             onClick={openVideoChatPopup} style={{cursor: "pointer"}}>
+                                        <div
+                                            className={`${styles.channel_item_box} ${selectedChannel === "voice" ? styles.active_channel : ""}`}
+                                            onClick={openVideoChatPopup} style={{cursor: "pointer"}}>
                                             <img src="/bundle/img/voice_ic.png" alt="voice"/>
                                             <span>화상채팅</span>
                                         </div>
@@ -313,20 +332,24 @@ export default function ServerMenuAside() {
                             <div className={styles.chat_box} onClick={() => setOpenChat(prev => !prev)}>
                                 <p>chat</p>
                                 <img src="/bundle/img/arrow_ic.png" alt="arrow"
-                                     style={{ transform: openChat ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.2s" }}/>
+                                     style={{
+                                         transform: openChat ? "rotate(0deg)" : "rotate(-90deg)",
+                                         transition: "transform 0.2s"
+                                     }}/>
                             </div>
                             <img src="/bundle/img/add_plus_ic.png" alt="add"
-                                 style={{cursor: "pointer"}} onClick={handleOpenChannelModal} />
+                                 style={{cursor: "pointer"}} onClick={handleOpenChannelModal}/>
                         </div>
-                        <div className={styles.channel_list} style={{ maxHeight: openChat ? "500px" : "0" }}>
+                        <div className={styles.channel_list} style={{maxHeight: openChat ? "500px" : "0"}}>
                             {openChat && (
-                                <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                                <ul style={{listStyle: "none", margin: 0, padding: 0}}>
                                     {chatChannels.map((channel) => (
                                         <li key={channel.id} className={styles.channel_item}>
-                                            <div className={`${styles.channel_item_box} ${selectedChannel === channel.name ? styles.active_channel : ""}`}
-                                                 onClick={() => handleChannelClick(channel.name)}
-                                                 onContextMenu={(e) => handleChannelContextMenu(e, channel.id)}
-                                                 style={{cursor: "pointer"}}>
+                                            <div
+                                                className={`${styles.channel_item_box} ${selectedChannel === channel.name ? styles.active_channel : ""}`}
+                                                onClick={() => handleChannelClick(channel.name)}
+                                                onContextMenu={(e) => handleChannelContextMenu(e, channel.id)}
+                                                style={{cursor: "pointer"}}>
                                                 <img src="/bundle/img/chat_hash_ic.png" alt="chat"/>
                                                 <span>{channel.name}</span>
                                             </div>
@@ -338,13 +361,39 @@ export default function ServerMenuAside() {
                     </div>
                 </div>
 
+                {/* user_profile_card_area */}
+                <div className={styles.server_menu_user_profile}>
+                    <div className={styles.user_box_area}>
+                        <div className={styles.user_lbox}>
+                            <img
+                                src={currentUser?.userImg || "/bundle/img/default_profile.png"}
+                                alt="user_profile"
+                                style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "50%",
+                                    objectFit: "cover"
+                                }}
+                            />
+                            <div className={styles.mini_l_box}>
+                                <strong>{currentUser?.userNick || "User"}</strong>
+                                <span>{currentUser?.username || "UserId"}</span>
+                            </div>
+                        </div>
+                        <div className={styles.user_rbox}>
+                            <img src="/bundle/img/setting_ic.png" alt="set" onClick={openAccountModifyModal}/>
+
+                        </div>
+                    </div>
+                </div>
+
                 {/* 채널 컨텍스트 메뉴 */}
                 {channelContextMenu.visible && (
                     <ul className={styles.channel_context_menu}
-                        style={{ top: channelContextMenu.y, left: channelContextMenu.x }}
+                        style={{top: channelContextMenu.y, left: channelContextMenu.x}}
                         onClick={() => setChannelContextMenu(prev => ({...prev, visible: false}))}>
                         <li className={styles.channel_context_box}>
-                            <div className={styles.channel_context_item}
+                            <div className={`${styles.channel_context_item} ${styles.channel_context_default}`}
                                  onClick={(e) => {
                                      e.stopPropagation();
                                      handleOpenChannelModifyModal(channelContextMenu.channelId);
@@ -352,7 +401,7 @@ export default function ServerMenuAside() {
                                 <span>채팅방 이름 변경</span>
                             </div>
                         </li>
-                        <li className={styles.context_divider}></li>
+                        {/*<li className={styles.context_divider}></li>*/}
                         <li className={styles.channel_context_box}>
                             <div className={`${styles.channel_context_item} ${styles.channel_context_delete}`}
                                  onClick={(e) => {
@@ -391,7 +440,9 @@ export default function ServerMenuAside() {
                             </div>
                             <div className={`${modalStyles.modal_btn_area} ${modalStyles.modal_btn_chat}`}>
                                 <div className={modalStyles.buttonRow}>
-                                    <button type="button" className={modalStyles.backBtn} onClick={handleCloseChannelModal}>취소</button>
+                                    <button type="button" className={modalStyles.backBtn}
+                                            onClick={handleCloseChannelModal}>취소
+                                    </button>
                                     <button type="submit" className={modalStyles.createBtn}>생성</button>
                                 </div>
                             </div>
@@ -418,14 +469,19 @@ export default function ServerMenuAside() {
                                     <input type="text" className={modalStyles.modal_input}
                                            placeholder="새로운 채팅방 이름을 입력하세요"
                                            value={modifyChannelData.name}
-                                           onChange={(e) => setModifyChannelData(prev => ({...prev, name: e.target.value}))}
+                                           onChange={(e) => setModifyChannelData(prev => ({
+                                               ...prev,
+                                               name: e.target.value
+                                           }))}
                                            required autoFocus/>
                                 </div>
                                 <span className={modalStyles.guide}>채팅방 이름이 즉시 변경됩니다!</span>
                             </div>
                             <div className={`${modalStyles.modal_btn_area} ${modalStyles.modal_btn_chat}`}>
                                 <div className={modalStyles.buttonRow}>
-                                    <button type="button" className={modalStyles.backBtn} onClick={handleCloseChannelModifyModal}>취소</button>
+                                    <button type="button" className={modalStyles.backBtn}
+                                            onClick={handleCloseChannelModifyModal}>취소
+                                    </button>
                                     <button type="submit" className={modalStyles.createBtn}>변경</button>
                                 </div>
                             </div>
@@ -433,6 +489,11 @@ export default function ServerMenuAside() {
                     </div>
                 </div>
             )}
+            {/*회원정보 모달*/}
+            {isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}
+                                                     onClose={() => {
+                                                         closeAccountModifyModal();
+                                                     }}/>)}
         </>
     );
 }
