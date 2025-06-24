@@ -14,7 +14,6 @@ export default function MyAccount ({isOpen, onClose}) {
         username: '',
         message: ''
     });
-    const token = sessionStorage.getItem('accessToken');
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showModifyModal, setShowModifyModal] = useState(false);
     const [showPwModal, setShowPwModal] = useState(false);
@@ -25,7 +24,6 @@ export default function MyAccount ({isOpen, onClose}) {
         fetch("/user/myAccount", {
             method: "GET",
             headers: {
-                Authorization : `Bearer ${token}`, // JWT 포함
                 "Content-Type" : "application/json"
             }
         })

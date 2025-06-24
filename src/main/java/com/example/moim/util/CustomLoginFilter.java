@@ -99,24 +99,24 @@ protected void successfulAuthentication(HttpServletRequest request, HttpServletR
 
     // 쿠키에 토큰 저장
     Cookie accessCookie = new Cookie("access_token", accessToken);
-    accessCookie.setHttpOnly(true);  // XSS 방지
-    accessCookie.setSecure(false);    // true 시 https만 작동
-    accessCookie.setPath("/");       // 모든 경로에서 사용
+    accessCookie.setHttpOnly(true);
+    accessCookie.setSecure(false); // 로컬 개발 환경에서는 false, 배포 시에는 true로 설정하는 것이 좋습니다.
+    accessCookie.setPath("/");
     accessCookie.setMaxAge(24 * 60 * 60); // 24시간
 
     Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
     refreshCookie.setHttpOnly(true);
-    refreshCookie.setSecure(false);
+    refreshCookie.setSecure(false); // 로컬 개발 환경에서는 false, 배포 시에는 true로 설정
     refreshCookie.setPath("/");
     refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
 
     response.addCookie(accessCookie);
     response.addCookie(refreshCookie);
 
-    // JSON 응답도 함께 (선택사항)
-    response.setContentType("application/json");
-    response.getWriter().write("{\"success\": true, \"message\": \"로그인 성공\"}");
+    // ✅ 응답 본문을 비우고 성공 상태 코드(200 OK)만 보냅니다.
+    response.setStatus(HttpServletResponse.SC_OK);
 }
+
 
 //        // 이하 성공/실패 처리
 //        @Override

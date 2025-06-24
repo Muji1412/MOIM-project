@@ -74,41 +74,49 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomLoginFilter customLoginFilter) throws Exception {
         http
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // 이 줄 추가
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/ws/**")
-                        .disable())
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+
+        http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login.do",
-                                "/api/user/login",
-                                "/api/user/signUp",
-                                "/api/user/usernameCheck",
-                                "/api/user/emailCheck",
-                                "/api/user/nickCheck",
-                                "/api/mail/searchPw",
-                                "/bundle/**",
-                                "/img/**",
-                                "/css/**",
-                                "/js/**"
+                        // =================================================================
+                        // 1. 페이지 로딩 및 인증 불필요 API는 모두 허용 (permitAll)
+                        //    - 사용자가 사이트에 처음 접속할 때, 이 경로들은 인증 없이 접근 가능합니다.
+                        // =================================================================
+                        .requestMatchers(
+                                // --- 페이지/라우팅 관련 경로 ---
+                                "/error", "/*.do", "/user/**", "/invite/**",
+
+                                // --- 인증 없이 호출해야 하는 API ---
+                                "/api/user/login", "/api/user/signUp",
+                                "/api/user/usernameCheck", "/api/user/emailCheck", "/api/user/nickCheck",
+                                "/api/mail/searchPw", "/api/groupsInvite/join",
+
+                                // --- 정적 리소스 (JS, CSS, 이미지 등) ---
+                                "/bundle/**", "/img/**", "/css/**", "/js/**",
+                                "/*.ico", "/*.json", "/*.png", "/sw.js",
+
+                                // --- 웹소켓 경로 ---
+                                "/ws/**"
                         ).permitAll()
+
+                        // =================================================================
+                        // 2. 위에서 허용한 것을 제외한 모든 /api/** 경로는 반드시 인증을 요구합니다.
+                        // =================================================================
+                        .requestMatchers("/api/**").authenticated()
+
+                        // =================================================================
+                        // 3. 그 외 나머지 모든 요청도 일단 인증을 요구 (안전장치)
+                        // =================================================================
                         .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login.do")
-                        .permitAll()
                 );
 
-//        http.formLogin(AbstractHttpConfigurer::disable); // 이 줄은 제거하거나 주석처리
-
+        http.formLogin(AbstractHttpConfigurer::disable);
         http.addFilterBefore(new JWTAuthenticationFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
-        http.exceptionHandling((exceptionhandler) -> exceptionhandler
-                .authenticationEntryPoint(authenticationEntryPoint));
+        http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
 
         return http.build();
     }

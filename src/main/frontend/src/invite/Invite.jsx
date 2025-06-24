@@ -29,7 +29,7 @@ export default function Invite() {
                 const response = await fetch(`/api/groupsInvite/join?inviteCode=${inviteCode}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        // 'Authorization': `Bearer ${token}`
                     },
                 });
 

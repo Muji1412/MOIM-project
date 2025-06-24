@@ -47,45 +47,32 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 servletPath.startsWith("/sw.js") ||
                 servletPath.startsWith("/.well-known/")) {
 
-            log.info("✅ JWT Filter - Skipping JWT check for path: {}", servletPath);
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Authorization 헤더에서 먼저 확인
-        String header = request.getHeader("Authorization");
+        // 더이상 세션에서 받아오지 않으므로 헤더관련 코드 삭제
+
         String token = null;
 
-        if (header != null && header.startsWith("Bearer ")) {
-            token = header.substring(7);
-            log.info("🔍 JWT Filter - Token found in Authorization header");
-        } else {
-            // 헤더에 없으면 쿠키에서 확인
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if ("access_token".equals(cookie.getName())) { // 쿠키 이름 확인
-                        token = cookie.getValue();
-                        log.info("🔍 JWT Filter - Token found in cookie: access_token");
-                        break;
-                    }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
                 }
             }
         }
 
         if (token != null) {
-            log.info("🔍 JWT Filter - Token extracted: {}...", token.substring(0, Math.min(token.length(), 20)));
 
             try {
                 String tokenTypeStr = jwtService.parseClaims(token).get("tokenType", String.class);
                 TokenType tokenType = TokenType.valueOf(tokenTypeStr);
-                log.info("🔍 JWT Filter - Token type: {}", tokenType);
-
                 if(jwtService.validateToken(token, tokenType)){
-                    log.info("✅ JWT Filter - Token is valid");
 
                     String username = jwtService.getUsername(token);
-                    log.info("🔍 JWT Filter - Username from token: {}", username);
 
                     UserDetails userDetails = (UserDetails) customUserDetailsService.loadUserByUsername(username);
 
@@ -96,7 +83,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
-                        log.info("✅ JWT Filter - Authentication set in SecurityContext for user: {}", username);
                     } else {
                         log.error("❌ JWT Filter - UserDetails is null for username: {}", username);
                     }

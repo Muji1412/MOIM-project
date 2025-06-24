@@ -52,18 +52,13 @@ export default function PushNotificationSetup() {
 
             console.log('✅ 새로운 푸시 구독 성공:', subscription);
 
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                console.log('푸시 알림을 구독하려면 로그인이 필요합니다.');
-                return;
-            }
 
             // 구독 정보를 백엔드로 전송
             await fetch('/api/subscribe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(subscription)
             });
