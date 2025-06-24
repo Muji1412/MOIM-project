@@ -1,19 +1,75 @@
 import React, {useEffect, useState, useRef} from "react";
 import chatStyles from './ChattingView.module.css';
 
-import { useLocation, useParams } from "react-router-dom";
-import { useServerChat } from '../context/ServerChatContext';
-import { useAuth } from '../context/AuthContext';
+import {useLocation, useParams} from "react-router-dom";
+import {useServerChat} from '../context/ServerChatContext';
+import {useAuth} from '../context/AuthContext';
 
 function ChattingView() {
 
-    const { isConnected, sendMessage, currentServer } = useServerChat(); // Context 사용
-    const { currentUser } = useAuth(); // 현재 사용자 정보 가져오기
+    const {isConnected, sendMessage, currentServer} = useServerChat(); // Context 사용
+    const {currentUser} = useAuth(); // 현재 사용자 정보 가져오기
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
     const [serverName, setServerName] = useState("");
+
+    // 컨텍스트 area
+    const [memberContextMenu, setMemberContextMenu] = useState({
+        visible: false,
+        x: 0,
+        y: 0,
+        selectedMember: null
+    });
+// 컨텍스트 메뉴 닫기 처리
+    useEffect(() => {
+        const handleClick = () => {
+            if (memberContextMenu.visible) {
+                setMemberContextMenu(prev => ({...prev, visible: false}));
+            }
+        };
+        window.addEventListener("click", handleClick);
+        return () => window.removeEventListener("click", handleClick);
+    }, [memberContextMenu.visible]);
+// 멤버 우클릭 메뉴 처리
+    const handleMemberContextMenu = (e, member) => {
+        e.preventDefault();
+
+        setMemberContextMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY,
+            selectedMember: member,
+        });
+    };
+// 친구추가 처리
+    const handleAddFriend = async (member) => {
+        try {
+            // 여기에 친구추가 API 호출 로직 구현
+            console.log('친구추가:', member);
+
+            // 예시 API 호출
+            // const response = await fetch('/api/friends/add', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ friendId: member.id })
+            // });
+
+            // if (response.ok) {
+            //     alert(`${member.nickname}님을 친구로 추가했습니다.`);
+            // } else {
+            //     alert('친구추가에 실패했습니다.');
+            // }
+
+        } catch (error) {
+            console.error('친구추가 중 오류:', error);
+            alert('친구추가 중 오류가 발생했습니다.');
+        }
+
+        setMemberContextMenu(prev => ({...prev, visible: false}));
+    };
+
 
     // URL 파라미터 받기
     const location = useLocation();
@@ -63,9 +119,9 @@ function ChattingView() {
                     console.error("멤버 정보 로드 실패:", err);
                     // 개발 중 테스트용 더미 데이터
                     setMembers([
-                        { id: 1, nickname: '박종신', color: 'purple' },
-                        { id: 2, nickname: '김철수', color: 'blue' },
-                        { id: 3, nickname: '이영희', color: 'green' }
+                        {id: 1, nickname: '박종신', color: 'purple'},
+                        {id: 2, nickname: '김철수', color: 'blue'},
+                        {id: 3, nickname: '이영희', color: 'green'}
                     ]);
                 });
         }
@@ -76,7 +132,6 @@ function ChattingView() {
         const colors = ['purple', 'blue', 'green', 'yellow'];
         return colors[Math.floor(Math.random() * colors.length)];
     };
-
 
 
     // 서버 정보 가져오기 (serverId로 서버명 조회)
@@ -335,7 +390,8 @@ function ChattingView() {
                         <div ref={messagesEndRef}/>
                     </div>
                     <div className={chatStyles.chat_input_row}>
-                        <button type="button" className={chatStyles.chat_plus_icon} onClick={handlePlusClick} tabIndex={0}
+                        <button type="button" className={chatStyles.chat_plus_icon} onClick={handlePlusClick}
+                                tabIndex={0}
                                 aria-label="이미지 업로드">
                             <span style={{fontSize: 24, color: "#5865f2", fontWeight: 'bold'}}>+</span>
                         </button>
@@ -351,13 +407,14 @@ function ChattingView() {
                     </div>
                 </div>
                 {/* 서버멤버 리스트를 보여 줄 부분 */}
-                <div className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : ''}`}>
+                <div
+                    className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : ''}`}>
                     <div className={chatStyles.mem_list_header}>
                         멤버 - {members.length}
                     </div>
                     <div className={chatStyles.mem_list_content}>
                         {members.map(member => (
-                            <div key={member.id} className={chatStyles.member_item}>
+                            <div key={member.id} className={chatStyles.member_item} onContextMenu={(e) => handleMemberContextMenu(e, member)}>
                                 <div className={chatStyles.member_avatar}>
                                     {member.profileImage ? (
                                         <img
@@ -373,7 +430,7 @@ function ChattingView() {
                                     ) : null}
                                     <div
                                         className={`${chatStyles.avatar_default} ${chatStyles['avatar_' + member.color]}`}
-                                        style={{ display: member.profileImage ? 'none' : 'flex' }}
+                                        style={{display: member.profileImage ? 'none' : 'flex'}}
                                     >
                                         {member.nickname.charAt(0).toUpperCase()}
                                     </div>
@@ -382,6 +439,24 @@ function ChattingView() {
                             </div>
                         ))}
                     </div>
+
+                    {/* 멤버 컨텍스트 메뉴 */}
+                    {memberContextMenu.visible && (
+                        <ul className={chatStyles.member_context_menu}
+                            style={{top: memberContextMenu.y, left: memberContextMenu.x}}
+                            onClick={() => setMemberContextMenu(prev => ({...prev, visible: false}))}>
+                            <li className={chatStyles.member_context_box}>
+                                <div className={`${chatStyles.member_context_item} ${chatStyles.member_context_default}`}
+                                     onClick={(e) => {
+                                         e.stopPropagation();
+                                         handleAddFriend(memberContextMenu.selectedMember);
+                                     }}>
+                                    <span>친구추가</span>
+                                </div>
+                            </li>
+                        </ul>
+                    )}
+
                 </div>
             </div>
         </section>
