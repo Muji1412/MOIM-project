@@ -4,6 +4,8 @@ import com.example.moim.chatting.ChatMessage;
 import com.example.moim.chatting.ChatService;
 import com.example.moim.chatting.ChatSessionManager;
 import com.example.moim.command.UserListResponse;
+import com.example.moim.entity.Users;
+import com.example.moim.repository.UsersRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -22,14 +24,16 @@ public class ChatController {
     private final ChatService chatService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChatSessionManager sessionManager;
+    private final UsersRepository usersRepository;
 
     // 생성자 주입 방식
     public ChatController(ChatService chatService,
                           RedisTemplate<String, Object> redisTemplate,
-                          ChatSessionManager sessionManager) {
+                          ChatSessionManager sessionManager, UsersRepository usersRepository) {
         this.chatService = chatService;
         this.redisTemplate = redisTemplate;
         this.sessionManager = sessionManager;
+        this.usersRepository = usersRepository;
     }
 
     // 1. 실시간 채팅 메시지 저장 (채널별)
@@ -39,8 +43,18 @@ public class ChatController {
     @SendTo("/topic/chat/{groupName}")
     public ChatMessage sendMessage(@DestinationVariable String groupName, ChatMessage message) {
         // message.channel 필드에 채널 ID가 들어있어야 함
+        // 🔥 발신자의 프로필 이미지 조회
+        Users sender = usersRepository.findByUserNick(message.getUser())
+                .orElse(null);
+
+        if (sender != null && sender.getUserImg() != null) {
+            message.setUserImg(sender.getUserImg());  // GCP URL 설정
+        }
+
+        // Redis에 프로필 이미지가 포함된 메시지 저장
         chatService.saveChat(groupName, message.getChannel(), message);
-        return message; // 브로드캐스트
+
+        return message; // 실시간 브로드캐스트 (프로필 이미지 포함)
     }
 
 

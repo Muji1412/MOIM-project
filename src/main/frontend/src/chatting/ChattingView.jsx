@@ -225,7 +225,7 @@ function ChattingView() {
 
             const newMsg = {
                 date: new Date().toISOString().slice(0, 10),
-                user: '박종범',
+                user: currentUser?.userNick,
                 color: 'purple',
                 text: '',
                 imageUrl: imageUrl,
@@ -312,9 +312,16 @@ function ChattingView() {
                             <div key={date}>
                                 <div className={chatStyles.chat_date_divider}>{formatDateLabel(date)}</div>
                                 {msgs.map((msg, idx) => (
+
                                     <div className={chatStyles.chat_message_row} key={idx}>
-                                        <div
-                                            className={`${chatStyles.chat_avatar} ${chatStyles['avatar_' + msg.color]}`}></div>
+                                        <div className={chatStyles.chat_avatar}>
+                                            <img
+                                                src={msg.userImg }
+                                                alt={`${msg.user} 프로필`}
+                                                className={chatStyles.profile_image}
+                                                onError={(e) => e.target.src = '/default-profile.png'}
+                                            />
+                                        </div>
                                         <div className={chatStyles.chat_message_bubble}>
                                             <div className={chatStyles.chat_message_user}>{msg.user}</div>
                                             {msg.text && <div className={chatStyles.chat_message_text}>{msg.text}</div>}
