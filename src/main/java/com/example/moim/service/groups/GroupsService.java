@@ -40,7 +40,8 @@ public class GroupsService {
                 .user(owner)
                 .build();
 
-        userGroupRepository.save(ownerGroup);
+        UserGroup savedOwnerGroup = userGroupRepository.save(ownerGroup);
+        System.out.println("서버 생성자 멤버십 추가 완료: " + savedOwnerGroup); // 디버깅용
 
         return savedGroup;
     }
@@ -75,10 +76,33 @@ public class GroupsService {
                 .orElseThrow(() -> new RuntimeException("Group not found"));
     }
 
-    public boolean isOwner(Long groupNo, String username) {
-        Groups group = getGroup(groupNo);
-        return group.getGroupOwnerId() != null && group.getGroupOwnerId().equals(username);
+    public boolean isMember(Long groupNo, String username) {
+        try {
+            // username으로 사용자 정보 조회
+            Users user = usersRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+            // UserGroupId 생성 (복합키)
+            UserGroupId userGroupId = new UserGroupId(groupNo, user.getUserNo());
+
+            // usergroup 테이블에서 멤버십 존재 여부 확인
+            return userGroupRepository.existsById(userGroupId);
+        } catch (Exception e) {
+            return false;
+        }
     }
+
+
+    public boolean isOwner(Long groupNo, String username) {
+        try {
+            Groups group = getGroup(groupNo);
+            return group.getGroupOwnerId() != null && group.getGroupOwnerId().equals(username);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 
     public Groups updateGroup(Long groupNo, Groups groups) {
         return groupsRepository.save(groups);
@@ -96,6 +120,31 @@ public class GroupsService {
         // 그룹 삭제
         groupsRepository.deleteById(groupNo);
     }
+
+    @Transactional
+    public void leaveGroup(Long groupNo, String username) {
+        System.out.println("=== 서버 나가기 시작 - GroupNo: " + groupNo + ", Username: " + username + " ===");
+
+        // username으로 사용자 정보 조회
+        Users user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        System.out.println("사용자 정보 조회 완료 - UserNo: " + user.getUserNo());
+        // UserGroupId 생성 (복합키)
+        UserGroupId userGroupId = new UserGroupId(groupNo, user.getUserNo());
+        System.out.println("삭제할 UserGroupId - GroupNo: " + userGroupId.getGroupNo() + ", UserNo: " + userGroupId.getUserNo());
+        // 삭제 전 존재 여부 확인
+        boolean exists = userGroupRepository.existsById(userGroupId);
+        System.out.println("삭제 전 멤버십 존재 여부: " + exists);
+
+        // 해당 사용자의 멤버십만 삭제
+        userGroupRepository.deleteById(userGroupId);
+        System.out.println("멤버십 삭제 완료");
+
+        // 삭제 후 확인
+        boolean existsAfter = userGroupRepository.existsById(userGroupId);
+        System.out.println("삭제 후 멤버십 존재 여부: " + existsAfter);
+    }
+
 
     // 전체 서버 조회 (관리자용)
 //    public List<Groups> getAllGroups() {

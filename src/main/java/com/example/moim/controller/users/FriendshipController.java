@@ -7,6 +7,7 @@ import com.example.moim.entity.Friendship;
 import com.example.moim.entity.Users;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.friendship.FriendshipService;
+import com.example.moim.service.notification.PushNotificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class FriendshipController {
 
     private final FriendshipService friendshipService;
     private final UsersRepository usersRepository;
+    public final PushNotificationService pushNotificationService;
 
     // 친구추가
     @PostMapping("/request")
@@ -44,8 +46,11 @@ public class FriendshipController {
         Long A = userA.getUserNo();
         Long B = userB.getUserNo();
 
+
         try {
             friendshipService.sendFriendRequest(A, B);
+            System.out.println("프렌드쉽 컨트롤러 로그, " + request.getRequesterUsername());
+            pushNotificationService.sendFriendRequestNotification(request);
             return ResponseEntity.ok().body("친구 요청이 전송되었습니다!");
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());

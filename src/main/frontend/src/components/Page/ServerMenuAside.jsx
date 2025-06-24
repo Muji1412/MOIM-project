@@ -238,7 +238,7 @@ export default function ServerMenuAside() {
         const popupHeight = 768;
         const videoChatData = {
             userId: currentUser.userNo,
-            userName: currentUser.username,
+            userName: currentUser.userNick,
             roomId: selectedServerId,
             timestamp: new Date().toISOString()
         };

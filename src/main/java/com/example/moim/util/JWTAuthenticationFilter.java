@@ -35,7 +35,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String servletPath = request.getServletPath();
-        log.info("🔍 JWT Filter - Request Path: {}", servletPath);
 
         // 정적 리소스와 로그인 경로는 JWT 체크 제외
         if (servletPath.equals("/api/user/login") || servletPath.equals("/login.do") ||
@@ -77,31 +76,25 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                     UserDetails userDetails = (UserDetails) customUserDetailsService.loadUserByUsername(username);
 
                     if(userDetails != null) {
-                        log.info("✅ JWT Filter - UserDetails loaded successfully for user: {}", username);
 
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     } else {
-                        log.error("❌ JWT Filter - UserDetails is null for username: {}", username);
                     }
                 } else {
-                    log.error("❌ JWT Filter - Token validation failed");
                 }
             } catch (Exception e) {
                 log.error("❌ JWT Filter - Error processing token: {}", e.getMessage(), e);
             }
         } else {
-            log.info("❌ JWT Filter - No token found in header or cookie");
         }
 
         // SecurityContext 상태 확인
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            log.info("✅ JWT Filter - User is authenticated: {}", auth.getName());
         } else {
-            log.info("❌ JWT Filter - User is NOT authenticated");
         }
 
         filterChain.doFilter(request, response);
