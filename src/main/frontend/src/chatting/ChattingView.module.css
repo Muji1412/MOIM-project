@@ -50,10 +50,7 @@
 .chat_message_row:hover {background-color: #f2f3f5;}
 
 .chat_avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  margin-right: 16px;
+  margin-right: 12px;
   flex-shrink: 0;
 }
 
@@ -208,7 +205,15 @@
   color: white;
 }
 
-/* 컨텍스트 메뉴 */
+
+.profile_image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+}
+
 .member_context_menu {position: fixed;background: #fff;border: 1px solid #ccc;border-radius: 8px;box-shadow: 0 4px 12px rgba(0,0,0,0.15);z-index: 9999;list-style: none;margin: 0;max-width: 160px;}
 .member_context_box {width: 155px; height: 45px;display: flex;justify-content: center;align-items: center;cursor: pointer;}
 .member_context_default:hover {background: #d9d9d9;}
@@ -234,3 +239,4 @@
   padding: 20px;
   font-size: 14px;
 }
+

@@ -10,6 +10,7 @@ import lombok.Setter;
 public class ChatMessage {
     private String date;
     private String user;
+    private String userImg;
     private String color;
     private String text;
     private String imageUrl;
