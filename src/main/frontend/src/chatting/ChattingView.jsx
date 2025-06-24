@@ -15,6 +15,12 @@ function ChattingView() {
     const messagesEndRef = useRef(null);
     const [serverName, setServerName] = useState("");
 
+    //멘션관련 상태
+    const [showMentionList, setShowMentionList] = useState(false);
+    const [mentionQuery, setMentionQuery] = useState('');
+    const [filteredMembers, setFilteredMembers] = useState([]);
+    const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+
     // 컨텍스트 area
     const [memberContextMenu, setMemberContextMenu] = useState({
         visible: false,
@@ -334,12 +340,109 @@ function ChattingView() {
     // 플러스 버튼 클릭
     const handlePlusClick = () => fileInputRef.current?.click();
 
-    // 엔터키 처리
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        const cursorPos = e.target.selectionStart;
+
+        setInputValue(value);
+
+        // @ 기호 감지
+        const beforeCursor = value.substring(0, cursorPos);
+        const mentionMatch = beforeCursor.match(/@(\w*)$/);
+
+        if (mentionMatch) {
+            const query = mentionMatch[1];
+            setMentionQuery(query);
+            setShowMentionList(true);
+
+            // 멤버 필터링 (닉네임으로만 간단하게)
+            const filtered = members.filter(member =>
+                member.nickname.toLowerCase().includes(query.toLowerCase())
+            );
+            setFilteredMembers(filtered.slice(0, 5)); // 최대 5명만 표시
+        } else {
+            setShowMentionList(false);
+        }
+    };
+
+    // 멘션 선택 처리
+    const handleMentionSelect = (member) => {
+        const beforeCursor = inputValue.substring(0, inputValue.lastIndexOf('@'));
+        const afterCursor = inputValue.substring(inputValue.lastIndexOf('@') + mentionQuery.length + 1);
+
+        const newValue = `${beforeCursor}@${member.nickname} ${afterCursor}`;
+        setInputValue(newValue);
+        setShowMentionList(false);
+    };
+
+
+    // 키보드처리
     const handleKeyDown = (e) => {
+
+        //멘션관련
+        if (showMentionList && filteredMembers.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedMentionIndex(prev =>
+                    prev < filteredMembers.length - 1 ? prev + 1 : 0
+                );
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedMentionIndex(prev =>
+                    prev > 0 ? prev - 1 : filteredMembers.length - 1
+                );
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleMentionSelect(filteredMembers[selectedMentionIndex]);
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setShowMentionList(false);
+                setSelectedMentionIndex(0); // 인덱스도 초기화
+                return;
+            }
+        }
+
+        // 엔터키
         if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
             e.preventDefault();
             handleSend();
         }
+    };
+
+    // 멘션창..
+    const MentionList = () => {
+        if (!showMentionList || filteredMembers.length === 0) return null;
+
+        return (
+            <div className={chatStyles.mention_dropdown}>
+                {filteredMembers.map((member, index) => (
+                    <div
+                        key={member.id}
+                        className={`${chatStyles.mention_item} ${
+                            index === selectedMentionIndex ? chatStyles.mention_item_selected : ''
+                        }`}
+                        onClick={() => handleMentionSelect(member)}
+                    >
+                        <div className={chatStyles.mention_avatar}>
+                            {member.profileImage ? (
+                                <img src={member.profileImage} alt={member.nickname} />
+                            ) : (
+                                <div className={chatStyles.avatar_default}>
+                                    {member.nickname.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                        </div>
+                        <span className={chatStyles.mention_name}>{member.nickname}</span>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     // Context 상태 확인 로그
@@ -429,13 +532,17 @@ function ChattingView() {
                         </button>
                         <input type="file" accept="image/*" ref={fileInputRef} style={{display: "none"}}
                                onChange={onFileChange}/>
-                        <input
-                            className={chatStyles.chat_input}
-                            placeholder={`#${channelName || 'Channel'}에 메시지 보내기`}
-                            value={inputValue}
-                            onChange={e => setInputValue(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                        />
+
+                        <div style={{position: 'relative', flex: 1}}>
+                            <input
+                                className={chatStyles.chat_input}
+                                placeholder={`#${channelName || 'Channel'}에 메시지 보내기`}
+                                value={inputValue}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                            />
+                            <MentionList />
+                        </div>
                     </div>
                 </div>
                 {/* 서버멤버 리스트를 보여 줄 부분 */}
