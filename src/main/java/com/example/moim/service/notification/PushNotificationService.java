@@ -128,10 +128,9 @@ public class PushNotificationService {
 
 
         if (recipientUserId != null) {
-            // ⭐️ 두 가지 방식으로 모두 전송 ⭐️
 
             // 방법 1: 기본 방식
-            messagingTemplate.convertAndSend("/sub/notification/" + recipientUserId, messageDTO);
+//            messagingTemplate.convertAndSend("/sub/notification/" + recipientUserId, messageDTO);
 
             // 방법 2: 사용자별 방식 (Spring Boot 2.4+ 권장)
             messagingTemplate.convertAndSendToUser(recipientUserId, "/queue/notification", messageDTO);

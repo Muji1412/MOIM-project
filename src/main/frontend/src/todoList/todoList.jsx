@@ -1,31 +1,37 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './todoList.css';
 
-export default function todoList({groupNo}) {
+export default function todoList({groupNo }) {
 
     const [type, setType] = useState('전체보기');
     const types = ['전체보기', '완료된 할일만 보기', '미완료된 할일만 보기'];
     const [isTypeExpanded, setIsTypeExpanded] = useState(false);
-    const [userNo, setUserNo] = useState(7);
-    const [todos, SetTodos] = useState([]);
+    const [userNo, setUserNo] = useState('');
+    const [todos, setTodos] = useState([]);
     const [today, setToday] = useState('');
     const [modTitle, setModTitle] = useState('');
     const [modEnd, setModEnd] = useState('');
-    const [modContent, setModContent] = useState('');
     const [modIsDone, setModIsDone] = useState('');
     const [modTodoNo, setModTodoNo] = useState('');
     const [checkModified, setCheckModified] = useState(false);
+    const [newTodo, setNewTodo] = useState('');
+    const [newTodoEnd, setNewTodoEnd] = useState('');
+    const [newTodoStart, setNewTodoStart] = useState('');
+    const [editTodoNo, setEditTodoNo] = useState(null);
+    const [editData, setEditData] = useState({ title: '', content: '', end: '' });
 
     useEffect(() => {
         const day = new Date().toISOString().slice(0,10);
         setToday(day);
+        setNewTodoStart(day);
+        setNewTodoEnd(day);
 
         fetch("/api/todoList", {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/x-www-form-urlencoded"},
-            body: new URLSearchParams({ userNo })
+            // body: new URLSearchParams({ groupNo })
         })
             .then(res => {
                 if (res.status === 401) {
@@ -40,21 +46,22 @@ export default function todoList({groupNo}) {
                     todoTitle: item.todoTitle,
                     todoStart: new Date(item.todoStart),
                     todoEnd: new Date(item.todoEnd),
-                    resource: {
-                        todoContent: item.todoContent,
-                        todoIsDone: item.todoIsDone,
-                        userNo: item.userNo
-                    }
+                    todoContent: item.todoContent,
+                    todoIsDone: item.todoIsDone,
+                    userNo: item.userNo,
+                    todoNo : item.todoNo
                 }));
-                SetTodos(todos);
+                setTodos(todos);
                 console.log(todos);
             });
-    }, [checkModified])
+    }, [checkModified, setType])
 
+    //드롭다운 버튼
     const handleExpand = () => {
         setIsTypeExpanded(prev => !prev);
     };
 
+    //검색버튼
     const typeHandler = (selectedType) => {
         setType(selectedType);
         setIsTypeExpanded(false); // 타입 선택 시 드롭다운 닫기
@@ -91,20 +98,56 @@ export default function todoList({groupNo}) {
       </span>
         );}
 
-    const handleTodoModify = () => {
+    // 완료된 일만 보기 필터 함수
+    const getFilteredTodos = () => {
+        if (type === '전체보기') return todos;
+        if (type === '완료된 할일만 보기') return todos.filter(todo => todo.todoIsDone === 'done');
+        if (type === '미완료된 할일만 보기') return todos.filter(todo => todo.todoIsDone !== 'done');
+        return todos;
+    };
+
+    //수정할 할일 선택
+    const handleEditClick = (todo) => {
+        setEditTodoNo(todo.todoNo);
+        setEditData({
+            title: todo.todoTitle,
+            content: todo.todoContent,
+            end: todo.todoEnd,
+        });
+    };
+
+    const handleSave = () => {
+        handleTodoModify(editTodoNo, editData); // 서버에 수정 반영 함수
+        setEditTodoNo(null);            // 입력창 닫기
+    };
+
+    const handleCancel = () => {
+        setEditTodoNo(null);
+    };
+
+    //수정할 할일 값 저장
+    const handleInputChange = (e) => {
+        setEditData(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    //할일 수정
+    const handleTodoModify = (todoNo, editData) => {
         fetch("api/todoList/modify", {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Content-Type": "application/json"
             },
-            body: {
-                todoTitle: modTitle,
-                todoEnd: modEnd,
-                todoContent: modContent,
-                todoIsDone: modIsDone,
-                todoNo: modTodoNo
-             }
+            body: JSON.stringify({
+                todoNo: todoNo,
+                todoTitle: editData.title,
+                todoContent: editData.content,
+                todoEnd: editData.end,
+                todoIsDone : modIsDone
+            })
         }).then(r => {
             if (r.status === 200) {
                 setCheckModified(prev => !prev);
@@ -114,9 +157,74 @@ export default function todoList({groupNo}) {
         })
     }
 
-    const handleTodoDelete = () => {
+    // 완료 버튼
+    const handleToggleDone = async (todoNo) => {
+        setTodos((prev) =>
+            prev.map((item) =>
+                item.todoNo === todoNo
+                    ? { ...item, todoIsDone: item.todoIsDone === 'done' ? 'in_progress' : 'done' } : item
+            )
+        );
+        // 2) 서버에도 상태 저장(예시로 PATCH 사용)
+        try {
+            const target = todos.find(t => t.todoNo === todoNo);
+            const nextStatus = target.todoIsDone === 'done' ? 'in_progress' : 'done';
+            console.log('보낼 값', { todoNo, todoIsDone: nextStatus });
+            await fetch(`/api/todoList/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+                },
+                body: JSON.stringify({ todoNo, todoIsDone: nextStatus }),
+            });
+        } catch (e) {
+            // 실패시 롤백 등 처리
+            alert("서버 반영 실패!");
+        }
+    };
 
+    //목록의 할일 지우기
+    const handleTodoDelete = async(todoNo) => {
+        fetch("/api/todoList/delete", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+        }, body: JSON.stringify({ "todoNo" : todoNo }),})
+            .then(res => {
+                if(res.status === 200) {
+                    setCheckModified(prev => !prev);
+                    console.log('잘지워짐')
+                } else {
+                    console.log('안지워짐')
+                }
+            });
     }
+
+    //새로운 할일 입력하기
+    const handleTodoAdd = () => {
+            fetch("api/todoList/add", {method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+                Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+        }, body: JSON.stringify({ "todoTitle" : newTodo,
+                                        "todoEnd" : newTodoEnd,
+                                        "todoStart" : newTodoStart,
+                                        "todoIsDone" : "in_progress"
+                }),})
+                .then(res => {
+                    if(res.status === 200) {
+                        console.log('잘추가됨');
+                        setCheckModified(prev => !prev);
+                        setNewTodo('');
+                    } else {
+                        alert('추가 안됨');
+                    }
+                })
+    }
+
+
 
     return(
         <div className="todo-container">
@@ -161,32 +269,79 @@ export default function todoList({groupNo}) {
                 </tr>
                 </thead>
                 <tbody>
-                {todos.map((todo, idx) => (
-                    <tr key={todo.id || idx}>
+                {getFilteredTodos().map((todo, idx) => (
+                    <tr key={todo.todoNo}>
                         <td>
                             <span className="drag-icon">☰</span>
                         </td>
                         <td>{todo.todoTitle}</td>
-                        <td>
-                <span className="checkbox">
-                  {todo.todoIsDone ? <span className="checkmark">&#10003;</span> : <span className="empty"></span>}
-                </span>
+                        <td className='middle'>
+                            <div style={{textAlign: "center"}}>
+                           <button
+                                onClick={() => handleToggleDone(todo.todoNo)}
+                                style={{
+                                    width: 18, height: 18,
+                                    borderRadius: '50%',
+                                    background: '#fff',
+                                    border: '1.5px solid #222',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginLeft: '45%'
+                                    }}
+                                                aria-label="완료 체크"
+                                            >
+                                  {todo.todoIsDone === 'done' && (
+                                      <img src='/bundle/img/checked_fill.png' alt='checked'/>
+                                  )}
+                           </button></div>
                         </td>
                         <td>{formatDueLabel(todo.todoEnd)}</td>
                         <td>
                             <button className="edit-btn" title="수정">
-                  <span role="img" aria-label="edit">
-                    <img src="/bundle/img/pen_black.png" alt="todo_modify"
-                        onClick={handleTodoModify}/>
-                  </span>
+                              <span role="img" aria-label="edit">
+                                <img src="/bundle/img/pen_black.png" alt="todo_modify"
+                                    onClick={() => handleEditClick(todo)}/>
+                              </span>
                             </button>
                             <button className="delete-btn" title="삭제">
-                  <span role="img" aria-label="delete">
-                    <img src="/bundle/img/delete_XO.png" alt="todo_delete"
-                            onClick={handleTodoDelete}/>
-                  </span>
+                                  <span role="img" aria-label="delete">
+                                    <img src="/bundle/img/delete_xo_resize.png" alt="todo_delete"
+                                            onClick={() => handleTodoDelete(todo.todoNo)}/>
+                                  </span>
                             </button>
                         </td>
+                        {/* 수정 모드일 때 인풋 렌더 */}
+                        {editTodoNo === todo.todoNo && (
+                            <tr>
+                                <td>
+                                    <input
+                                        name="title"
+                                        value={editData.title}
+                                        onChange={handleInputChange}
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        name="content"
+                                        value={editData.content}
+                                        onChange={handleInputChange}
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        name="end"
+                                        type="date"
+                                        value={editData.end}
+                                        onChange={handleInputChange}
+                                    />
+                                </td>
+                                <td>
+                                    <button onClick={handleSave}>확인</button>
+                                    <button onClick={handleCancel}>취소</button>
+                                </td>
+                            </tr>
+                        )}
                     </tr>
                 ))}
                 <tr>
@@ -194,14 +349,17 @@ export default function todoList({groupNo}) {
                         <span className="drag-icon">☰</span>
                     </td>
                     <td>
-                        <input className="add-input" placeholder="추가하기" />
+                        <input className="add-input" placeholder="추가하기"
+                            onChange={(e) => setNewTodo(e.target.value)}/>
                     </td>
                     <td />
                     <td>
-                        <input className="date-input" type="date" value={today} />
+                        <input className="date-input" type="date" value={newTodoEnd}
+                            onChange={(e) => setNewTodoEnd(e.target.value)}/>
                     </td>
                     <td>
-                        <button className="add-btn" title="추가">＋</button>
+                        <button className="add-btn" title="추가"
+                         onClick={handleTodoAdd}>＋</button>
                     </td>
                 </tr>
                 </tbody>
@@ -209,62 +367,3 @@ export default function todoList({groupNo}) {
         </div>
     )
 }
-
-
-// <div className="full-background">
-//     <div className="todo-outer-box">
-//         {/*제목 및 검색버튼 들어있는 박스 */}
-//         <div className="todo-header-box">
-//             <h2 className="todo-title">TODO LIST</h2>
-//             <div className="search-dropbox" style={{ position: 'relative', display: 'block' }}>
-//                 {/* 검색 기본 버튼 */}
-//                 {!isTypeExpanded && (
-//                     <button className="typeBtn" type="button" onClick={handleExpand}>
-//                         {type}
-//                     </button>
-//                 )}
-//                 {/* 드롭다운 메뉴 */}
-//                 {isTypeExpanded && (
-//                     <div className="typeBtn-drop" >
-//                         {types.map((item, idx) => (
-//                             <button className="typeBtn-drop-inner"
-//                                     type="button"
-//                                     key={item}
-//                                     onClick={() => typeHandler(item)}>
-//                                 {item}
-//                             </button>
-//                         ))}
-//                     </div>
-//                 )}
-//             </div>
-//         </div>
-//         {/*할일 박스*/}
-//         <div className="todo-section">
-//             {/*할일 맨위 항목들*/}
-//             <div className="todo-section-title">
-//                 <div className="section-label-move">#</div>
-//                 <div className="section-label-cont">항목</div>
-//                 <div className="section-label-progress">완료 여부</div>
-//                 <div className="section-label-end-date">마감일</div>
-//                 <div className="section-label-modify-delete">수정 / 삭제</div>
-//             </div>
-//             {/* 할일들 */}
-//             <div className="todo-section-things">
-//                 <ul>
-//                     {todos.map((item, idx) => (
-//                         <li className="tdlist" key={idx} style={{marginBottom: '16px', border: '1px solid #eee', padding: '8px'}}>
-//                             <div>{item.todoTitle}</div>
-//                             <div>{formatDate(item.todoEnd)}</div>
-//                             <div>{item.resource?.todoContent}</div>
-//                             <div>{item.resource?.todoIsDone ? '완료' : '미완료'}</div>
-//                         </li>
-//                     ))}
-//                 </ul>
-//             </div>
-//             {/* 추가 버튼 */}
-//             <div className="things-add-btn">
-//                 <div className="add-btn"><img src="/bundle/img/add_plus_ic.png" alt="일정 추가"/></div>
-//             </div>
-//         </div>
-//     </div>
-// </div>

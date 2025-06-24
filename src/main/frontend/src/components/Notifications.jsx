@@ -12,7 +12,6 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-// 이 컴포넌트를 앱의 최상단(e.g., App.jsx)에 한 번만 포함시켜 주세요.
 export default function PushNotificationSetup() {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const VAPID_PUBLIC_KEY = "BDgnhdO6oZ0uD0vA9YlsOi_1FcMkxUUXOqbBQrscEctZGpvIszTkuQk99LR06fkQvejdwlbYvlDSoaEwvg91bwI"; //
@@ -53,18 +52,13 @@ export default function PushNotificationSetup() {
 
             console.log('✅ 새로운 푸시 구독 성공:', subscription);
 
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                console.log('푸시 알림을 구독하려면 로그인이 필요합니다.');
-                return;
-            }
 
             // 구독 정보를 백엔드로 전송
             await fetch('/api/subscribe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(subscription)
             });

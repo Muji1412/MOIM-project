@@ -62,26 +62,7 @@ public class GroupsService {
         return groupsRepository.findAllById(groupNos);
     }
 
-    // 서버에 사용자 초대 (간단한 방법)
-    @Transactional
-    public void inviteUserToGroup(Long groupNo, String username) {
-        Groups group = getGroup(groupNo);
-        Users user = usersRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        // 이미 그룹에 속해있는지 확인 (간단한 방법)
-        if (userGroupRepository.existsByUserNoAndGroupNo(user.getUserNo(), groupNo)) {
-            throw new RuntimeException("User is already a member of this group");
-        }
-
-        UserGroup userGroup = UserGroup.builder()
-                .id(new UserGroupId(groupNo, user.getUserNo()))
-                .group(group)
-                .user(user)
-                .build();
-
-        userGroupRepository.save(userGroup);
-    }
 
     // 서버 멤버 조회 (추가된 메서드)
     public List<Users> getGroupMembers(Long groupNo) {

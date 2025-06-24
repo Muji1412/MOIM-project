@@ -11,7 +11,7 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
     const [type, setType] = useState('할일');
     const types = ['할일', '휴가', '공지'];
     const [isTypeExpanded, setIsTypeExpanded] = useState(false);
-    const [isDone, setIsDone] = useState("");
+    const [isDone, setIsDone] = useState('in_progress');
 
     useEffect(() => {
         const day = new Date().toISOString().slice(0,10);
@@ -20,6 +20,9 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
 
 
     const handleSubmit = () => {
+        if(title === '' || startDate === '' || endDate === '') {
+            return;
+        }
         fetch('/api/calendar/addEvent', {
             method: 'POST',
             headers: {
