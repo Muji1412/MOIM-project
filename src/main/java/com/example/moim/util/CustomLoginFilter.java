@@ -8,6 +8,7 @@ import com.example.moim.command.CustomUserInfoVO;
 import com.example.moim.service.user.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -81,26 +82,62 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 //                }
 //            }
 //        }
-        // 이하 성공/실패 처리
-        @Override
-        protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                                FilterChain chain, Authentication authResult)
-                throws ServletException, IOException {
-            CustomUserInfoVO vo = new CustomUserInfoVO();
-            CustomUserDetails cDetails = (CustomUserDetails) authResult.getPrincipal();
-            vo.setUserNo(cDetails.getUserNo());
-            vo.setUsername(cDetails.getUsername());
-            vo.setPassword(cDetails.getPassword());
-            vo.setUserLastLoggedDate(cDetails.getCustomUserInfoVO().getUserLastLoggedDate());
-            String accessToken = jwtService.createToken(vo);
-            String refreshToken = jwtService.createRefreshToken(vo);
-        //        System.out.println("여기까지 왔음");
+          // 성공 실패처리 변경 - 쿠키도 추가
+@Override
+protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                        FilterChain chain, Authentication authResult)
+        throws ServletException, IOException {
+    CustomUserInfoVO vo = new CustomUserInfoVO();
+    CustomUserDetails cDetails = (CustomUserDetails) authResult.getPrincipal();
+    vo.setUserNo(cDetails.getUserNo());
+    vo.setUsername(cDetails.getUsername());
+    vo.setPassword(cDetails.getPassword());
+    vo.setUserLastLoggedDate(cDetails.getCustomUserInfoVO().getUserLastLoggedDate());
 
-//        filterChain.doFilter(request, response);    //다음 필터로 넘김
-            response.setContentType("application/json");
-            response.getWriter().write("{\"accessToken\":\"" + accessToken + "\"," + "\"refreshToken\":\"" + refreshToken +"\"}");
-//        System.out.println("액세스토큰 "+accessToken);
-        }
+    String accessToken = jwtService.createToken(vo);
+    String refreshToken = jwtService.createRefreshToken(vo);
+
+    // 쿠키에 토큰 저장
+    Cookie accessCookie = new Cookie("access_token", accessToken);
+    accessCookie.setHttpOnly(true);
+    accessCookie.setSecure(false); // 로컬 개발 환경에서는 false, 배포 시에는 true로 설정하는 것이 좋습니다.
+    accessCookie.setPath("/");
+    accessCookie.setMaxAge(24 * 60 * 60); // 24시간
+
+    Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+    refreshCookie.setHttpOnly(true);
+    refreshCookie.setSecure(false); // 로컬 개발 환경에서는 false, 배포 시에는 true로 설정
+    refreshCookie.setPath("/");
+    refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+
+    response.addCookie(accessCookie);
+    response.addCookie(refreshCookie);
+
+    // ✅ 응답 본문을 비우고 성공 상태 코드(200 OK)만 보냅니다.
+    response.setStatus(HttpServletResponse.SC_OK);
+}
+
+
+//        // 이하 성공/실패 처리
+//        @Override
+//        protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+//                                                FilterChain chain, Authentication authResult)
+//                throws ServletException, IOException {
+//            CustomUserInfoVO vo = new CustomUserInfoVO();
+//            CustomUserDetails cDetails = (CustomUserDetails) authResult.getPrincipal();
+//            vo.setUserNo(cDetails.getUserNo());
+//            vo.setUsername(cDetails.getUsername());
+//            vo.setPassword(cDetails.getPassword());
+//            vo.setUserLastLoggedDate(cDetails.getCustomUserInfoVO().getUserLastLoggedDate());
+//            String accessToken = jwtService.createToken(vo);
+//            String refreshToken = jwtService.createRefreshToken(vo);
+//        //        System.out.println("여기까지 왔음");
+//
+////        filterChain.doFilter(request, response);    //다음 필터로 넘김
+//            response.setContentType("application/json");
+//            response.getWriter().write("{\"accessToken\":\"" + accessToken + "\"," + "\"refreshToken\":\"" + refreshToken +"\"}");
+////        System.out.println("액세스토큰 "+accessToken);
+//        }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,

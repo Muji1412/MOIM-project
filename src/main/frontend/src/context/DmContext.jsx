@@ -288,16 +288,11 @@ export const DmProvider = ({ children }) => {
     // 기존 함수들은 그대로...
     const fetchDmRooms = async () => {
         console.log('=== fetchDmRooms 호출 ===');
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-            console.log('토큰이 없어서 DM 방 목록 조회 중단');
-            return;
-        }
 
         try {
             console.log('DM 방 목록 API 요청 시작');
             const response = await axios.get('/api/dm/rooms', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                // headers: { 'Authorization': `Bearer ${token}` }
             });
             console.log('DM 방 목록 API 응답:', response.data);
             setDmRooms(response.data);
@@ -312,16 +307,11 @@ export const DmProvider = ({ children }) => {
         console.log('=== fetchMessages 호출 ===');
         console.log('roomId:', roomId);
 
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-            console.log('토큰이 없어서 메시지 조회 중단');
-            return;
-        }
 
         try {
             console.log('메시지 목록 API 요청 시작');
             const response = await axios.get(`/api/dm/rooms/${roomId}/messages`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                // headers: { 'Authorization': `Bearer ${token}` }
             });
             console.log('메시지 목록 API 응답:', response.data);
 
@@ -341,14 +331,6 @@ export const DmProvider = ({ children }) => {
 
     const selectDmRoom = async (friend) => {
         console.log('=== selectDmRoom 호출 ===');
-        console.log('전달받은 friend:', friend);
-        console.log('currentUser:', currentUser);
-
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-            console.log('토큰이 없어서 DM 방 선택 중단');
-            return;
-        }
 
         if (!friend || !friend.userNick) {
             console.error('friend 데이터가 올바르지 않음:', friend);
@@ -362,7 +344,7 @@ export const DmProvider = ({ children }) => {
             const response = await axios.post('/api/dm/rooms',
                 { recipientNick: friend.userNick },
                 {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // headers: { 'Authorization': `Bearer ${token}` }
                 }
             );
 

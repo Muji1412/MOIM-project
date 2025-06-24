@@ -22,18 +22,18 @@ export default function NewHeader() {
     // 현재 유저정보 가져오는 api
     useEffect(() => {
         const fetchMyInfo = async () => {
-            const token = sessionStorage.getItem('accessToken');
-
-            if (!token) {
-                console.log('로그인이 필요합니다.');
-                return;
-            }
+            // const token = sessionStorage.getItem('accessToken');
+            //
+            // if (!token) {
+            //     console.log('로그인이 필요합니다.');
+            //     return;
+            // }
 
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        // 'Authorization': `Bearer ${token}`
                     }
                 });
 

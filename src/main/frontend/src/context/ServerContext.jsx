@@ -23,7 +23,7 @@ export const ServerProvider = ({ children }) => {
             const response = await fetch('/api/groups', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });

@@ -31,11 +31,10 @@ function ChattingView() {
         if (serverId && serverId !== "default") {
             console.log("서버 정보 로딩 시작:", serverId);
 
-            const token = sessionStorage.getItem('accessToken');
             fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             })

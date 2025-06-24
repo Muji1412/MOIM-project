@@ -31,7 +31,7 @@ public class FriendshipServiceImpl implements FriendshipService{
         if (friendshipRepository.findById(friendshipId).isPresent()) {
             Friendship friendship = friendshipRepository.findById(friendshipId).isPresent() ? friendshipRepository.findById(friendshipId).get() : null;
 
-            if (friendship.getFriendStat().equals("blocked")){
+            if (friendship.getFriendStat(). equals("blocked")){
                 throw new IllegalStateException("요청을 보낼 수 없습니다.");
             }
             throw new IllegalStateException("이미 요청을 보냈습니다.");

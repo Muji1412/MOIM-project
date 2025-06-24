@@ -4,6 +4,7 @@ import com.example.moim.jwt.JWTService;
 import com.example.moim.service.user.CustomUserDetailsService;
 import com.example.moim.util.JWTAuthenticationFilter;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import com.example.moim.util.CustomAuthenticationEntryPoint;
 import com.example.moim.util.CustomLoginFilter;
@@ -72,38 +73,50 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomLoginFilter customLoginFilter) throws Exception {
-        //AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        //CustomLoginFilter customLoginFilter = new CustomLoginFilter(jwtService);
-        //customLoginFilter.setAuthenticationManager(authenticationManager);
         http
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/ws/**")  // 웹소켓 CSRF 비활성화 추가
-                        .disable())
-                // ✅ 이 부분을 수정합니다.
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) //웹소켓 헤더 설정
-                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+
+        http
                 .authorizeHttpRequests(authorize -> authorize
-                        // 모든 요청에 대해 인증을 요구하는 대신, 모든 요청을 허용합니다.
-                       .anyRequest().permitAll()
-//                        .requestMatchers("/login.do", "/user/login", "/signup.do", "/searchpassword.do",
-//                                 "/todolist", "/calendar", "/", "/img/favicon.ico", "/bundle/js/**",
-//                                "/ws/**", "/todo", "/videocall", "/servers/**",
-//                                "/whiteboard/**", "/whiteboard", "/videocall.do", "/home", "/chat/**").permitAll()
-//                        .requestMatchers("/api/user/refresh","/api/user/login","/api/user/emailCheck", "/api/user/nickCheck",
-//                                "/api/user/usernameCheck", "/api/user/signUp", "/api/chat/**").permitAll()
-//                        .requestMatchers("/bundle/css/**", "/static/**", "/bundle/**", "/img/**", "/img/favicon.ico").permitAll()
-//                        .anyRequest().authenticated()
+                        // =================================================================
+                        // 1. 페이지 로딩 및 인증 불필요 API는 모두 허용 (permitAll)
+                        //    - 사용자가 사이트에 처음 접속할 때, 이 경로들은 인증 없이 접근 가능합니다.
+                        // =================================================================
+                        .requestMatchers(
+                                // --- 페이지/라우팅 관련 경로 ---
+                                "/error", "/*.do", "/user/**", "/invite/**",
+
+                                // --- 인증 없이 호출해야 하는 API ---
+                                "/api/user/login", "/api/user/signUp",
+                                "/api/user/usernameCheck", "/api/user/emailCheck", "/api/user/nickCheck",
+                                "/api/mail/searchPw", "/api/groupsInvite/join",
+
+                                // --- 정적 리소스 (JS, CSS, 이미지 등) ---
+                                "/bundle/**", "/img/**", "/css/**", "/js/**",
+                                "/*.ico", "/*.json", "/*.png", "/sw.js",
+
+                                // --- 웹소켓 경로 ---
+                                "/ws/**"
+                        ).permitAll()
+
+                        // =================================================================
+                        // 2. 위에서 허용한 것을 제외한 모든 /api/** 경로는 반드시 인증을 요구합니다.
+                        // =================================================================
+                        .requestMatchers("/api/**").authenticated()
+
+                        // =================================================================
+                        // 3. 그 외 나머지 모든 요청도 일단 인증을 요구 (안전장치)
+                        // =================================================================
+                        .anyRequest().authenticated()
                 );
 
         http.formLogin(AbstractHttpConfigurer::disable);
-
-        // CustomLoginFilter는 토큰이 있을 때만 동작하므로 그대로 두어도 괜찮습니다.
         http.addFilterBefore(new JWTAuthenticationFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
-        http.exceptionHandling((exceptionhandler) -> exceptionhandler
-                .authenticationEntryPoint(authenticationEntryPoint));
+        http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
 
         return http.build();
     }

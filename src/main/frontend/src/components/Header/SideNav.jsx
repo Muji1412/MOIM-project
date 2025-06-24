@@ -62,11 +62,11 @@ export default function SideNav() {
     useEffect(() => {
         const fetchServers = async () => {
             try {
-                const token = sessionStorage.getItem('accessToken');
                 const response = await fetch('/api/groups/user', {
                     method: 'GET',
+                    credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        // 'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -212,12 +212,6 @@ export default function SideNav() {
         if (!newServer.name.trim()) return;
 
         try {
-            const token = sessionStorage.getItem('accessToken');
-
-            if (!token) {
-                alert('로그인이 필요합니다. 다시 로그인해주세요.');
-                return;
-            }
 
             const formData = new FormData();
             formData.append('name', newServer.name);
@@ -227,7 +221,7 @@ export default function SideNav() {
             const response = await fetch('/api/groups', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: formData,
             });
@@ -295,11 +289,6 @@ export default function SideNav() {
         if (!modifyServer.name.trim()) return;
 
         try {
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                alert('로그인이 필요합니다. 다시 로그인해주세요.');
-                return;
-            }
 
             const formData = new FormData();
             formData.append('name', modifyServer.name);
@@ -310,7 +299,7 @@ export default function SideNav() {
             const response = await fetch(`/api/groups/${modifyServer.id}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: formData,
             });

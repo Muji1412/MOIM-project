@@ -1,7 +1,7 @@
 // src/main/frontend/src/components/Page/FriendListPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import styles from '../Section/Section.module.css';
+import styles from './Section.module.css';
 import { useDm } from "../../context/DmContext";
 
 export default function FriendListPage() {
@@ -16,15 +16,15 @@ export default function FriendListPage() {
     // 사용자 정보 가져오기
     useEffect(() => {
         const fetchMyInfo = async () => {
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                console.log('로그인이 필요합니다.');
-                return;
-            }
+            // const token = sessionStorage.getItem('accessToken');
+            // if (!token) {
+            //     console.log('로그인이 필요합니다.');
+            //     return;
+            // }
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
@@ -65,15 +65,15 @@ export default function FriendListPage() {
     );
 
     const fetchFriends = async () => {
-        const token = sessionStorage.getItem('accessToken');
-        if (!token || !currentUser) return;
+        // const token = sessionStorage.getItem('accessToken');
+        // if (!token || !currentUser) return;
 
         try {
             const response = await fetch('/api/friendship/list', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({userId: currentUser.userNo})
             });
@@ -117,13 +117,13 @@ export default function FriendListPage() {
         if (!friend || !window.confirm(`'${friend.userNick}'님을 친구 목록에서 삭제하시겠습니까?`)) {
             return;
         }
-        const token = sessionStorage.getItem('accessToken');
+        // const token = sessionStorage.getItem('accessToken');
         try {
             const response = await fetch('/api/friendship/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     userA: friend.friendshipUserA,
@@ -148,13 +148,13 @@ export default function FriendListPage() {
             return;
         }
 
-        const token = sessionStorage.getItem('accessToken');
+        // const token = sessionStorage.getItem('accessToken');
         try {
             const response = await fetch('/api/friendship/block', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     userA: friend.friendshipUserA,
