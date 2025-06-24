@@ -10,6 +10,8 @@ import com.example.moim.repository.DirectMessageRepository;
 import com.example.moim.repository.DirectMessageRoomRepository;
 import com.example.moim.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +79,8 @@ public class DirectMessageService {
         return messages.stream()
                 .map(DirectMessageDTO::new)
                 .collect(Collectors.toList());
+
+
     }
 
     @Transactional
@@ -96,4 +100,6 @@ public class DirectMessageService {
 
         return dmRepository.save(dm);
     }
+
+    //로그찍을라고
 }

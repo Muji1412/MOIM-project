@@ -31,6 +31,7 @@ export default function MyAccount ({isOpen, onClose}) {
             .then(res => res.json())
             .then(data => {
                 setUserInfo({
+                    userNo: data.userNo,
                     email: data.userEmail,
                     nickname: data.userNick,
                     phone: data.userPhone,

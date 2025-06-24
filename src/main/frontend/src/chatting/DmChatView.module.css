@@ -66,22 +66,21 @@
 /* 개별 메시지 행 */
 .chat_message_row {
     display: flex;
-    padding: 8px 4px;
+    align-items: flex-start;
+    padding: 8px 16px;
+    margin-bottom: 12px;
     border-radius: 8px;
 }
-
 .chat_message_row:hover {
     background-color: #f2f3f5;
 }
 
 .chat_avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    margin-right: 16px;
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
     flex-shrink: 0;
 }
-
 .avatar_purple { background: #b92ff7; }
 .avatar_blue   { background: #1cc9e2; }
 .avatar_green  { background: #b6e63e; }
@@ -155,3 +154,15 @@
 .chat_input::placeholder {
     color: #6a737c;
 }
+
+
+.profile_image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+}
+
+
+

@@ -32,6 +32,7 @@ public class DirectMessage {
     @Column(nullable = false, length = 1000)
     private String message;
 
+
     @CreatedDate
     @Column
     private LocalDateTime sentAt;

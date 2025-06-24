@@ -16,6 +16,7 @@ public class FileUploadService {
 
     private final Storage storage;
 
+
     @Value("${spring.cloud.gcp.storage.bucket}")
     private String bucketName;
 
@@ -26,10 +27,10 @@ public class FileUploadService {
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : "";
 
-        String fileName = "";
+        // 프로필 이미지 폴더 구조 적용
+        String fileName = "profile-images/";
         if (folderPath != null && !folderPath.isEmpty()) {
-            fileName = folderPath;
-            if (!folderPath.endsWith("/")) fileName += "/";
+            fileName += folderPath + "/";  // 사용자 ID 폴더
         }
         fileName += uuid + ext;
 

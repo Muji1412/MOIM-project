@@ -142,6 +142,8 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         if (!selectedFile) return null;
         const formData = new FormData();
         formData.append('file', selectedFile);
+        formData.append('folderPath', userInfo.userNo.toString());
+
         //클라우드에 formData 이용해 파일업로드
         const uploadRes = await fetch('api/files', {
             method: 'POST',
