@@ -95,7 +95,6 @@ function ChattingView() {
 
     // 멤버 리스트 토글 상태 추가
     const [isMemberListVisible, setIsMemberListVisible] = useState(true);
-    const [members, setMembers] = useState([]);
 
     // 멤버 리스트 토글 함수
     const toggleMemberList = () => {
@@ -103,8 +102,16 @@ function ChattingView() {
     };
 
     // 서버 멤버 정보 가져오기 (group_no 기반)
+    const [members, setMembers] = useState([]);
+    const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+
     useEffect(() => {
+        let isActive = true;
+
         if (serverId && serverId !== "default" && serverName) {
+            setIsLoadingMembers(true);
+            setMembers([]); // 이전 데이터 초기화
+
             fetch(`${APPLICATION_SERVER_URL}/api/groups/${serverId}/members`, {
                 method: 'GET',
                 headers: {
@@ -113,22 +120,31 @@ function ChattingView() {
             })
                 .then(res => res.json())
                 .then(data => {
-                    console.log("멤버 정보 응답:", data);
-                    // 서버에서 받은 데이터 구조에 맞게 처리
-                    const memberList = data.map(member => ({
-                        id: member.userNo || member.userId,
-                        username: member.username,
-                        nickname: member.nickname || member.username || member.name,
-                        profileImage: member.profileImage || member.profileImage, //사용자 프로필 이미지
-                        // TODO 종수 이거 이미지 못불러옴. test11 프사 있는데도 안불러와짐
-                    }));
-                    setMembers(memberList);
+                    if (isActive) {
+                        const memberList = data.map(member => ({
+                            id: member.userNo || member.userId,
+                            username: member.username,
+                            nickname: member.nickname || member.username || member.name,
+                            profileImage: member.userImg || member.profileImage,
+                        }));
+                        setMembers(memberList);
+                        setIsLoadingMembers(false);
+                    }
                 })
                 .catch(err => {
-                    console.error("멤버 정보 로드 실패:", err);
+                    if (isActive) {
+                        console.error("멤버 정보 로드 실패:", err);
+                        setMembers([]);
+                        setIsLoadingMembers(false);
+                    }
                 });
         }
+
+        return () => {
+            isActive = false;
+        };
     }, [serverId, serverName, APPLICATION_SERVER_URL]);
+
 
     // 랜덤 색상 생성 함수
     const getRandomColor = () => {
@@ -281,6 +297,7 @@ function ChattingView() {
             });
             const imageUrl = await res.text();
 
+            // TODO 종범 이부분 수정필요합니다 사진 올릴때는 유저명이 아니라 박종범으로 들어갑니다
             const newMsg = {
                 date: new Date().toISOString().slice(0, 10),
                 user: '박종범',
@@ -417,31 +434,40 @@ function ChattingView() {
                         멤버 - {members.length}
                     </div>
                     <div className={chatStyles.mem_list_content}>
-                        {members.map(member => (
-                            <div key={member.id} className={chatStyles.member_item} onContextMenu={(e) => handleMemberContextMenu(e, member)}>
-                                <div className={chatStyles.member_avatar}>
-                                    {member.profileImage ? (
-                                        <img
-                                            src={member.profileImage}
-                                            alt={member.nickname}
-                                            className={chatStyles.avatar_image}
-                                            onError={(e) => {
-                                                // 이미지 로드 실패 시 기본 색상 아바타로 대체
-                                                e.target.style.display = 'none';
-                                                e.target.nextSibling.style.display = 'flex';
-                                            }}
-                                        />
-                                    ) : null}
-                                    <div
-                                        className={`${chatStyles.avatar_default} ${chatStyles['avatar_' + member.color]}`}
-                                        style={{display: member.profileImage ? 'none' : 'flex'}}
-                                    >
-                                        {member.nickname.charAt(0).toUpperCase()}
-                                    </div>
-                                </div>
-                                <span className={chatStyles.member_nickname}>{member.nickname}</span>
+                        {isLoadingMembers ? (
+                            <div className={chatStyles.loading_container}>
+                                <div className={chatStyles.loading_message}>멤버 정보 로딩중...</div>
                             </div>
-                        ))}
+                        ) : members.length === 0 ? (
+                            <div className={chatStyles.empty_message}>멤버가 없습니다</div>
+                        ) : (
+                            members.map(member => (
+                                <div key={member.id} className={chatStyles.member_item}
+                                     onContextMenu={(e) => handleMemberContextMenu(e, member)}>
+                                    <div className={chatStyles.member_avatar}>
+                                        {member.profileImage ? (
+                                            <img
+                                                src={member.profileImage}
+                                                alt={member.nickname}
+                                                className={chatStyles.avatar_image}
+                                                onError={(e) => {
+                                                    // 이미지 로드 실패 시 기본 색상 아바타로 대체
+                                                    e.target.style.display = 'none';
+                                                    e.target.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                        ) : null}
+                                        <div
+                                            className={`${chatStyles.avatar_default} ${chatStyles['avatar_' + (member.color || getRandomColor())]}`}
+                                            style={{display: member.profileImage ? 'none' : 'flex'}}
+                                        >
+                                            {member.nickname ? member.nickname.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                    </div>
+                                    <span className={chatStyles.member_nickname}>{member.nickname}</span>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     {/* 멤버 컨텍스트 메뉴 */}
@@ -450,11 +476,12 @@ function ChattingView() {
                             style={{top: memberContextMenu.y, left: memberContextMenu.x}}
                             onClick={() => setMemberContextMenu(prev => ({...prev, visible: false}))}>
                             <li className={chatStyles.member_context_box}>
-                                <div className={`${chatStyles.member_context_item} ${chatStyles.member_context_default}`}
-                                     onClick={(e) => {
-                                         e.stopPropagation();
-                                         handleAddFriend(memberContextMenu.selectedMember);
-                                     }}>
+                                <div
+                                    className={`${chatStyles.member_context_item} ${chatStyles.member_context_default}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddFriend(memberContextMenu.selectedMember);
+                                    }}>
                                     <span>친구추가</span>
                                 </div>
                             </li>
