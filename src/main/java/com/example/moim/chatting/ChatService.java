@@ -32,10 +32,22 @@ public class ChatService {
 
     // 2. 이미지 파일을 GCP에 업로드하고, 업로드된 이미지의 URL을 반환
     public String uploadImageToGCS(MultipartFile file) {
-        String bucketName = "moim-bucket"; // GCP 버킷 이름
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename(); // 파일명 중복 방지
+        String bucketName = "moim-bucket";
+
+        // UUID로 고유한 파일명 생성
+        String uuid = UUID.randomUUID().toString();
+        String originalFilename = file.getOriginalFilename();
+        String ext = originalFilename != null
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
+
+        // chat-images 폴더에 저장
+        String fileName = "chat-images/" + uuid + ext;
+
         BlobId blobId = BlobId.of(bucketName, fileName);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                .setContentType(file.getContentType())
+                .build();
         try {
             storage.create(blobInfo, file.getBytes()); // 실제 업로드
         } catch (IOException e) {

@@ -31,6 +31,7 @@ const DmChatView = () => {
         ? { userNick: activeDmRoom.user2Nick, userImg: activeDmRoom.user2Img }
         : { userNick: activeDmRoom.user1Nick, userImg: activeDmRoom.user1Img };
 
+
     return (
         <div className={styles.chat_view_container}> {/* 수정 */}
             <div className={styles.channel_header}>
@@ -38,14 +39,23 @@ const DmChatView = () => {
             </div>
             <div className={styles.messages_container}> {/* 수정 */}
                 {dmMessages.map((msg, index) => (
+
                     <div key={index} className={styles.chat_message_row}>
-                        <div className={styles.chat_avatar}></div>
+                        <div className={styles.chat_avatar}>
+                            <img
+                                src={msg.senderImg } //
+                                alt={`${msg.user} 프로필`}
+                                className={styles.profile_image}
+                                onError={(e) => e.target.src = '/default-profile.png'}
+                            /> {/*프로필 이미지 관련*/}
+                        </div>
                         <div className={styles.chat_message_bubble}>
                             <div className={styles.chat_message_user}>{msg.user}</div>
                             <div className={styles.chat_message_text}>{msg.text}</div>
                         </div>
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
             <div className={styles.chat_input_row}>
                 <form onSubmit={handleSendMessage} style={{display: 'flex', width: '100%'}}>
@@ -56,7 +66,7 @@ const DmChatView = () => {
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="메시지를 입력하세요..."
                     />
-                    <button type="submit">전송</button>
+                    <button type="submit" style={{display: 'none'}}>전송</button>
                 </form>
             </div>
         </div>

@@ -261,10 +261,25 @@ export const DmProvider = ({ children }) => {
                 console.log('=== 웹소켓 메시지 수신 ===');
                 console.log('receivedMessage:', receivedMessage);
 
+                //  수정된 부분: 발신자 이미지 찾기 함수 추가
+                const getSenderImage = (username) => {
+                    const currentActiveRoom = activeDmRoomRef.current;
+                    if (!currentActiveRoom) return null;
+
+                    if (currentActiveRoom.user1Nick === username) {
+                        return currentActiveRoom.user1Img;
+                    } else if (currentActiveRoom.user2Nick === username) {
+                        return currentActiveRoom.user2Img;
+                    }
+                    return null;
+                };
+
+
                 setDmMessages((prevMessages) => [...prevMessages, {
                     user: receivedMessage.user,
                     text: receivedMessage.text,
                     timestamp: receivedMessage.date || new Date().toISOString(),
+                    senderImg: receivedMessage.senderImg || getSenderImage(receivedMessage.user) //프로필 이미지 관련
                 }]);
             });
             setSubscription(newSubscription);
@@ -308,7 +323,8 @@ export const DmProvider = ({ children }) => {
             const formattedMessages = response.data.map(msg => ({
                 user: msg.senderNick,
                 text: msg.message,
-                timestamp: msg.sentAt
+                timestamp: msg.sentAt,
+                senderImg: msg.senderImg
             }));
             console.log('포맷된 메시지:', formattedMessages);
             setDmMessages(formattedMessages);
