@@ -48,26 +48,36 @@ function ChattingView() {
         try {
             // 여기에 친구추가 API 호출 로직 구현
             console.log('친구추가:', member);
+            // 멤버에 찍히는거
+            // id: 22
+            // nickname: nick
+            // username 추가했음,
 
-            // 예시 API 호출
-            // const response = await fetch('/api/friends/add', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ friendId: member.id })
-            // });
+            const requesterUsername = currentUser.username;
+            const receiverUsername = member.username;
 
-            // if (response.ok) {
-            //     alert(`${member.nickname}님을 친구로 추가했습니다.`);
-            // } else {
-            //     alert('친구추가에 실패했습니다.');
-            // }
+            const response = await fetch('/api/friendship/request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({requesterUsername, receiverUsername})
+            });
+
+            const responseBody = await response.text();
+            if (response.ok) {
+                alert(responseBody);
+            } else {
+                alert(`요청 실패: ${responseBody}`);
+            }
 
         } catch (error) {
             console.error('친구추가 중 오류:', error);
             alert('친구추가 중 오류가 발생했습니다.');
         }
 
-        setMemberContextMenu(prev => ({...prev, visible: false}));
+        // TODO 종수 이거 친구추가 끝나고나면 에러 안터지게 컨텍스트 창 꺼지게 설정, 이대로 쓰면 언디파인드 터짐
+        // setMemberContextMenu(prev => ({...prev, visible: false}));
     };
 
 
@@ -84,7 +94,7 @@ function ChattingView() {
     const APPLICATION_SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:8089' : 'https://moim.o-r.kr';
 
     // 멤버 리스트 토글 상태 추가
-    const [isMemberListVisible, setIsMemberListVisible] = useState(false);
+    const [isMemberListVisible, setIsMemberListVisible] = useState(true);
     const [members, setMembers] = useState([]);
 
     // 멤버 리스트 토글 함수
@@ -95,11 +105,9 @@ function ChattingView() {
     // 서버 멤버 정보 가져오기 (group_no 기반)
     useEffect(() => {
         if (serverId && serverId !== "default" && serverName) {
-            const token = sessionStorage.getItem('accessToken');
             fetch(`${APPLICATION_SERVER_URL}/api/groups/${serverId}/members`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             })
@@ -109,20 +117,15 @@ function ChattingView() {
                     // 서버에서 받은 데이터 구조에 맞게 처리
                     const memberList = data.map(member => ({
                         id: member.userNo || member.userId,
+                        username: member.username,
                         nickname: member.nickname || member.username || member.name,
                         profileImage: member.profileImage || member.profileImage, //사용자 프로필 이미지
-                        color: getRandomColor() // 색상은 랜덤 또는 서버에서 제공
+                        // TODO 종수 이거 이미지 못불러옴. test11 프사 있는데도 안불러와짐
                     }));
                     setMembers(memberList);
                 })
                 .catch(err => {
                     console.error("멤버 정보 로드 실패:", err);
-                    // 개발 중 테스트용 더미 데이터
-                    setMembers([
-                        {id: 1, nickname: '박종신', color: 'purple'},
-                        {id: 2, nickname: '김철수', color: 'blue'},
-                        {id: 3, nickname: '이영희', color: 'green'}
-                    ]);
                 });
         }
     }, [serverId, serverName, APPLICATION_SERVER_URL]);
