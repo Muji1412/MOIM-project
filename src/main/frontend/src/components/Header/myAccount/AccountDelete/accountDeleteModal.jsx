@@ -19,7 +19,6 @@ const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {
         fetch("/api/user/deleteAccount", {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({ password })

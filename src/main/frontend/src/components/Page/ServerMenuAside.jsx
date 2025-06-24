@@ -269,6 +269,14 @@ export default function ServerMenuAside() {
         window.open('/whiteboard.do', 'whiteboardPopup', `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes`);
     };
 
+    const navigateToCalendar = () => {
+        const calData ={
+            groupNo: selectedServerId
+        }
+        sessionStorage.setItem('calendarData', JSON.stringify(calData));
+        navigate(`/calendar`);
+    }
+
     return (
         <>
             <aside className={styles.server_menu_aside}>
@@ -279,7 +287,7 @@ export default function ServerMenuAside() {
                 </div>
 
                 <div className={styles.server_menu_list}>
-                    <div className={styles.menu_box} onClick={() => navigate(`/calendar`)}>
+                    <div className={styles.menu_box} onClick={() => navigateToCalendar()}>
                         <div className={styles.menu_item} style={{cursor: "pointer"}}>
                             <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
                             <p>Calendar</p>

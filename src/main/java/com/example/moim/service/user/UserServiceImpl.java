@@ -63,6 +63,7 @@ public class UserServiceImpl implements UserService {
         user.setUserNick(uservo.getUserNick());
         user.setUserPhone(uservo.getUserPhone());
         user.setUserLastLoggedDate(timestamp);
+        user.setUserImg("https://storage.googleapis.com/moim-bucket/default.png");
 
         return usersRepository.save(user);
         }

@@ -26,7 +26,7 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
         fetch('/api/calendar/addEvent', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+                //Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({

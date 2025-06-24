@@ -24,7 +24,8 @@ export default function MyAccount ({isOpen, onClose}) {
         fetch("/user/myAccount", {
             method: "GET",
             headers: {
-                "Content-Type" : "application/json"
+               "Content-Type" : "application/json"
+
             }
         })
             .then(res => res.json())
