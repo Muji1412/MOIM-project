@@ -47,7 +47,6 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
         fetch("/api/user/myAccount/modifyPw", {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({username : id, oldPw : currentPassword, newPw : newPassword})

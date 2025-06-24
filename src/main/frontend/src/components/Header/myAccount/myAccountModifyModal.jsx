@@ -41,7 +41,6 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         const res = await fetch("/api/user/myAccount/modifyInfo", {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({username
@@ -103,9 +102,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
             fetch(`/api/user/nickCheck?userNick=${encodeURIComponent(newNick)}`,
                 {
                     method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`
-                    }})
+                    })
                 .then(res => res.text())
                 .then(text => setNickCheck(text === "true"))
                 .catch(() => setNickCheck(null));
@@ -148,9 +145,6 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         //클라우드에 formData 이용해 파일업로드
         const uploadRes = await fetch('api/files', {
             method: 'POST',
-            headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`
-            },
             body: formData,
         });
         //db에 이미지 url 저장

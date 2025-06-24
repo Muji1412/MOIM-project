@@ -71,4 +71,9 @@ public class ViewController {
         log.info("inviteCode: {}", inviteCode);
         return "invite";
     }
+
+    @GetMapping("/signup.do")
+    public String signupPage() {
+        return "signup";
+    }
 }

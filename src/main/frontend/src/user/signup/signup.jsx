@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import './signup.css';
 import debounce from 'lodash/debounce';
 import SignupSuccessModal from './signupSuccessModal';
+import './signupSuccessModal.css';
 
 export default function Signup() {
     const [username, setUsername] = useState('');
@@ -22,9 +23,17 @@ export default function Signup() {
     const userPhoneRef = useRef(null);
     const [showModal, setShowModal] = useState(false);
 
+    //아이디 정규식
+    const idRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*/;
+
+
     // 아이디 중복 체크
     const checkUsername = useCallback(
         debounce((username) => {
+            if (!idRegEx.test(username)) {
+                setNameCheck(true);
+                return;
+            }
         if (!username) {
             setNameCheck(null);
             return;
