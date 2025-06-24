@@ -22,18 +22,18 @@ export default function NewHeader() {
     // 현재 유저정보 가져오는 api
     useEffect(() => {
         const fetchMyInfo = async () => {
-            const token = sessionStorage.getItem('accessToken');
-
-            if (!token) {
-                console.log('로그인이 필요합니다.');
-                return;
-            }
+            // const token = sessionStorage.getItem('accessToken');
+            //
+            // if (!token) {
+            //     console.log('로그인이 필요합니다.');
+            //     return;
+            // }
 
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        // 'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -138,7 +138,7 @@ export default function NewHeader() {
             }
             return (
                 <>
-                    <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
+                    <img className={styles.title_img} src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
                     <p>친구목록</p>
                 </>
             );
@@ -147,7 +147,7 @@ export default function NewHeader() {
         // 기본값
         return (
             <>
-                <img src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
+                <img className={styles.title_img} src="/bundle/img/friend_ic_white.png" alt="friend_tab"/>
                 <p>친구목록</p>
             </>
         );

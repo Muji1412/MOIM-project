@@ -31,7 +31,7 @@ public class FriendshipServiceImpl implements FriendshipService{
         if (friendshipRepository.findById(friendshipId).isPresent()) {
             Friendship friendship = friendshipRepository.findById(friendshipId).isPresent() ? friendshipRepository.findById(friendshipId).get() : null;
 
-            if (friendship.getFriendStat().equals("blocked")){
+            if (friendship.getFriendStat(). equals("blocked")){
                 throw new IllegalStateException("요청을 보낼 수 없습니다.");
             }
             throw new IllegalStateException("이미 요청을 보냈습니다.");
@@ -151,6 +151,14 @@ public class FriendshipServiceImpl implements FriendshipService{
             });
         }
         return pendingDTOs;
+    }
+    public boolean areFriends(Long userA, Long userB) {
+        // 같은 사용자면 true 반환 (자기 자신에게는 메시지 보낼 수 있음)
+        if (userA.equals(userB)) {
+            return true;
+        }
+
+        return friendshipRepository.areFriends(userA, userB);
     }
 
 

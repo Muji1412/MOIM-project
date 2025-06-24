@@ -52,6 +52,8 @@ export const DmProvider = ({ children }) => {
                 // ⭐️ 연결 완료 후 알림 구독 ⭐️
                 if (currentUser) {
                     subscribeToNotifications(client);
+                    //에러 구독
+                    subscribeToErrors(client);
                 }
             },
             onStompError: (frame) => {
@@ -112,27 +114,17 @@ export const DmProvider = ({ children }) => {
         try {
             // ⭐️ 여러 구독 방식으로 테스트 ⭐️
 
-            // 방법 1: 기본 구독
-            const subscription1 = client.subscribe(
-                `/sub/notification/${currentUser.username}`,
-                (message) => {
-                    console.log('=== 방법1 알림 수신 ===', message.body);
-                    const notificationData = JSON.parse(message.body);
-                    handleNewNotification(notificationData);
-                }
-            );
-
-            // 방법 2: user prefix 사용 (Spring Boot 2.4+ 권장)
-            const subscription2 = client.subscribe(
+            const subscription = client.subscribe(
                 `/user/queue/notification`,
                 (message) => {
-                    console.log('=== 방법2 알림 수신 ===', message.body);
+                    console.log('=== 알림 수신 ===', message.body);
                     const notificationData = JSON.parse(message.body);
                     handleNewNotification(notificationData);
                 }
             );
 
-            setNotificationSubscription(subscription1); // 기본 구독 사용
+
+            setNotificationSubscription(subscription);
             console.log('✅ 알림 구독 성공!');
 
             // ⭐️ 구독 성공 확인을 위한 테스트 메시지 요청 ⭐️
@@ -286,16 +278,11 @@ export const DmProvider = ({ children }) => {
     // 기존 함수들은 그대로...
     const fetchDmRooms = async () => {
         console.log('=== fetchDmRooms 호출 ===');
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-            console.log('토큰이 없어서 DM 방 목록 조회 중단');
-            return;
-        }
 
         try {
             console.log('DM 방 목록 API 요청 시작');
             const response = await axios.get('/api/dm/rooms', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                // headers: { 'Authorization': `Bearer ${token}` }
             });
             console.log('DM 방 목록 API 응답:', response.data);
             setDmRooms(response.data);
@@ -310,16 +297,11 @@ export const DmProvider = ({ children }) => {
         console.log('=== fetchMessages 호출 ===');
         console.log('roomId:', roomId);
 
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-            console.log('토큰이 없어서 메시지 조회 중단');
-            return;
-        }
 
         try {
             console.log('메시지 목록 API 요청 시작');
             const response = await axios.get(`/api/dm/rooms/${roomId}/messages`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                // headers: { 'Authorization': `Bearer ${token}` }
             });
             console.log('메시지 목록 API 응답:', response.data);
 
@@ -339,14 +321,6 @@ export const DmProvider = ({ children }) => {
 
     const selectDmRoom = async (friend) => {
         console.log('=== selectDmRoom 호출 ===');
-        console.log('전달받은 friend:', friend);
-        console.log('currentUser:', currentUser);
-
-        const token = sessionStorage.getItem('accessToken');
-        if (!token) {
-            console.log('토큰이 없어서 DM 방 선택 중단');
-            return;
-        }
 
         if (!friend || !friend.userNick) {
             console.error('friend 데이터가 올바르지 않음:', friend);
@@ -360,12 +334,13 @@ export const DmProvider = ({ children }) => {
             const response = await axios.post('/api/dm/rooms',
                 { recipientNick: friend.userNick },
                 {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // headers: { 'Authorization': `Bearer ${token}` }
                 }
             );
 
             console.log('DM 방 생성/조회 API 응답:', response.data);
             setActiveDmRoom(response.data);
+            console.log(response.data)
 
             if (!dmRooms.find(room => room.id === response.data.id)) {
                 console.log('새로운 DM 방이므로 목록 새로고침');
@@ -385,6 +360,8 @@ export const DmProvider = ({ children }) => {
                 channel: activeDmRoom.id.toString(),
                 user: currentUser.userNick,
                 text: content,
+                user1No: activeDmRoom.user1No,
+                user2No: activeDmRoom.user2No
             };
             console.log('전송할 메시지:', chatMessage);
 
@@ -396,6 +373,21 @@ export const DmProvider = ({ children }) => {
 
             fetchDmRooms();
         }
+    };
+
+    const subscribeToErrors = (client) => {
+        if (!currentUser || !client || !client.connected) return;
+
+        client.subscribe('/user/queue/errors', (error) => {
+            const errorData = JSON.parse(error.body);
+            console.log('WebSocket 에러 수신:', errorData);
+
+            // 토스트 알림으로 사용자에게 알리기
+            toast.error(errorData.message, {
+                autoClose: 3000
+            });
+
+        });
     };
 
     const value = {
@@ -414,7 +406,8 @@ export const DmProvider = ({ children }) => {
         closeAddFriend,
 
         // 친구창 띄워주는
-        returnToFriendsList
+        returnToFriendsList,
+
     };
 
     return <DmContext.Provider value={value}>{children}</DmContext.Provider>;

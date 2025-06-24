@@ -1,12 +1,11 @@
 // src/main/frontend/src/components/Page/FriendListPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import styles from '../Section/Section.module.css';
-import FriendContextMenu from "../Context/FriendContextMenu";
+import styles from './Section.module.css';
 import { useDm } from "../../context/DmContext";
 
 export default function FriendListPage() {
-    const { selectDmRoom, openAddFriend } = useDm(); // openAddFriend 추가
+    const { selectDmRoom, openAddFriend } = useDm();
     const [currentUser, setCurrentUser] = useState(null);
     const [friendsList, setFriendsList] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -17,15 +16,15 @@ export default function FriendListPage() {
     // 사용자 정보 가져오기
     useEffect(() => {
         const fetchMyInfo = async () => {
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                console.log('로그인이 필요합니다.');
-                return;
-            }
+            // const token = sessionStorage.getItem('accessToken');
+            // if (!token) {
+            //     console.log('로그인이 필요합니다.');
+            //     return;
+            // }
             try {
                 const response = await fetch('/api/user/my-info', {
                     method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
@@ -66,15 +65,15 @@ export default function FriendListPage() {
     );
 
     const fetchFriends = async () => {
-        const token = sessionStorage.getItem('accessToken');
-        if (!token || !currentUser) return;
+        // const token = sessionStorage.getItem('accessToken');
+        // if (!token || !currentUser) return;
 
         try {
             const response = await fetch('/api/friendship/list', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    // 'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({userId: currentUser.userNo})
             });
@@ -118,13 +117,13 @@ export default function FriendListPage() {
         if (!friend || !window.confirm(`'${friend.userNick}'님을 친구 목록에서 삭제하시겠습니까?`)) {
             return;
         }
-        const token = sessionStorage.getItem('accessToken');
+        // const token = sessionStorage.getItem('accessToken');
         try {
             const response = await fetch('/api/friendship/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     userA: friend.friendshipUserA,
@@ -134,6 +133,8 @@ export default function FriendListPage() {
             if (response.ok) {
                 alert('친구가 삭제되었습니다.');
                 fetchFriends();
+                // 컨텍스트 메뉴 닫기
+                setContextMenu({ visible: false, x: 0, y: 0, friend: null });
             } else {
                 alert('친구 삭제에 실패했습니다.');
             }
@@ -147,13 +148,13 @@ export default function FriendListPage() {
             return;
         }
 
-        const token = sessionStorage.getItem('accessToken');
+        // const token = sessionStorage.getItem('accessToken');
         try {
             const response = await fetch('/api/friendship/block', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     userA: friend.friendshipUserA,
@@ -163,6 +164,8 @@ export default function FriendListPage() {
             if (response.ok) {
                 alert('친구가 차단되었습니다.');
                 fetchFriends();
+                // 컨텍스트 메뉴 닫기
+                setContextMenu({ visible: false, x: 0, y: 0, friend: null });
             } else {
                 alert('친구 차단에 실패했습니다.');
             }
@@ -180,7 +183,6 @@ export default function FriendListPage() {
                             <img src="/bundle/img/friend_ic.png" alt="#" />
                             <p>Friend</p>
                         </div>
-                        {/* Link 대신 openAddFriend 함수 사용 */}
                         <button onClick={openAddFriend} className={styles.add_friend_btn}>
                             Add Friend
                         </button>
@@ -238,13 +240,51 @@ export default function FriendListPage() {
                     )}
                 </div>
 
+                {/* 직접 구현한 컨텍스트 메뉴 */}
                 {contextMenu.visible && (
-                    <FriendContextMenu
-                        contextMenu={contextMenu}
-                        onClose={() => setContextMenu({ visible: false, x: 0, y: 0, friend: null })}
-                        onDelete={() => handleDeleteFriend(contextMenu.friend)}
-                        onBlock={() => handleBlockFriend(contextMenu.friend)}
-                    />
+                    <div
+                        className={styles.contextMenu}
+                        style={{
+                            position: 'fixed',
+                            top: contextMenu.y,
+                            left: contextMenu.x,
+                            backgroundColor: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '4px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            zIndex: 1000
+                        }}
+                    >
+                        <ul style={{
+                            margin: 0,
+                            padding: '4px 0',
+                            listStyle: 'none'
+                        }}>
+                            <li
+                                onClick={() => handleDeleteFriend(contextMenu.friend)}
+                                style={{
+                                    padding: '8px 16px',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid #eee'
+                                }}
+                                onMouseOver={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                                onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
+                            >
+                                친구 삭제
+                            </li>
+                            <li
+                                onClick={() => handleBlockFriend(contextMenu.friend)}
+                                style={{
+                                    padding: '8px 16px',
+                                    cursor: 'pointer'
+                                }}
+                                onMouseOver={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                                onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
+                            >
+                                친구 차단
+                            </li>
+                        </ul>
+                    </div>
                 )}
             </div>
         </section>

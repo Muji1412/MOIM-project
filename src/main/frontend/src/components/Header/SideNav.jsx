@@ -5,9 +5,13 @@ import { useNavigate } from "react-router-dom";
 import styles from "./SideNav.module.css";
 import modalStyles from "./Modal.module.css";
 import { useServer } from '../../context/ServerContext';
+import { useServerChat } from '../../context/ServerChatContext';
+
+
 
 export default function SideNav() {
     const navigate = useNavigate();
+    const { connectToServer } = useServerChat()
 
     const {
         servers,
@@ -58,11 +62,11 @@ export default function SideNav() {
     useEffect(() => {
         const fetchServers = async () => {
             try {
-                const token = sessionStorage.getItem('accessToken');
-                const response = await fetch('/api/groups', {
+                const response = await fetch('/api/groups/user', {
                     method: 'GET',
+                    credentials: 'include',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        // 'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -98,18 +102,29 @@ export default function SideNav() {
     }, [contextMenu.visible]);
 
     // 서버 클릭 핸들러
-    const handleServerClick = (serverId) => {
-        setSelectedServerId(serverId); // 컨텍스트 상태 업데이트는 그대로 유지
+    const handleServerClick = async (serverId) => {
+        setSelectedServerId(serverId);
 
         if (serverId === "default") {
-            // '친구' 페이지의 새로운 경로인 /home 으로 이동시킵니다.
             navigate("/home");
         } else {
-            // '서버' 페이지의 경로는 원래 구조와 동일하게 유지합니다.
-            // ViewController가 /servers/:id 형태를 이미 알고 있기 때문입니다.
-            navigate(`/servers/${serverId}`);
+            const selectedServer = servers.find(s => s.id === serverId);
+            if (selectedServer) {
+                try {
+                    console.log("서버 연결 시도:", selectedServer);
+                    await connectToServer(selectedServer);
+                    console.log("웹소켓 연결 완료, 페이지 이동");
+                    navigate(`/servers/${serverId}`);
+                } catch (error) {
+                    console.error("웹소켓 연결 실패:", error);
+                    alert("서버 연결에 실패했습니다. 다시 시도해주세요.");
+                }
+            } else {
+                console.error("서버를 찾을 수 없습니다:", serverId);
+            }
         }
     };
+
 
     // 서버 컨텍스트 메뉴 핸들러
     const handleServerContextMenu = (e, serverId) => {
@@ -197,12 +212,6 @@ export default function SideNav() {
         if (!newServer.name.trim()) return;
 
         try {
-            const token = sessionStorage.getItem('accessToken');
-
-            if (!token) {
-                alert('로그인이 필요합니다. 다시 로그인해주세요.');
-                return;
-            }
 
             const formData = new FormData();
             formData.append('name', newServer.name);
@@ -212,7 +221,7 @@ export default function SideNav() {
             const response = await fetch('/api/groups', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: formData,
             });
@@ -280,11 +289,6 @@ export default function SideNav() {
         if (!modifyServer.name.trim()) return;
 
         try {
-            const token = sessionStorage.getItem('accessToken');
-            if (!token) {
-                alert('로그인이 필요합니다. 다시 로그인해주세요.');
-                return;
-            }
 
             const formData = new FormData();
             formData.append('name', modifyServer.name);
@@ -295,7 +299,7 @@ export default function SideNav() {
             const response = await fetch(`/api/groups/${modifyServer.id}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    // 'Authorization': `Bearer ${token}`,
                 },
                 body: formData,
             });
@@ -368,6 +372,63 @@ export default function SideNav() {
         });
     };
 
+    // 서버 나가기 함수
+    const handleLeaveServer = async (serverId) => {
+        if (!serverId || serverId === "default") {
+            alert("서버를 선택해주세요.");
+            return;
+        }
+
+        const serverToLeave = servers.find(s => s.id === serverId);
+        const confirmLeave = window.confirm(`정말로 "${serverToLeave?.name}" 서버에서 나가시겠습니까?`);
+        if (!confirmLeave) return;
+
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            const response = await fetch(`/api/groups/${serverId}/leave`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert("서버에서 나갔습니다.");
+
+                // 서버 목록에서 해당 서버 제거
+                setServers(prev => prev.filter(server => server.id !== serverId));
+
+                // 현재 선택된 서버가 나간 서버라면 홈으로 이동
+                if (selectedServerId === serverId) {
+                    setSelectedServerId("default");
+                    setChatChannels([]);
+                    setSelectedChannel(null);
+                    navigate('/home');
+                }
+
+                // 컨텍스트 메뉴 닫기
+                setContextMenu(prev => ({...prev, visible: false}));
+
+            } else if (response.status === 401) {
+                alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+            } else {
+                let errorMessage = '서버 나가기에 실패했습니다.';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    console.error('응답 파싱 실패:', e);
+                }
+                alert(`${errorMessage} (${response.status})`);
+            }
+        } catch (error) {
+            console.error('서버 나가기 중 오류:', error);
+            alert('서버 나가기 중 오류가 발생했습니다: ' + error.message);
+        }
+    };
+
+
     return (
         <aside className={styles.aside}>
             <div className={styles.aside_container}>
@@ -404,13 +465,13 @@ export default function SideNav() {
                                     className={`${styles.server_ic} ${selectedServerId === server.id ? styles.active_ic : ""}`}
                                     style={{
                                         background: !server.image
-                                            ? selectedServerId === server.id ? "#c3ee41" : "#d9d9d9"
+                                            ? selectedServerId === server.id ? "#c3ee41" : ""
                                             : "transparent",
                                         overflow: "hidden",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        color: "#333",
+                                        // color: "#d9d9d9",
                                         fontWeight: "bold"
                                     }}
                                 >
@@ -479,7 +540,12 @@ export default function SideNav() {
                         </div>
                     </li>
                     <li className={styles.context_menu_list}>
-                        <div className={`${styles.context_box} ${styles.context_quit}`}>
+                        <div className={`${styles.context_box} ${styles.context_quit}`}
+                             onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleLeaveServer(contextMenu.serverId);
+                             }}
+                        >
                             <span>서버 나가기</span>
                         </div>
                     </li>
@@ -512,6 +578,33 @@ export default function SideNav() {
                             </button>
                         </div>
                         <form onSubmit={handleAddServer} className={modalStyles.modal_form}>
+                            <div className={modalStyles.modal_upload_area}>
+
+                                <label className={modalStyles.upload_label}>
+                                        {imagePreview ? (
+                                            <img
+                                                src={imagePreview}
+                                                alt="preview"
+                                                className={modalStyles.modal_img_preview}
+                                            />
+                                        ) : (
+                                            <img src="/bundle/img/upload_ic.png" alt="upload"/>
+                                        )}
+                                    <input
+                                        ref={inputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        style={{display: "none"}}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={modalStyles.modal_img_btn}
+                                        onClick={() => inputRef.current?.click()}
+                                    >
+                                    </button>
+                                </label>
+                            </div>
                             <div className={modalStyles.modal_input_area}>
                                 <label className={modalStyles.modal_title_label} htmlFor="serverName">
                                     서버 이름
@@ -528,40 +621,6 @@ export default function SideNav() {
                                         required
                                         autoFocus
                                     />
-                                </div>
-                            </div>
-                            <div className={modalStyles.modal_input_area}>
-                                <label className={modalStyles.modal_title_label}>
-                                    서버 이미지
-                                </label>
-                                <div className={modalStyles.modal_img_area}>
-                                    <div className={modalStyles.modal_img_box}>
-                                        {imagePreview ? (
-                                            <img
-                                                src={imagePreview}
-                                                alt="preview"
-                                                className={modalStyles.modal_img_preview}
-                                            />
-                                        ) : (
-                                            <div className={modalStyles.modal_img_placeholder}>
-                                                <span>이미지 선택</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <input
-                                        ref={inputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        style={{display: "none"}}
-                                    />
-                                    <button
-                                        type="button"
-                                        className={modalStyles.modal_img_btn}
-                                        onClick={() => inputRef.current?.click()}
-                                    >
-                                        이미지 업로드
-                                    </button>
                                 </div>
                             </div>
                             <div className={modalStyles.modal_btn_area}>

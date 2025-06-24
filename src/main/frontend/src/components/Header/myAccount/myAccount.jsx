@@ -14,7 +14,6 @@ export default function MyAccount ({isOpen, onClose}) {
         username: '',
         message: ''
     });
-    const token = sessionStorage.getItem('accessToken');
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showModifyModal, setShowModifyModal] = useState(false);
     const [showPwModal, setShowPwModal] = useState(false);
@@ -26,6 +25,7 @@ export default function MyAccount ({isOpen, onClose}) {
             method: "GET",
             headers: {
                "Content-Type" : "application/json"
+
             }
         })
             .then(res => res.json())

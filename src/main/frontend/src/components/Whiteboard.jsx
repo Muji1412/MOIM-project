@@ -9,13 +9,31 @@ function Whiteboard() {
     const [autoJoin, setAutoJoin] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [connectedUsers, setConnectedUsers] = useState([]);
+    const [activeUsers, setActiveUsers] = useState(new Map());
+    const [isStateRestored, setIsStateRestored] = useState(false);
+    const [hasReceivedInitialState, setHasReceivedInitialState] = useState(false);
 
     // --- TLDraw Refs ---
     const editorRef = useRef(null);
     const store = useRef(createTLStore({ shapeUtils: defaultShapeUtils }));
     const whiteboardSubscription = useRef(null);
+    const isUpdatingRef = useRef(false);
 
-    // --- 데이터 로딩 패턴 ---
+    // --- 사용자별 고유 색상 생성 ---
+    const getUserColor = useCallback((userId) => {
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+            '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+            '#FF8A80', '#82B1FF', '#B9F6CA', '#FFD180'
+        ];
+        const hash = userId.split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+        }, 0);
+        return colors[Math.abs(hash) % colors.length];
+    }, []);
+
+    // --- 데이터 로딩 패턴 (수정됨) ---
     const getStoredData = useCallback(() => {
         try {
             const storedData = sessionStorage.getItem('whiteboardData');
@@ -28,6 +46,9 @@ function Whiteboard() {
                     setWhiteboardData(data);
                     setIsConnected(false);
                     setConnectedUsers([]);
+                    setActiveUsers(new Map());
+                    // setIsStateRestored(false); // 이 줄 제거 - 상태 복원 상태 유지
+                    setHasReceivedInitialState(false); // 초기 상태 수신 여부만 초기화
                 }
             } else {
                 setShowJoinForm(true);
@@ -70,6 +91,45 @@ function Whiteboard() {
         }
     }, [autoJoin, whiteboardData, isConnected]);
 
+    // --- 활성 사용자 정리 ---
+    useEffect(() => {
+        const cleanupInterval = setInterval(() => {
+            const now = Date.now();
+            setActiveUsers(prev => {
+                const updated = new Map();
+                prev.forEach((user, userId) => {
+                    if (now - user.lastSeen < 30000) {
+                        updated.set(userId, user);
+                    } else {
+                        if (editorRef.current) {
+                            const presenceId = `presence:${userId}`;
+                            editorRef.current.store.mergeRemoteChanges(() => {
+                                editorRef.current.store.remove([presenceId]);
+                            });
+                        }
+                    }
+                });
+                return updated;
+            });
+        }, 5000);
+
+        return () => clearInterval(cleanupInterval);
+    }, []);
+
+    // --- 상태 복원 타이머 (수정됨) ---
+    useEffect(() => {
+        if (isConnected && editorRef.current && !hasReceivedInitialState) {
+            // 연결 후 1초 대기 후 초기 상태 수신 완료로 설정 (수정됨)
+            const timer = setTimeout(() => {
+                console.log('초기 상태 수신 타이머 완료 - 실시간 동기화 활성화');
+                setHasReceivedInitialState(true);
+                setIsStateRestored(true);
+            }, 1000); // 3000 → 1000으로 단축
+
+            return () => clearTimeout(timer);
+        }
+    }, [isConnected, hasReceivedInitialState]);
+
     // --- Cleanup on Unmount ---
     useEffect(() => {
         const handleBeforeUnload = () => {
@@ -102,13 +162,12 @@ function Whiteboard() {
         };
     }, [whiteboardData]);
 
-    // --- 서버별 공유 WebSocket 연결 (수정됨) ---
+    // --- 서버별 공유 WebSocket 연결 ---
     const createServerWebSocket = async () => {
         try {
             console.log('=== 서버 공유 화이트보드 WebSocket 연결 생성 ===');
 
-            // 각 연결마다 고유 ID 생성
-            window.whiteboardConnectionId = Date.now() + Math.random();
+            window.whiteboardConnectionId = Date.now() + '.' + Math.random().toString(36).substr(2, 9);
             console.log('연결 ID:', window.whiteboardConnectionId);
             console.log('서버 ID:', whiteboardData.groupId);
 
@@ -117,9 +176,10 @@ function Whiteboard() {
 
             const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
                 ? 'http://localhost:8089'
-                : 'https://moim.o-r.kr';
+                : `http://${window.location.hostname}:8089`;
 
-            // 기존 연결 정리
+            console.log('WebSocket 서버 URL:', APPLICATION_SERVER_URL);
+
             if (window.whiteboardStompClient) {
                 try {
                     window.whiteboardStompClient.disconnect();
@@ -142,7 +202,6 @@ function Whiteboard() {
                 window.whiteboardStompClient = client;
                 setIsConnected(true);
 
-                // /sub 접두사로 구독 (WebSocketConfig에 맞춤)
                 whiteboardSubscription.current = client.subscribe(
                     `/sub/whiteboard/${whiteboardData.groupId}`,
                     (message) => {
@@ -156,9 +215,8 @@ function Whiteboard() {
                 );
 
                 console.log('서버 화이트보드 구독 완료:', `/sub/whiteboard/${whiteboardData.groupId}`);
-                console.log('구독 ID:', whiteboardSubscription.current.id);
 
-                // 즉시 연결 테스트 메시지 전송
+                // 연결 테스트 메시지 전송
                 setTimeout(() => {
                     console.log('=== 연결 테스트 메시지 전송 ===');
                     sendServerMessage({
@@ -194,11 +252,10 @@ function Whiteboard() {
         }
     };
 
-    // --- 서버 메시지 전송 함수 (수정됨) ---
+    // --- 서버 메시지 전송 함수 ---
     const sendServerMessage = (message) => {
         if (window.whiteboardStompClient && window.whiteboardStompClient.connected) {
             try {
-                // 모든 메시지에 연결 ID 추가
                 const messageWithConnectionId = {
                     ...message,
                     connectionId: window.whiteboardConnectionId
@@ -207,9 +264,12 @@ function Whiteboard() {
                 console.log('=== 서버 메시지 전송 ===', messageWithConnectionId.type);
                 console.log('연결 ID:', window.whiteboardConnectionId);
                 console.log('서버:', whiteboardData.groupId);
-                console.log('전송 목적지:', `/pub/whiteboard/${whiteboardData.groupId}`);
 
-                // /pub 접두사로 전송 (WebSocketConfig에 맞춤)
+                if (messageWithConnectionId.type === 'change') {
+                    console.log('데이터 크기:', messageWithConnectionId.data ? messageWithConnectionId.data.length : 0);
+                    console.log('Assets 크기:', messageWithConnectionId.assets ? messageWithConnectionId.assets.length : 0);
+                }
+
                 window.whiteboardStompClient.send(
                     `/pub/whiteboard/${whiteboardData.groupId}`,
                     {},
@@ -221,75 +281,203 @@ function Whiteboard() {
             }
         } else {
             console.error('서버 WebSocket 연결이 없습니다.');
-            console.log('연결 상태:', {
-                exists: !!window.whiteboardStompClient,
-                connected: window.whiteboardStompClient?.connected
-            });
         }
     };
 
-    // --- 서버 메시지 핸들러 (수정됨) ---
+    // --- 상태 복원 전용 핸들러 (수정됨) ---
+    const handleStateRestoration = (message) => {
+        console.log('=== 화이트보드 상태 복원 시작 ===');
+        console.log('메시지 타입:', message.type);
+
+        if (!editorRef.current) {
+            console.error('에디터가 준비되지 않음');
+            return;
+        }
+
+        try {
+            isUpdatingRef.current = true;
+
+            if (message.type === 'current-state') {
+                console.log('>>> 기존 화이트보드 상태 복원 중...');
+                console.log('>>> 상태 데이터 크기:', message.data ? message.data.length : 0);
+                console.log('>>> Assets 크기:', message.assets ? message.assets.length : 0);
+
+                // Assets 먼저 로드
+                if (message.assets) {
+                    const assets = JSON.parse(message.assets);
+                    console.log('>>> Assets 복원 중:', Object.keys(assets).length, '개');
+
+                    Object.values(assets).forEach(asset => {
+                        editorRef.current.store.put([asset]);
+                    });
+                }
+
+                // 화이트보드 상태 복원
+                const snapshot = JSON.parse(message.data);
+                editorRef.current.store.loadSnapshot(snapshot);
+
+                console.log('>>> 화이트보드 상태 복원 완료');
+                setHasReceivedInitialState(true);
+                setIsStateRestored(true);
+
+            } else if (message.type === 'empty-state') {
+                console.log('>>> 새 화이트보드 - 빈 상태로 시작');
+                setHasReceivedInitialState(true);
+                setIsStateRestored(true);
+            }
+
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 1000);
+
+        } catch (error) {
+            console.error('화이트보드 상태 복원 실패:', error);
+            isUpdatingRef.current = false;
+        }
+    };
+
+    // --- 서버 메시지 핸들러 ---
     const handleServerMessage = (message) => {
         console.log('=== 서버 공유 화이트보드 메시지 수신 ===');
         console.log('메시지 타입:', message.type);
         console.log('발신 연결 ID:', message.connectionId);
         console.log('현재 연결 ID:', window.whiteboardConnectionId);
-        console.log('전체 메시지:', message);
 
         switch (message.type) {
             case 'connection-test':
                 console.log('>>> 연결 테스트 메시지 수신 성공!');
-                alert('실시간 연결 테스트 성공! 서버: ' + message.groupId);
                 break;
 
             case 'echo-test':
                 console.log('>>> 에코 테스트 성공! 서버 응답:', message.data);
-                alert('실시간 연결 테스트 성공: ' + message.data);
                 break;
 
             case 'change':
-                // 연결 ID 필터링으로 자신의 변경사항은 무시
                 if (editorRef.current && message.connectionId !== window.whiteboardConnectionId) {
                     try {
-                        console.log('다른 연결의 변경사항 적용:', message.userName);
+                        console.log('>>> 다른 연결의 변경사항 적용:', message.userName);
+                        console.log('>>> 데이터 크기:', message.data ? message.data.length : 0);
+                        console.log('>>> Assets 크기:', message.assets ? message.assets.length : 0);
+
+                        isUpdatingRef.current = true;
+
+                        if (message.assets) {
+                            const assets = JSON.parse(message.assets);
+                            console.log('>>> Assets 적용 중:', Object.keys(assets).length, '개');
+
+                            Object.values(assets).forEach(asset => {
+                                editorRef.current.store.put([asset]);
+                            });
+                        }
+
                         const snapshot = JSON.parse(message.data);
                         editorRef.current.store.loadSnapshot(snapshot);
-                        console.log('서버 화이트보드 동기화 완료');
+                        console.log('>>> 서버 화이트보드 동기화 완료 (assets 포함)');
+
+                        setTimeout(() => {
+                            isUpdatingRef.current = false;
+                        }, 500);
                     } catch (error) {
                         console.error('서버 화이트보드 동기화 실패:', error);
+                        isUpdatingRef.current = false;
                     }
                 } else {
-                    console.log('자신의 연결이므로 무시');
+                    console.log('>>> 자신의 연결이므로 무시');
+                }
+                break;
+
+            case 'cursor-move':
+                if (editorRef.current && message.connectionId !== window.whiteboardConnectionId) {
+                    try {
+                        console.log('>>> 다른 사용자 커서 업데이트:', message.userName, '(연결 ID:', message.connectionId + ')');
+                        const cursorData = JSON.parse(message.data);
+
+                        const uniqueUserId = `${message.userId}_${message.connectionId}`;
+                        const displayName = `${message.userName} (${message.connectionId.slice(-6)})`;
+
+                        setActiveUsers(prev => {
+                            const updated = new Map(prev);
+                            updated.set(uniqueUserId, {
+                                userName: displayName,
+                                lastSeen: Date.now(),
+                                color: getUserColor(uniqueUserId),
+                                connectionId: message.connectionId
+                            });
+                            return updated;
+                        });
+
+                        const presenceId = `presence:${uniqueUserId}`;
+                        const userColor = getUserColor(uniqueUserId);
+
+                        const presenceRecord = {
+                            id: presenceId,
+                            typeName: 'instance_presence',
+                            userId: uniqueUserId,
+                            userName: displayName,
+                            currentPageId: editorRef.current.getCurrentPageId(),
+                            cursor: {
+                                x: cursorData.x,
+                                y: cursorData.y,
+                                type: cursorData.type || 'default',
+                                rotation: cursorData.rotation || 0
+                            },
+                            lastActivityTimestamp: cursorData.timestamp,
+                            followingUserId: null,
+                            chatMessage: '',
+                            color: userColor
+                        };
+
+                        editorRef.current.store.mergeRemoteChanges(() => {
+                            editorRef.current.store.put([presenceRecord]);
+                        });
+
+                        console.log('>>> 커서 위치 업데이트 완료 (고유 ID:', uniqueUserId + ')');
+                    } catch (error) {
+                        console.error('커서 위치 업데이트 실패:', error);
+                    }
+                } else {
+                    console.log('>>> 자신의 연결이므로 커서 무시');
                 }
                 break;
 
             case 'current-state':
-                // 서버에서 보내는 현재 상태는 항상 적용
-                if (editorRef.current && message.connectionId === 'server-state') {
-                    try {
-                        console.log('서버의 현재 화이트보드 상태 로드 중...');
-                        const snapshot = JSON.parse(message.data);
-                        editorRef.current.store.loadSnapshot(snapshot);
-                        console.log('서버 화이트보드 상태 로드 완료');
-                    } catch (error) {
-                        console.error('서버 화이트보드 상태 로드 실패:', error);
-                    }
+            case 'empty-state':
+                // 상태 복원 처리
+                if (message.connectionId === 'server-state') {
+                    handleStateRestoration(message);
                 }
                 break;
 
             case 'user-join':
-                console.log('서버에 새 사용자 입장:', message.userName);
+                console.log('>>> 서버에 새 사용자 입장:', message.userName);
                 break;
 
             case 'user-leave':
-                console.log('서버에서 사용자 퇴장:', message.userName);
+                console.log('>>> 서버에서 사용자 퇴장:', message.userName);
+                if (editorRef.current) {
+                    const uniqueUserId = `${message.userId}_${message.connectionId}`;
+                    const presenceId = `presence:${uniqueUserId}`;
+                    editorRef.current.store.mergeRemoteChanges(() => {
+                        editorRef.current.store.remove([presenceId]);
+                    });
+                    console.log('>>> 사용자 presence 제거:', message.userName, '(연결 ID:', message.connectionId + ')');
+                }
+
+                setActiveUsers(prev => {
+                    const updated = new Map(prev);
+                    for (const [userId, user] of prev.entries()) {
+                        if (user.connectionId === message.connectionId) {
+                            updated.delete(userId);
+                        }
+                    }
+                    return updated;
+                });
                 break;
 
             case 'user-count':
                 const userCount = parseInt(message.data) || 0;
-                console.log('서버 접속자 수 업데이트:', userCount + '명');
+                console.log('>>> 서버 접속자 수 업데이트:', userCount + '명');
 
-                // 서버 접속자 수 표시
                 const serverUsers = [];
                 for (let i = 0; i < userCount; i++) {
                     serverUsers.push({
@@ -301,7 +489,7 @@ function Whiteboard() {
                 break;
 
             default:
-                console.log('알 수 없는 서버 메시지 타입:', message.type);
+                console.log('>>> 알 수 없는 서버 메시지 타입:', message.type);
                 break;
         }
     };
@@ -313,22 +501,42 @@ function Whiteboard() {
         console.log('서버:', whiteboardData.groupId);
         console.log('연결 ID:', window.whiteboardConnectionId);
 
-        // 변경사항 감지 패턴
         let changeTimeout;
-        let isUpdating = false;
+        let cursorTimeout;
 
-        editor.store.listen(() => {
-            if (isConnected && whiteboardData && !isUpdating) {
+        const handleStoreChange = () => {
+            const isWebSocketConnected = window.whiteboardStompClient?.connected;
+            const hasWhiteboardData = !!whiteboardData;
+            const isCurrentlyUpdating = isUpdatingRef.current;
+
+            console.log('>>> 스토어 변경 감지:', {
+                isConnected: isWebSocketConnected,
+                hasData: hasWhiteboardData,
+                isUpdating: isCurrentlyUpdating,
+                hasReceivedInitialState: hasReceivedInitialState
+            });
+
+            // 조건 완화: hasReceivedInitialState 조건 제거 (수정됨)
+            if (isWebSocketConnected && hasWhiteboardData && !isCurrentlyUpdating) {
                 clearTimeout(changeTimeout);
                 changeTimeout = setTimeout(() => {
                     try {
                         const snapshot = editor.store.getSnapshot();
                         const snapshotString = JSON.stringify(snapshot);
 
-                        console.log('=== 서버 공유 화이트보드 변경사항 전송 ===');
+                        const assets = {};
+                        Object.keys(snapshot.store).forEach(key => {
+                            const record = snapshot.store[key];
+                            if (record.typeName === 'asset') {
+                                assets[key] = record;
+                            }
+                        });
+
+                        console.log('=== 서버 공유 화이트보드 변경사항 전송 (assets 포함) ===');
                         console.log('연결 ID:', window.whiteboardConnectionId);
                         console.log('서버:', whiteboardData.groupId);
                         console.log('스냅샷 크기:', snapshotString.length);
+                        console.log('asset 수:', Object.keys(assets).length);
 
                         sendServerMessage({
                             type: 'change',
@@ -336,14 +544,50 @@ function Whiteboard() {
                             groupId: whiteboardData.groupId,
                             userId: whiteboardData.userId || whiteboardData.userName,
                             userName: whiteboardData.userName,
-                            data: snapshotString
+                            data: snapshotString,
+                            assets: Object.keys(assets).length > 0 ? JSON.stringify(assets) : null
                         });
                     } catch (error) {
                         console.error('서버 화이트보드 스냅샷 생성 실패:', error);
                     }
-                }, 100);
+                }, 50); // 100 → 50으로 단축
             }
-        });
+        };
+
+        const handlePointerMove = (info) => {
+            const isWebSocketConnected = window.whiteboardStompClient?.connected;
+            if (isWebSocketConnected && whiteboardData && !isUpdatingRef.current) {
+                clearTimeout(cursorTimeout);
+                cursorTimeout = setTimeout(() => {
+                    const { x, y } = info.point;
+
+                    sendServerMessage({
+                        type: 'cursor-move',
+                        roomId: whiteboardData.roomId,
+                        groupId: whiteboardData.groupId,
+                        userId: whiteboardData.userId || whiteboardData.userName,
+                        userName: whiteboardData.userName,
+                        data: JSON.stringify({
+                            x: x,
+                            y: y,
+                            type: 'default',
+                            rotation: 0,
+                            timestamp: Date.now()
+                        })
+                    });
+                }, 50);
+            }
+        };
+
+        const unsubscribeStore = editor.store.listen(handleStoreChange);
+        const unsubscribePointer = editor.on('pointer-move', handlePointerMove);
+
+        return () => {
+            unsubscribeStore();
+            unsubscribePointer();
+            clearTimeout(changeTimeout);
+            clearTimeout(cursorTimeout);
+        };
     };
 
     const leaveWhiteboard = () => {
@@ -362,9 +606,13 @@ function Whiteboard() {
     // 디버깅용 로그
     useEffect(() => {
         console.log('현재 서버 화이트보드 접속자 수:', connectedUsers.length, connectedUsers);
+        console.log('현재 활성 사용자 수:', activeUsers.size, Array.from(activeUsers.entries()));
         console.log('현재 연결 ID:', window.whiteboardConnectionId);
         console.log('WebSocket 연결 상태:', window.whiteboardStompClient?.connected);
-    }, [connectedUsers]);
+        console.log('업데이트 상태:', isUpdatingRef.current);
+        console.log('상태 복원 완료:', isStateRestored);
+        console.log('초기 상태 수신 완료:', hasReceivedInitialState);
+    }, [connectedUsers, activeUsers, isStateRestored, hasReceivedInitialState]);
 
     // --- Render Logic ---
     if (!isConnected && (!whiteboardData || showJoinForm)) {
@@ -385,11 +633,10 @@ function Whiteboard() {
         <>
             <style>{whiteboardStyles}</style>
             <div className="whiteboard-wrapper">
-                {/* 서버 정보 표시 */}
                 <div className="server-info">
                     <h3>서버 {whiteboardData.groupId} 공유 화이트보드</h3>
                     <p>이 서버의 모든 사용자가 실시간으로 공유하는 화이트보드입니다</p>
-                    <small>연결 ID: {window.whiteboardConnectionId}</small>
+                    <small>연결 ID: {window.whiteboardConnectionId} | 초기 상태: {hasReceivedInitialState ? '수신완료' : '대기중'}</small>
                     <div style={{marginTop: '8px'}}>
                         <button
                             onClick={() => sendServerMessage({
@@ -405,10 +652,34 @@ function Whiteboard() {
                                 padding: '4px 8px',
                                 borderRadius: '4px',
                                 fontSize: '10px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                marginRight: '8px'
                             }}
                         >
                             연결 테스트
+                        </button>
+                        <button
+                            onClick={() => {
+                                console.log('=== 수동 상태 요청 ===');
+                                sendServerMessage({
+                                    type: 'request-current-state',
+                                    roomId: whiteboardData.roomId,
+                                    groupId: whiteboardData.groupId,
+                                    userId: whiteboardData.userId || whiteboardData.userName,
+                                    userName: whiteboardData.userName
+                                });
+                            }}
+                            style={{
+                                background: '#34a853',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '10px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            상태 복원
                         </button>
                     </div>
                 </div>
@@ -423,9 +694,28 @@ function Whiteboard() {
 
                 <div className="controls-bar">
                     <div className="connected-users">
-                        <span>서버 {whiteboardData.groupId} 접속자: {connectedUsers.length}명</span>
-                        {connectedUsers.map(user => (
-                            <span key={user.userId} className="user-badge">
+                        <span>서버 {whiteboardData.groupId} 접속자: {activeUsers.size}명</span>
+                        {Array.from(activeUsers.entries()).map(([userId, user]) => (
+                            <span
+                                key={userId}
+                                className="user-badge"
+                                style={{
+                                    backgroundColor: user.color + '20',
+                                    borderLeft: `3px solid ${user.color}`,
+                                    position: 'relative'
+                                }}
+                            >
+                                <span
+                                    className="user-indicator"
+                                    style={{
+                                        backgroundColor: user.color,
+                                        width: '8px',
+                                        height: '8px',
+                                        borderRadius: '50%',
+                                        display: 'inline-block',
+                                        marginRight: '6px'
+                                    }}
+                                ></span>
                                 {user.userName}
                             </span>
                         ))}
@@ -455,8 +745,9 @@ const whiteboardStyles = `
     .server-info small { display: block; margin-top: 4px; font-size: 10px; color: #666; }
     .main-content { flex-grow: 1; position: relative; }
     .controls-bar { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 16px; background-color: #2c2d30; }
-    .connected-users { display: flex; align-items: center; gap: 8px; }
-    .user-badge { background: rgba(138, 180, 248, 0.2); padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+    .connected-users { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .user-badge { background: rgba(138, 180, 248, 0.2); padding: 4px 8px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; }
+    .user-indicator { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
     .control-btn { background: #4a4a4a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; }
     .control-btn.leave { background-color: #ea4335; }
     .control-btn:hover { opacity: 0.8; }

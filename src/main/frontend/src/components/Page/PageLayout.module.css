@@ -6,12 +6,14 @@
 
 /* 왼쪽 친구/DM 목록 (FriendsAside) 및 서버 메뉴(ServerMenuAside) */
 .aside_menu {
-    width: 240px;
+    width: 280px;
     flex-shrink: 0;
     background-color: #f2f3f5;
     border-right: 1px solid #e3e5e8;
     display: flex;
     flex-direction: column;
+    border-top-left-radius: 15px;
+    position: relative;
 }
 
 /* 오른쪽 메인 컨텐츠 영역 (FriendListPage / FriendAddPage / ChattingView) */
@@ -43,7 +45,7 @@
     color: #4f5660;
     cursor: pointer;
     font-size: 14px;
-    text-align: left;
+    text-align: center;
 }
 
 .menu_list {
@@ -55,7 +57,7 @@
     align-items: center;
     padding: 10px;
     margin: 2px 0;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 500;
     color: #4f5660;
@@ -106,6 +108,7 @@
 
 .dm_user_box:hover {
     background-color: #dcdfe4;
+    border-radius: 10px;
 }
 
 .dm_user_box.active {
@@ -126,3 +129,18 @@
     margin-right: 12px;
     background-color: #fff;
 }
+
+/* user_profile_area */
+/* aside_user_box */
+.server_menu_user_profile {width: 95%;height: 60px;background: #fff;position: absolute;bottom: 1%;left: 50%;transform: translate(-50%, 0%);border-radius: 10px;}
+.user_box_area {width: 93%;height: 100%;display: flex;justify-content: space-between;align-items: center;margin: 0 auto;}
+
+.user_lbox {display: flex;height: 100%;flex-direction: row;align-items: center;justify-content: flex-start;gap: 5px;}
+.user_lbox img {width: 35px;height: 35px;border-radius: 100%;border: 1px solid black;}
+
+.mini_l_box {display: flex;flex-direction: column;align-items: center;height: 35px;}
+.mini_l_box span {font-size: 11px;height: 15px;}
+.mini_l_box strong {height: 20px;}
+
+.user_rbox {display: flex;flex-direction: row;justify-content: space-between;gap: 15px;}
+.user_rbox img {width: 20px;height: 20px;cursor: pointer;}

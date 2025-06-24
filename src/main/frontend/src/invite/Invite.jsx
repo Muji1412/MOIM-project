@@ -7,17 +7,9 @@ export default function Invite() {
     const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
-        const pathParts = window.location.pathname.split('/');
-        const inviteCode = pathParts[pathParts.length - 1];
-
         const joinGroup = async () => {
-            const token = sessionStorage.getItem('accessToken');
-
-            if (!token) {
-                alert('로그인이 필요합니다.');
-                window.location.href = '/user/login.do'; // 로그인 페이지로 리다이렉트
-                return;
-            }
+            const pathParts = window.location.pathname.split('/');
+            const inviteCode = pathParts[pathParts.length - 1];
 
             if (!inviteCode) {
                 setStatus('error');
@@ -25,18 +17,21 @@ export default function Invite() {
                 return;
             }
 
+            // 더이상 세션방식으로 처리하지 않으므로, fetch하기 전에 처리하는게 아니라, fetch 해서 받은 응답으로 처리
             try {
                 const response = await fetch(`/api/groupsInvite/join?inviteCode=${inviteCode}`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
                 });
 
                 if (response.ok) {
                     setStatus('success');
                     alert('서버 참여에 성공했습니다! 메인 페이지로 이동합니다.');
-                    window.location.href = '/';
+                    window.location.href = '/home';
+
+                } else if (response.status === 401) {
+                    alert('서버에 참여하려면 로그인이 필요합니다.');
+                    window.location.href = '/login.do'; // 로그인
+
                 } else {
                     const errorText = await response.text();
                     setErrorMessage(errorText || '서버 참여에 실패했습니다. 링크가 만료되었거나 유효하지 않습니다.');
@@ -50,7 +45,7 @@ export default function Invite() {
         };
 
         joinGroup();
-    }, []); // 페이지가 처음 로드될 때 한 번만 실행
+    }, []);
 
     return (
         <div className="invite-container">

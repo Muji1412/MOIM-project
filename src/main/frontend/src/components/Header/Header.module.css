@@ -1,19 +1,6 @@
-.header {
-  width: 100%;
-  height: 50px;
-  background: #23272a;
-}
+.header {width: 100%;height: 50px;background: #23272a;}
 
-.hr_box {
-  display: flex;
-  flex-direction: row;
-  width: 150px;
-  height: 100%;
-  align-items: center;
-  color: #fff;
-  gap: 15px;
-  margin: 0 auto;
-}
+.hr_box {display: flex;flex-direction: row;width: 150px;height: 100%;align-items: center;color: #fff;gap: 15px;margin: 0 auto;}
 
 /* 서버 선택 시 header에 해당 서버의 이름과 img가 보이도록 수정 */
 .hr_box img{max-width: 20px; max-height: 20px; width: 100%;height: 100%;border-radius: 5px;}
@@ -21,65 +8,20 @@
 .server_icon_placeholder_name{text-align: center;}
 
 /* aside */
-.aside {
-  width: 350px;
-  height: calc(100vh - 50px);
-  min-height: 300px;
-  float: left;
-}
-.aside_container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-}
-.aside_box {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  background: #23272a;
-  flex-direction: row;
-  overflow: hidden;
-}
+.aside {width: 350px;height: calc(100vh - 50px);min-height: 300px;float: left;}
+.aside_container {width: 100%;height: 100%;display: flex;flex-direction: column;position: relative;overflow: hidden;}
+.aside_box {width: 100%;height: 100%;display: flex;background: #23272a;flex-direction: row;overflow: hidden;}
 
-.server_list {
-  flex: 1;
-  overflow-y: auto ;
-  width: 20%;
-  max-height: calc(100vh - 120px);
-  /*overflow: hidden;*/
-  min-height: 0;
-
+.server_list {flex: 1;overflow-y: auto ;width: 20%;max-height: calc(100vh - 120px); /*overflow: hidden;*/min-height: 0;
   /* 브라우저별로 스크롤바 UI 숨김 처리 */
   -ms-overflow-style: none;  /* Internet Explorer, Edge */
   scrollbar-width: none;     /* Firefox */
 }
-.server_box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
+.server_box {display: flex;flex-direction: column;align-items: center;justify-content: center;gap: 8px;}
 
-.default_server {
-  width: 100%;
-  height: 50px;
-  flex-direction: row;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  position: relative;
-}
-.default_server .default_fill {
-  height: 100%;
-  width: 5px;
-}
-.default_server .default_ic {
-  background: #c3ee41;
-}
+.default_server {width: 100%;height: 50px;flex-direction: row;display: flex;align-items: center;justify-content: flex-start;position: relative;}
+.default_server .default_fill {height: 100%;width: 5px;}
+.default_server .default_ic {background: #c3ee41;}
 
 .server_divider {
   width: 70%;
@@ -144,7 +86,7 @@
   cursor:pointer;
 }
 
-.add_server .server_ic{  background: #d9d9d9;}
+/*.add_server .server_ic{  background: #d9d9d9;}*/
 
 .home_ic img {
   width: 30px;
@@ -186,6 +128,7 @@
   background: #c3ee41 !important;
   transition: 0.2s;
   cursor: pointer;
+  color: #282c34 !important;
 }
 
 /* .list_item:hover .fill {width: 5px;}
@@ -196,6 +139,8 @@
 }
 .list_item:hover .server_ic:not(.active_ic) {
   background: #c3ee41;
+  color: #282c34;
+/**/
 }
 
 /* server_menu */

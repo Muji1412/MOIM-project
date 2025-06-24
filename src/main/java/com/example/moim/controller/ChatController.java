@@ -2,6 +2,9 @@ package com.example.moim.controller;
 
 import com.example.moim.chatting.ChatMessage;
 import com.example.moim.chatting.ChatService;
+import com.example.moim.chatting.ChatSessionManager;
+import com.example.moim.command.UserListResponse;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -10,15 +13,23 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import org.springframework.http.ResponseEntity; // 추가 import
+import org.springframework.http.HttpStatus; // 추가 import
 
 @Controller // STOMP(WebSocket) 메시지 처리를 위한 컨트롤러임을 명시
 public class ChatController {
 
     private final ChatService chatService;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChatSessionManager sessionManager;
 
     // 생성자 주입 방식
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService,
+                          RedisTemplate<String, Object> redisTemplate,
+                          ChatSessionManager sessionManager) {
         this.chatService = chatService;
+        this.redisTemplate = redisTemplate;
+        this.sessionManager = sessionManager;
     }
 
     // 1. 실시간 채팅 메시지 저장 (채널별)
@@ -47,7 +58,77 @@ public class ChatController {
     @GetMapping("/api/chat/{groupName}/{channelName}/all")
     @ResponseBody
     public List<ChatMessage> getAllChats(@PathVariable String groupName, @PathVariable String channelName) {
+
+        String key = "chat:" + groupName + ":" + channelName;
+        System.out.println("조회 키: " + key);
+
+        List<Object> result = redisTemplate.opsForList().range(key, 0, -1);
+        System.out.println("조회 결과: " + result);
+
         return chatService.getChatsByChannel(groupName, channelName);
+    }
+
+    // 4. 채널 사용자 목록 조회 (REST)
+    @GetMapping("/api/chat/users/{channelName}")
+    @ResponseBody
+    public ResponseEntity<UserListResponse> getChannelUsers(@PathVariable String channelName) {
+        try {
+            List<String> users = sessionManager.getChannelUsers(channelName);
+
+            UserListResponse response = new UserListResponse();
+            response.setChannelName(channelName);
+            response.setUsers(users);
+            response.setUserCount(users.size());
+            response.setTimestamp(System.currentTimeMillis());
+
+            System.out.println("채널 " + channelName + " 사용자 목록 조회: " + users);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("사용자 목록 조회 실패: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new UserListResponse());
+        }
+    }
+
+    // 5. 채널 입장 처리 (WebSocket)
+    @MessageMapping("/chat/join/{groupName}")
+    public void joinChannel(@DestinationVariable String groupName,
+                            ChatMessage message,
+                            org.springframework.messaging.simp.SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        String username = message.getUser();
+        String channel = message.getChannel();
+
+        // 사용자를 채널에 추가
+        sessionManager.addUser(channel, sessionId, username);
+
+        System.out.println(username + "이(가) " + channel + " 채널에 입장했습니다. (세션: " + sessionId + ")");
+
+        // 입장 메시지 생성 (선택사항)
+        ChatMessage joinMessage = new ChatMessage();
+        joinMessage.setUser("System");
+        joinMessage.setText(username + "님이 채팅방에 입장했습니다.");
+        joinMessage.setChannel(channel);
+        joinMessage.setDate(new java.util.Date().toString());
+
+        // 채팅 기록에 저장 (선택사항)
+        // chatService.saveChat(groupName, channel, joinMessage);
+    }
+
+    // 6. 채널 퇴장 처리 (WebSocket)
+    @MessageMapping("/chat/leave/{groupName}")
+    public void leaveChannel(@DestinationVariable String groupName,
+                             ChatMessage message,
+                             org.springframework.messaging.simp.SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        String username = message.getUser();
+        String channel = message.getChannel();
+
+        // 사용자를 채널에서 제거
+        sessionManager.removeUser(channel, sessionId);
+
+        System.out.println(username + "이(가) " + channel + " 채널에서 퇴장했습니다.");
     }
 
 }

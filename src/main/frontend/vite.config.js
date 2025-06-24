@@ -14,9 +14,6 @@ export default defineConfig({
                 // ✅ 메인 애플리케이션 진입점 (헤더와 컨텐츠를 모두 포함)
                 main: path.resolve(__dirname, 'src/main/index.jsx'),
 
-                // ❌ Header.jsx는 App.jsx 내부에서 import되므로 별도 진입점이 필요 없습니다.
-                // header: path.resolve(__dirname, 'src/Header.jsx'),
-
                 // ✅ 로그인/회원가입처럼 완전히 다른 페이지는 그대로 둡니다.
                 login: path.resolve(__dirname, 'src/user/login/Main.jsx'),
                 signup: path.resolve(__dirname, 'src/user/signup/Main.jsx'),
