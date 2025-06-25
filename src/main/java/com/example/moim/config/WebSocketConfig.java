@@ -1,7 +1,11 @@
 package com.example.moim.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration // 설정세팅 어노테이션
@@ -44,6 +48,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // ⭐️ 사용자별 목적지 prefix 설정 ⭐️
         config.setUserDestinationPrefix("/user");
+
+        config.enableSimpleBroker("/topic")
+                .setTaskScheduler(heartBeatScheduler())
+                .setHeartbeatValue(new long[]{10000, 10000});
+    }
+
+    @Bean
+    public TaskScheduler heartBeatScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("websocket-heartbeat-");
+        scheduler.initialize();
+        return scheduler;
     }
 
 }
