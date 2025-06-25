@@ -29,6 +29,11 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/")
                 .setCachePeriod(0);
+
+        // 화이트보드 JavaScript 청크 파일들을 위한 매핑 추가
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/")
+                .setCachePeriod(0);
     }
 
 }
