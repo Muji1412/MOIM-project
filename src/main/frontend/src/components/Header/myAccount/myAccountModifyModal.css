@@ -1,4 +1,4 @@
-.modal-overlay {
+.modify_modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -11,7 +11,7 @@
     z-index: 1000;
 }
 
-.modal {
+.modify_modal {
     background: #23272a;
     border-radius: 12px;
     padding: 32px;
