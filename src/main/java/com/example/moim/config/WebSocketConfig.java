@@ -41,17 +41,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // ⭐️ 메시지 브로커 설정 개선 ⭐️
-        config.enableSimpleBroker("/sub", "/topic", "/queue") // /user 추가
-                .setTaskScheduler(null); // 기본 스케줄러 사용
+        config.enableSimpleBroker("/sub", "/topic", "/queue")
+                .setTaskScheduler(heartBeatScheduler())
+                .setHeartbeatValue(new long[]{10000, 10000});
 
         config.setApplicationDestinationPrefixes("/app", "/pub");
 
         // ⭐️ 사용자별 목적지 prefix 설정 ⭐️
         config.setUserDestinationPrefix("/user");
 
-        config.enableSimpleBroker("/topic")
-                .setTaskScheduler(heartBeatScheduler())
-                .setHeartbeatValue(new long[]{10000, 10000});
     }
 
     @Bean
