@@ -16,7 +16,7 @@
 .box{
     overflow: hidden;
     border-radius: 12px;
-    width: 770px;
+    width: 720px;
     text-align: center;
     background: #eeeeee;;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -25,9 +25,9 @@
 /* 좌측 회색 메뉴*/
 .menu {
     background: #e1e0e1;
-    width: 20%;
-    min-width: 220px;
-    height: 800px;
+    width: 30%;
+    /*min-width: 220px;*/
+    height: 730px;
     float: left;
 }
 
@@ -59,23 +59,23 @@
     font-size: 16px;
     border-bottom: 1px solid #a7a7a7;
     border-top: 1px solid #a7a7a7;
-    padding: 4px;
-    padding-bottom: 4px;
+    padding: 6px;
     margin: 10px 20px;
     cursor: pointer;
     text-align: left;
-    height: 32px;
+    height: 40px;
 }
 
 .menu-logout > img{
     float: right;
     margin-right: 10px;
+    margin-top: 4px;
 }
 
 /* 헤더, 좌측메뉴 제외한 흰 부분*/
 .myAccount-background {
     width: 60%;
-    min-width: 500px;
+    /*min-width: 500px;*/
     float: left;
     margin-left: 50px;
     background: #eeeeee;
@@ -84,7 +84,7 @@
 /* 맨 위 헤드라인 부분 */
 .myAccount-headline {
     width: 60%;
-    min-width: 400px;
+    min-width: 420px;
     overflow: hidden;
     flex-direction: row;
     vertical-align: middle;
@@ -92,6 +92,7 @@
     justify-content: center;
     border-bottom: #777777;
     padding: 10px 30px;
+    height: 100px;
 }
 
 /* 제목 - my account */
@@ -124,7 +125,7 @@
     width: 60%;
     min-width: 400px;
     border-radius: 18px;
-    padding: 40px 30px;
+    padding: 25px 20px;
     text-align: center;
     margin-bottom: 15px;
 }
@@ -188,7 +189,7 @@
 
 .inner-content {
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     text-align: left;
 }
 
@@ -199,7 +200,7 @@
 
 /*비밀번호 바꾸기*/
 .pw-change-btn{
-    width: 30%;
+    width: 25%;
     background: #8aa82b;
     color: white;
     padding: 6px 0;

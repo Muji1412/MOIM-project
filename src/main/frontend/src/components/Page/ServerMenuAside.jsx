@@ -275,11 +275,15 @@ export default function ServerMenuAside() {
 
     //캘린더로 이동시 groupNo 전달
     const navigateToCalendar = () => {
+        // if (!selectedServerId || selectedServerId === "default") {
+        //     alert("먼저 서버를 선택해주세요!");
+        //     return;
+        // }
         const calData ={
-            groupNo: selectedServerId
+            groupNo: serverId
         }
         sessionStorage.setItem('calendarData', JSON.stringify(calData));
-        navigate(`/calendar`);
+        navigate('/calendar');
     }
 
     // accountDelete 모달 오픈시

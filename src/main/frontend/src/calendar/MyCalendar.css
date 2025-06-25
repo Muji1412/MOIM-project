@@ -26,6 +26,24 @@
     border-radius: 5px;
 }
 
+/*Month, week, day, agenda 중 선택된 버튼 색깔*/
+.rbc-active {
+    background-color: #8aa82b;
+    color: #cccccc;
+}
+
+.rbc-show-more {
+    color: #8aa82b;
+}
+
+.rbc-allday-cell {
+    /*display: none;*/
+}
+
+.rbc-time-content{
+    display: none;
+}
+
 /*일정 */
 /*.rbc-event {*/
 /*    border: 1px solid white !important;*/

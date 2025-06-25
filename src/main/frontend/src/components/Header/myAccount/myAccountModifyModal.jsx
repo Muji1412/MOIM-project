@@ -175,7 +175,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                 {/* 제목 위 하트 아이콘 */}
                 <p className="modal-header-heart"><img src="/img/symbol_heart.png" alt="heart"/> </p>
                 {/* 창 제목 */}
-                <h2 className="modal-title">Modifying User Information</h2>
+                <h2 className="modal-title">사용자 정보 수정</h2>
                 <div className="modal-inner-box">
                     {/*이메일*/}
                     <div className="modal-inner-label">
@@ -190,7 +190,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
 
                     {/*닉네임*/}
                     <div className="modal-inner-label">
-                        Nickname <p className="modal-inner-star">*</p>
+                        닉네임 <p className="modal-inner-star">*</p>
                     </div>
                     <input className="modal-inner-input" value={newNick}
                            ref={userNickRef}
@@ -200,7 +200,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
 
                     {/*전화번호*/}
                     <div className="modal-inner-label">
-                        Phone <p className="modal-inner-star">*</p>
+                        전화번호 <p className="modal-inner-star">*</p>
                     </div>
                     <input className="modal-inner-input" value={userPhone}
                            ref={userPhoneRef}
@@ -210,14 +210,14 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                     {phoneCheck === false && <span style={{ color: '#97b82d' }}></span>}
                     {/*상태메시지*/}
                     <div className="modal-inner-label">
-                        Status Message <p className="modal-inner-star"></p>
+                        상태메시지 <p className="modal-inner-star"></p>
                     </div>
                     <input className="modal-inner-input" value={userMsg}
                            onChange={e => setUserMsg(e.target.value)}></input>
                     {/*프로필 이미지*/}
                     <div className="profile-image-box">
                         <div className="modal-inner-label">
-                            Profile Image <p className="modal-inner-star"></p>
+                            프로필 이미지 <p className="modal-inner-star"></p>
                         </div>
                         <input  id="fileUpload" type="file" accept="image/*"
                                 style={{display:"none"}} onChange={handleFileChange}></input>
@@ -229,11 +229,11 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                 </div>
                 {/*수정 버튼*/}
                 <button className="modal-btn" onClick={handleSave}>
-                    Modify
+                    수정
                 </button>
                 {/*닫기 버튼*/}
                 <button className="modal-btn-close" onClick={onClose}>
-                    Close
+                    닫기
                 </button>
             </div>
         </div>
