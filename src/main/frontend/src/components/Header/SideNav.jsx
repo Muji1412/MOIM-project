@@ -1,7 +1,7 @@
 //SideNav
 
 import React, {useState, useEffect, useRef} from "react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import styles from "./SideNav.module.css";
 import modalStyles from "./Modal.module.css";
 import {useServer} from '../../context/ServerContext';
@@ -11,6 +11,7 @@ import {useServerChat} from '../../context/ServerChatContext';
 export default function SideNav() {
     const navigate = useNavigate();
     const {connectToServer} = useServerChat()
+    const {serverId} = useParams();//url에서 serverId 추출해서 서버 불러오기 부분에 새로고침 눌러도 해당 서버 벗어나지 않게
 
     const {
         servers,
@@ -77,6 +78,22 @@ export default function SideNav() {
                         image: group.groupImage || ""
                     }));
                     setServers(mappedServers);
+
+                    // URL 파라미터로 상태 복원
+                    if (serverId && serverId !== "default") {
+                        const foundServer = mappedServers.find(s => s.id === serverId);
+                        if (foundServer) {
+                            setSelectedServerId(serverId);
+                            console.log("서버 상태 복원됨:",serverId);
+                        }else{
+                            navigate('/home');
+                            setSelectedServerId("default");
+                        }
+                    }else{
+                        //url에 serverId가 없으면 기본값
+                        setSelectedServerId("default");
+                    }
+
                 } else if (response.status === 401) {
                     console.error('인증 실패: 로그인이 필요합니다');
                 } else {
@@ -88,7 +105,8 @@ export default function SideNav() {
         };
 
         fetchServers();
-    }, [setServers]);
+    // }, [setServers]);
+    }, [setServers, serverId,navigate,setSelectedServerId]);
 
     // 컨텍스트 메뉴 닫기
     useEffect(() => {
@@ -113,7 +131,8 @@ export default function SideNav() {
                     console.log("서버 연결 시도:", selectedServer);
                     await connectToServer(selectedServer);
                     console.log("웹소켓 연결 완료, 페이지 이동");
-                    navigate(`/servers/${serverId}`);
+                    // navigate(`/servers/${serverId}`);
+                    navigate(`/servers/${serverId}?channelName=${encodeURIComponent('일반채팅')}`);
                 } catch (error) {
                     console.error("웹소켓 연결 실패:", error);
                     alert("서버 연결에 실패했습니다. 다시 시도해주세요.");
@@ -252,7 +271,9 @@ export default function SideNav() {
                         }]);
                         setSelectedChannel(defaultChannel.chanName);
 
-                        navigate(`/chat?groupName=${encodeURIComponent(createdServer.name)}&channelName=${encodeURIComponent(defaultChannel.chanName)}`);
+                        // navigate(`/chat?groupName=${encodeURIComponent(createdServer.name)}&channelName=${encodeURIComponent(defaultChannel.chanName)}`);
+                        navigate(`/servers/${createdServer.id}?channelName=${encodeURIComponent('일반채팅')}`);
+
                     } else {
                         console.error('기본 채널 생성 실패');
                     }

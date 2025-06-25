@@ -79,9 +79,6 @@ function ChattingView() {
             alert('친구추가 중 오류가 발생했습니다.');
             setMemberContextMenu(prev => ({...prev, visible: false}));
         }
-
-        // TODO 종수 이거 친구추가 끝나고나면 에러 안터지게 컨텍스트 창 꺼지게 설정, 이대로 쓰면 언디파인드 터짐
-
     };
 
 

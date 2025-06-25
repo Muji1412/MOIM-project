@@ -12,8 +12,11 @@
 /* 채널 헤더 */
 .channel_header {
     flex-shrink: 0; /* 높이가 줄어들지 않도록 고정 */
-    padding: 20px 24px;
+    padding: 0 24px;
     border-bottom: 1px solid #e3e5e8;
+    height: 65px;
+    display: flex;
+    align-items: center;
 }
 
 .channel_title {
