@@ -1,6 +1,8 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import './todoList.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 export default function todoList({groupNo }) {
 
@@ -379,7 +381,15 @@ export default function todoList({groupNo }) {
                                 </td>
                                 <td>
                                     <button className="add-btn" title="추가"
-                                            onClick={handleTodoAdd}>＋</button>
+                                            onClick={handleTodoAdd}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                             fill="currentColor" className="bi bi-patch-plus" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                  d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
+                                            <path
+                                                d="m10.273 2.513-.921-.944.715-.698.622.637.89-.011a2.89 2.89 0 0 1 2.924 2.924l-.01.89.636.622a2.89 2.89 0 0 1 0 4.134l-.637.622.011.89a2.89 2.89 0 0 1-2.924 2.924l-.89-.01-.622.636a2.89 2.89 0 0 1-4.134 0l-.622-.637-.89.011a2.89 2.89 0 0 1-2.924-2.924l.01-.89-.636-.622a2.89 2.89 0 0 1 0-4.134l.637-.622-.011-.89a2.89 2.89 0 0 1 2.924-2.924l.89.01.622-.636a2.89 2.89 0 0 1 4.134 0l-.715.698a1.89 1.89 0 0 0-2.704 0l-.92.944-1.32-.016a1.89 1.89 0 0 0-1.911 1.912l.016 1.318-.944.921a1.89 1.89 0 0 0 0 2.704l.944.92-.016 1.32a1.89 1.89 0 0 0 1.912 1.911l1.318-.016.921.944a1.89 1.89 0 0 0 2.704 0l.92-.944 1.32.016a1.89 1.89 0 0 0 1.911-1.912l-.016-1.318.944-.921a1.89 1.89 0 0 0 0-2.704l-.944-.92.016-1.32a1.89 1.89 0 0 0-1.912-1.911z"/>
+                                        </svg>
+                                    </button>
                                 </td>
                             </tr>
                             {provided.placeholder}
@@ -395,19 +405,32 @@ export default function todoList({groupNo }) {
     )
 }
 
-{/*{getFilteredTodos().map((todo, idx) => (*/}
-{/*    <React.Fragment key={todo.todoNo}>*/}
-{/*        <tr>*/}
-{/*            <td>*/}
-{/*                <span className="drag-icon">☰</span>*/}
-{/*            </td>*/}
-{/*            <td className='todo-title-for-hover'>{todo.todoTitle}</td>*/}
-{/*            <td className='middle'>*/}
-{/*                <div style={{textAlign: "center"}}>*/}
-{/*                    <button*/}
-{/*                        onClick={() => handleToggleDone(todo.todoNo)}*/}
-{/*                        style={{*/}
-{/*                            width: 18, height: 18,*/}
+{/*{getFilteredTodos().map((todo, idx) => (*/
+}
+{/*    <React.Fragment key={todo.todoNo}>*/
+}
+{/*        <tr>*/
+}
+{/*            <td>*/
+}
+{/*                <span className="drag-icon">☰</span>*/
+}
+{/*            </td>*/
+}
+{/*            <td className='todo-title-for-hover'>{todo.todoTitle}</td>*/
+}
+{/*            <td className='middle'>*/
+}
+{/*                <div style={{textAlign: "center"}}>*/
+}
+{/*                    <button*/
+}
+{/*                        onClick={() => handleToggleDone(todo.todoNo)}*/
+}
+{/*                        style={{*/
+}
+{/*                            width: 18, height: 18,*/
+}
 {/*                            borderRadius: '50%',*/}
 {/*                            background: '#fff',*/}
 {/*                            border: '1.5px solid #222',*/}

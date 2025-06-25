@@ -207,7 +207,7 @@
     font-size: 1.25rem;
 }
 .add-btn:hover {
-    background: #dcffe2;
+    background: #ecfd99;
 }
 
 .add-input {
@@ -223,6 +223,10 @@
     border-radius: 6px;
     border: 1px solid #ccc;
     padding: 4px 5px;
+}
+
+.bi-patch-plus{
+
 }
 
 .heartSym{

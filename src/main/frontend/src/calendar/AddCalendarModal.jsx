@@ -120,31 +120,31 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
                                 type="radio"
                                 name="progress"
                                 value="진행 중"
-                                checked={isDone === "in_progress"}
+                                checked={isDone === "진행 중"}
                                 onChange={handleRadio}
-                            /> In Progress
+                            /> 진행 중
                         </label>
                         <label className="label-radio">
                             <input
                                 type="radio"
                                 name="progress"
                                 value="완료"
-                                checked={isDone === "Done"}
+                                checked={isDone === "완료"}
                                 onChange={handleRadio}
-                            /> Done
+                            /> 완료
                         </label>
                         <label className="label-radio">
                             <input
                                 type="radio"
                                 name="progress"
                                 value="취소"
-                                checked={isDone === "Canceled"}
+                                checked={isDone === "취소"}
                                 onChange={handleRadio}
-                            /> Canceled
+                            /> 취소
                         </label><br/>
                         </div>
-                        <button type="submit" className="modal-btn" onClick={handleSubmit}>Save</button>
-                        <button type="button" className="modal-btn-close" onClick={onClose}>Close</button>
+                        <button type="submit" className="modal-btn" onClick={handleSubmit}>저장</button>
+                        <button type="button" className="modal-btn-close" onClick={onClose}>닫기</button>
                 </div>
             </div>
         </div>
