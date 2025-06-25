@@ -4,8 +4,10 @@ import MyAccountModifyModal from "./myAccountModifyModal";
 import ChangePasswordModal from "./ChangePassword/changePasswordModal";
 import AccountDeleteModal from "./AccountDelete/accountDeleteModal";
 import LogoutModal from "./Logout/logoutModal";
+import AccountDeleteSuccessModal from "./AccountDelete/accountDeleteSuccessModal";
 
-export default function MyAccount ({isOpen, onClose}) {
+export default function MyAccount ({isOpen, onClose, onDelete }) {
+    if (!isOpen) return null;
     const [userInfo, setUserInfo] = useState({
         email: '',
         nickname: '',
@@ -44,6 +46,7 @@ export default function MyAccount ({isOpen, onClose}) {
     }
 
     useEffect(() => {
+        console.log("MyAccount 렌더링, onDelete prop:", onDelete);
         fetchUserInfo();
         if (showLogoutModal || showModifyModal || showPwModal || showDeleteModal) {
             window.addEventListener('keydown', handleKeyDown);
@@ -93,14 +96,23 @@ export default function MyAccount ({isOpen, onClose}) {
     };
 
     //회원탈퇴 모달창 켜기
-    const handleDeleteAccount = () => {
-        setShowDeleteModal(true);
-    }
+    // const handleDeleteAccount = () => {
+    //     //setShowDeleteModal(true);
+    //     //onDelete(); // 부모(Home)의 콜백 호출!
+    //     console.log('onDelete:', onDelete);
+    //     if (typeof onDelete === "function") onDelete();
+    //     else console.error('onDelete is not a function!');
+    // }
 
     //회원탈퇴 모달창 끄기
-    const handleDeleteCloseAccount = () => {
-        setShowDeleteModal(false);
-    }
+    // const handleDeleteCloseAccount = () => {
+    //     setShowDeleteModal(false);
+    // }
+
+    const handleDeleteAccount = () => {
+        if (typeof onDelete === "function") onDelete();
+        else console.error('onDelete is not a function!');
+    };
 
     //창닫기
     const handleClose = () => {
@@ -134,34 +146,35 @@ export default function MyAccount ({isOpen, onClose}) {
                                 <img src={userInfo.img || "/bundle/img/default_profile.png"} alt="user_img" className="profile-image-img"/>
                             </div>
                             <div>
-                                <button className="modify-btn" onClick={handleModify}>Modify</button>
+                                <button className="modify-btn" onClick={handleModify}>회원정보 수정</button>
                             </div>
                         </div>
                         {/* 회원정보 표시되는 흰 박스*/}
                         <div className="myAccount-container-under">
                             {/* 닉네임 */}
-                            <div className="inner-title">Nickname</div>
+                            <div className="inner-title">닉네임</div>
                             <div className="inner-content">{userInfo.nickname}</div>
                             {/* 아이디 */}
-                            <div className="inner-title">User name</div>
+                            <div className="inner-title">ID</div>
                             <div className="inner-content">{userInfo.username}</div>
                             {/* 이메일 */}
                             <div className="inner-title">Email</div>
                             <div className="inner-content">{userInfo.email}</div>
                             {/* 전화번호 */}
-                            <div className="inner-title">Phone</div>
+                            <div className="inner-title">전화번호</div>
                             <div className="inner-content">{userInfo.phone}</div>
                             {/* 상태메시지 */}
-                            <div className="inner-title">Status Message</div>
+                            <div className="inner-title">상태메시지</div>
                             <div className="inner-content">{userInfo.message}</div>
                         </div>
                     </div>
                     {/* 비밀번호 바꾸기 */}
                     <div className="inner-title">Passwords and Authentication<br/>
-                    <button className="pw-change-btn" onClick={handleChangePw}> Change Password </button></div>
+                    <button className="pw-change-btn" onClick={handleChangePw}> 비밀번호 변경하기 </button></div>
                     {/* 회원 탈퇴 */}
                     <div className="inner-title">Remove Account <br/>
-                    <button className="account-delete-btn" onClick={handleDeleteAccount}> Delete </button></div>
+                    <button className="account-delete-btn"
+                            onClick={handleDeleteAccount}> 회원 탈퇴 </button></div>
 
                     {/*로그아웃 모달창*/}
                     <LogoutModal isOpen={showLogoutModal} onClose={handleCloseLogout}/>
@@ -176,10 +189,10 @@ export default function MyAccount ({isOpen, onClose}) {
                     {userInfo && showPwModal && (< ChangePasswordModal isOpen={showPwModal}
                                          userInfo={userInfo}
                                          onClose={handleChangePwCloseModal}/>)}
-                    {/* 회원 탈퇴 모달창 */}
-                    {userInfo && showDeleteModal && (< AccountDeleteModal isOpen={showDeleteModal}
-                                                                       userInfo={userInfo}
-                                                                       onClose={handleDeleteCloseAccount}/>)}
+                    {/*/!* 회원 탈퇴 모달창 *!/*/}
+                    {/*{userInfo && showDeleteModal && (< AccountDeleteModal isOpen={showDeleteModal}*/}
+                    {/*                                                   userInfo={userInfo}*/}
+                    {/*                                                   onClose={handleDeleteCloseAccount}/>)}*/}
                 </div>
             </div>
         </div>

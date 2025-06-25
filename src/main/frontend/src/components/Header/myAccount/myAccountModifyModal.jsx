@@ -222,8 +222,8 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                         <input  id="fileUpload" type="file" accept="image/*"
                                 style={{display:"none"}} onChange={handleFileChange}></input>
                         <label htmlFor="fileUpload" className="custom-file-label">
-                            {previewUrl ? <img src={previewUrl} alt="previewImg"/>
-                                : <img src="/bundle/img/add_plus_ic.png" alt="addImg"/>}
+                            {previewUrl !== null ? <img src={previewUrl} alt="previewImg"/>
+                                : <img src={userImg} alt="addImg"/>}
                         </label>
                     </div>
                 </div>

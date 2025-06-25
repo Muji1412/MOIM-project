@@ -4,22 +4,41 @@ import React, {useState} from 'react';
 import {useDm} from '../../context/DmContext';
 import {useAuth} from '../../context/AuthContext';
 import styles from './PageLayout.module.css';
-import MyAccount from "../Header/myAccount/myAccount"; // 4단계에서 만들 CSS
+import MyAccount from "../Header/myAccount/myAccount";
+import AccountDeleteModal from "../Header/myAccount/AccountDelete/accountDeleteModal";
+import AccountDeleteSuccessModal from "../Header/myAccount/AccountDelete/accountDeleteSuccessModal"; // 4단계에서 만들 CSS
+import {useNavigate, useParams} from "react-router-dom";
 
 export default function FriendsAside() {
     const {dmRooms, selectDmRoom, activeDmRoom, returnToFriendsList} = useDm();
     const {currentUser} = useAuth();
     const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
+    const [whichModal, setWhichModal] = useState(null);
+    const navigate = useNavigate();
 
     //myAccount 모달창 켜기
     const openAccountModifyModal = () => {
-        setIsAccountModifyModalOpen(true);
+        // setIsAccountModifyModalOpen(true);
+        setWhichModal('edit');
     }
 
     //myAccount 모달창 끄기
     const closeAccountModifyModal = () => {
         setIsAccountModifyModalOpen(false);
     }
+
+    // accountDelete 모달 오픈시
+    const openDeleteModal = () => {
+        console.log('openDeleteModal 호출됨');
+        setWhichModal('delete');
+    };
+    // 3단계: delete 성공 모달 오픈 (delete에서 호출)
+    const openDeleteSuccessModal = () => setWhichModal('deleteSuccess');
+    // 4단계: delete 성공 모달 닫히면 홈에서 로그인 페이지로 이동
+    const handleDeleteSuccessClose = () => {
+        setWhichModal(null);         // 모달 모두 닫기
+        window.location.href = "/login.do";         // 로그인 페이지로 이동
+    };
 
     return (
         <aside className={styles.aside_menu}>
@@ -96,10 +115,25 @@ export default function FriendsAside() {
                 </div>
             </div>
             {/*회원정보 모달*/}
-            {isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}
-                                                     onClose={() => {
-                                                         closeAccountModifyModal();
-                                                     }}/>)}
+            {/*{isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}*/}
+            {/*                                         onClose={() => {*/}
+            {/*                                             closeAccountModifyModal();*/}
+            {/*                                         }}/>)}*/}
+            <MyAccount
+                isOpen={whichModal === 'edit'}  // or open={whichModal === 'edit'}
+                onDelete={openDeleteModal}
+                onClose={() => setWhichModal(null)}
+            />
+            {/**탈퇴(삭제) 버튼 클릭 시 호출**/}
+            <AccountDeleteModal
+                isOpen={whichModal === 'delete'}
+                onClose={() => setWhichModal(null)}
+                onDeleteSuccess={openDeleteSuccessModal} // **비밀번호 확인 후 탈퇴 성공시 호출**
+            />
+            <AccountDeleteSuccessModal
+                isOpen={whichModal === 'deleteSuccess'}
+                onClose={handleDeleteSuccessClose}   // **닫기 누르면 홈에서 로그인 이동**
+            />
         </aside>
     );
 }

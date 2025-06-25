@@ -1,6 +1,7 @@
 package com.example.moim.controller.users;
 
 import com.example.moim.command.*;
+import com.example.moim.entity.RefreshToken;
 import com.example.moim.entity.Users;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.repository.RefreshTokenRepository;
@@ -9,6 +10,8 @@ import com.example.moim.service.user.CustomUserDetails;
 import com.example.moim.service.user.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -120,28 +123,65 @@ public class UserRestController {
 
     //비밀번호 수정
     @PostMapping("/myAccount/modifyPw")
-    public ResponseEntity<?> modifyPw(@Valid @RequestBody PWChangeDTO pwChangeDTO) {
+    public ResponseEntity<?> modifyPw(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                      HttpServletResponse response,
+                                      @Valid @RequestBody PWChangeDTO pwChangeDTO) {
+        long userNo = userDetails.getUserNo();
         try {
             Users pwChangedUser = userService.modifyPw(pwChangeDTO);
-            return ResponseEntity.ok(Map.of(    "msg", "비밀번호가 변경되어 재 로그인이 필요합니다.",
-                    "userNick", pwChangedUser.getUserNick()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            RefreshToken e = refreshTokenRepository.findByUserUserNo(userNo)
+                    .orElseThrow(() -> new EntityNotFoundException("토큰이 없습니다."));
+            refreshTokenRepository.delete(e); //db에서 리프레시토큰 삭제
         } catch (EntityNotFoundException e) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return  ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+
+        Cookie accessTokenCookie = new Cookie("access_token", "");
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setMaxAge(0); // 즉시 만료
+        accessTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+
+        Cookie refreshTokenCookie = new Cookie("refresh_token", "");
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+        System.out.println("왜이래 또");
+        return ResponseEntity.ok(Map.of(    "msg", "비밀번호가 변경되어 재 로그인이 필요합니다."));
     }
 
     //회원 탈퇴
     @PostMapping("/deleteAccount")
-    public ResponseEntity<?> deleteAccount(@Valid @RequestParam String password) {
+    public ResponseEntity<?> deleteAccount(@Valid @RequestParam String password,
+                                           HttpServletResponse response) {
+        //액세스토큰, 리프레시토큰 모두 삭제
         try {
             userService.deleteAccount(password);
         } catch (Exception e) {
             return  ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
 
-        return ResponseEntity.ok("탈퇴가 완료되었습니다.");
+        Cookie accessTokenCookie = new Cookie("access_token", "");
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setMaxAge(0); // 즉시 만료
+        accessTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+
+        Cookie refreshTokenCookie = new Cookie("refresh_token", "");
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/my-info")
@@ -187,6 +227,36 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자가 없습니다.");
         }
         return ResponseEntity.status(200).body(Map.of("username", user.get().getUsername()));
+    }
+
+    //로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletResponse response) {
+        long userNo = userDetails.getUserNo();
+        try {
+            RefreshToken e = refreshTokenRepository.findByUserUserNo(userNo)
+                    .orElseThrow(() -> new EntityNotFoundException("토큰이 없습니다."));
+            refreshTokenRepository.delete(e); //로그아웃시 db에서 리프레시토큰 삭제
+        } catch (Exception e) {
+            return  ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+
+        Cookie accessTokenCookie = new Cookie("access_token", "");
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setMaxAge(0); // 즉시 만료
+        accessTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+
+        Cookie refreshTokenCookie = new Cookie("refresh_token", "");
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+        return ResponseEntity.ok().build();
     }
 
 

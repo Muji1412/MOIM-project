@@ -189,13 +189,13 @@ export default function Signup() {
             ref={usernameRef}
             onChange={handleIdChange}
           />
-          {nameCheck === true && <span style={{ color: '#ee2349' }}>ID is not available</span>}
-          {nameCheck === false && <span style={{ color: '#97b82d' }}>Available ID</span>}
+          {nameCheck === true && <span style={{ color: '#ee2349' }}>사용 불가능한 ID입니다</span>}
+          {nameCheck === false && <span style={{ color: '#97b82d' }}>사용 가능한 ID입니다</span>}
         </div>
         {/* 비밀번호 */}
         <div className="signup-input-group">
           <label>
-            Password <span className="required">*</span>
+            비밀번호 <span className="required">*</span>
           </label>
           <input
             type="password"
@@ -207,7 +207,7 @@ export default function Signup() {
         {/* 비밀번호 체크*/}
         <div className="signup-input-group">
           <label>
-            Confirm Password <span className="required">*</span>
+            비밀번호 확인 <span className="required">*</span>
           </label>
           <input
             type="password"
@@ -217,8 +217,8 @@ export default function Signup() {
             onChange={e => setPassword2(e.target.value)}
             onBlur={e => handlePwChange(e)}
           />
-          {pwCheck === true && <span style={{ color: '#ee2349' }}>Passwords don't match</span>}
-            {pwCheck === false && <span style={{ color: '#97b82d' }}>Passwords match</span>}
+          {pwCheck === true && <span style={{ color: '#ee2349' }}>비밀번호가 일치하지 않습니다</span>}
+            {pwCheck === false && <span style={{ color: '#97b82d' }}>비밀번호가 일치합니다</span>}
         </div>
         {/* 이메일 */}
         <div className="signup-input-group">
@@ -232,13 +232,13 @@ export default function Signup() {
             onChange={e => setUserEmail(e.target.value)}
             onBlur={handleEmailChange}
           />
-          {emailCheck === true && <span style={{ color: '#ee2349' }}>Email is not available</span>}
-          {emailCheck === false && <span style={{ color: '#97b82d' }}>Available Email</span>}
+          {emailCheck === true && <span style={{ color: '#ee2349' }}>사용 불가능한 이메일입니다</span>}
+          {emailCheck === false && <span style={{ color: '#97b82d' }}>사용 가능한 이메일입니다</span>}
         </div>
         {/* 닉네임 */}
         <div className="signup-input-group">
           <label>
-            Nick <span className="required">*</span>
+            닉네임 <span className="required">*</span>
           </label>
           <input
             className= {nickCheck === true? "input-error":"signup-input"}
@@ -246,13 +246,13 @@ export default function Signup() {
             ref={userNickRef}
             onChange={handleNickCheck}
           />
-          {nickCheck === true && <span style={{ color: '#ee2349' }}>Nickname is not available</span>}
-          {nickCheck === false && <span style={{ color: '#97b82d' }}>Available Nickname</span>}
+          {nickCheck === true && <span style={{ color: '#ee2349' }}>이미 사용 중인 닉네임입니다</span>}
+          {nickCheck === false && <span style={{ color: '#97b82d' }}>사용 가능한 닉네임입니다</span>}
         </div>
         {/* 핸드폰 */}
         <div className="signup-input-group">
           <label>
-            Phone <span className="required">*</span>
+            전화번호 <span className="required">*</span>
           </label>
           <input
             className="signup-input"
@@ -261,14 +261,14 @@ export default function Signup() {
             onChange={e => setUserPhone(e.target.value)}
             onBlur={(e) => handlePhone(e.target.value)}
           />
-            {phoneCheck === true && <span style={{ color: '#ee2349' }}>Please write in 11 digits number</span>}
+            {phoneCheck === true && <span style={{ color: '#ee2349' }}>11자리 숫자를 입력해 주세요</span>}
             {phoneCheck === false && <span style={{ color: '#97b82d' }}></span>}
         </div>
 
 
         {/* 회원가입 버튼 */}
         <button className="signup-btn" onClick={handleSignup}>
-          Sign up
+          회원 가입
         </button>
           <SignupSuccessModal isOpen={showModal} onClose={handleCloseModal} />
         </div>
