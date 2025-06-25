@@ -442,13 +442,52 @@ function ChattingView() {
         );
     };
 
-    // Context 상태 확인 로그
+    //새로고침시 웹소켓 연결 트리거
     useEffect(() => {
-        console.log("=== Context 상태 확인 ===");
-        console.log("연결 상태:", isConnected);
-        console.log("현재 서버:", currentServer);
-        console.log("서버명:", serverName);
-    }, [isConnected, currentServer, serverName]);
+        const autoConnectToServer = async () => {
+
+            console.log("isConnected:"+isConnected);
+            // 이미 연결되어 있으면 스킵
+            if (isConnected && currentServer?.id === serverId) {
+                console.log("이미 해당 서버에 연결되어 있음");
+                return;
+            }
+
+            // serverId가 있고 default가 아닐 때만 연결 시도
+            if (serverId && serverId !== "default") {
+                console.log("새로고침 후 자동 서버 연결 시도:", serverId);
+
+                try {
+                    // 서버 정보 가져오기
+                    const response = await fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const serverData = await response.json();
+                        const serverInfo = {
+                            id: serverId,
+                            name: serverData.groupName
+                        };
+
+                        // WebSocket 연결
+                        await connectToServer(serverInfo);
+                        console.log("자동 연결 완료:", serverInfo);
+                    } else {
+                        console.error("서버 정보 조회 실패");
+                    }
+                } catch (error) {
+                    console.error("자동 연결 중 오류:", error);
+                }
+            }
+        };
+
+        // 컴포넌트 마운트 시 자동 연결 시도
+        autoConnectToServer();
+    }, [serverId, isConnected, currentServer]); // serverId 변경 시에도 재연결
 
     // 날짜별 메시지 그룹화
     const groupByDate = messages.reduce((acc, msg) => {
