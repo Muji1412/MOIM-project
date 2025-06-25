@@ -279,10 +279,12 @@ export default function ServerMenuAside() {
         //     alert("먼저 서버를 선택해주세요!");
         //     return;
         // }
-        const calData ={
-            groupNo: serverId
+        if (serverId && serverId !== '') {
+            const calData ={
+                groupNo: serverId
+            }
+            sessionStorage.setItem('calendarData', JSON.stringify(calData));
         }
-        sessionStorage.setItem('calendarData', JSON.stringify(calData));
         navigate('/calendar');
     }
 

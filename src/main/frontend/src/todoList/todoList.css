@@ -16,7 +16,7 @@
 /*}*/
 
 .todo-container {
-    width: 100%;
+    width: 95%;
     margin: 30px auto;
     background: #fff;
     border: 2px solid #777777;
@@ -41,7 +41,7 @@
     position: absolute;
     top: 50px;
     right: 130px;
-    width: 80%;
+    width: 10%;
 }
 
 /*드롭다운 안되어있는 기본 버튼 상태 */

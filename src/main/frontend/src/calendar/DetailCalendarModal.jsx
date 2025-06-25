@@ -69,7 +69,6 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
         fetch('/api/calendar/modifyEvent', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({

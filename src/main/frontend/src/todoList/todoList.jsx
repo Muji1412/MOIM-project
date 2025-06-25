@@ -30,7 +30,6 @@ export default function todoList({groupNo }) {
         fetch("/api/todoList", {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/x-www-form-urlencoded"},
             // body: new URLSearchParams({ groupNo })
         })
@@ -139,15 +138,12 @@ export default function todoList({groupNo }) {
         fetch("api/todoList/modify", {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 todoNo: todoNo,
                 todoTitle: editData.title,
-                todoContent: editData.content,
-                todoEnd: editData.end,
-                todoIsDone : modIsDone
+                todoEnd: editData.end
             })
         }).then(r => {
             if (r.status === 200) {
@@ -174,8 +170,7 @@ export default function todoList({groupNo }) {
             await fetch(`/api/todoList/complete`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ todoNo, todoIsDone: nextStatus }),
             });
@@ -190,8 +185,7 @@ export default function todoList({groupNo }) {
         fetch("/api/todoList/delete", {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+                'Content-Type': 'application/json'
         }, body: JSON.stringify({ "todoNo" : todoNo }),})
             .then(res => {
                 if(res.status === 200) {
@@ -207,8 +201,7 @@ export default function todoList({groupNo }) {
     const handleTodoAdd = () => {
             fetch("api/todoList/add", {method: 'POST',
             headers: {
-            'Content-Type': 'application/json',
-                Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+            'Content-Type': 'application/json'
         }, body: JSON.stringify({ "todoTitle" : newTodo,
                                         "todoEnd" : newTodoEnd,
                                         "todoStart" : newTodoStart,
