@@ -23,8 +23,8 @@ export default function Login() {
           } else {
             // 실패 시 에러 메시지 처리
             const data = await res.json().catch(() => ({error: "An unknown error occurred"}));
-            if (res.status === 401 || res.status === 404) {
-              setResult(data.error || "ID or Password doesn't match");
+            if (res.status === 401 || res.status === 404 || res.status === 502) {
+              setResult(data.error || "ID 혹은 비밀번호가 일치하지 않습니다");
             } else {
               setResult("An unknown error occurred");
             }
@@ -32,7 +32,7 @@ export default function Login() {
         })
         .catch(err => {
           console.log(err);
-          setResult("There was a problem connecting to the server.");
+          setResult("서버 연결에 문제가 발생했습니다.");
         });
   }
 
@@ -80,15 +80,15 @@ export default function Login() {
         {result && <div className="login-error">{result}</div>}
         {/* 비밀번호 찾기 */}
         <div className="search-password">
-          <a href="searchpassword.do" className="searchPwBtn">Did you forget your password?</a>
+          <a href="searchpassword.do" className="searchPwBtn">비밀번호 찾기</a>
         </div>
         {/* 44. 로그인 버튼 */}
         <button className="login-btn" onClick={handleLogin}>
-          Sign in
+          로그인
         </button>
         {/* 47. 하단 회원가입 링크 */}
         <div className="login-bottom">
-          Do you need an account? <a href="signup.do" className="signupBtn">Sign up</a>
+          아직 회원이 아니신가요? <a href="signup.do" className="signupBtn">가입하기</a>
         </div>
       </div>
     </div>

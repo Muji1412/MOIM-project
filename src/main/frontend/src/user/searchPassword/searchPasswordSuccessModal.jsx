@@ -7,10 +7,10 @@ const SearchPasswordSuccessModal = ({ isOpen, onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Finding Passwords</h2>
-                <p>We've sent a password reset email to the address you provided.</p>
+                {/*<h2>Finding Passwords</h2>*/}
+                <p>입력하신 이메일로 새로운 비밀번호가 발송되었습니다.</p>
                 <button className="modal-btn" onClick={onClose}>
-                    Login
+                    로그인
                 </button>
             </div>
         </div>

@@ -65,30 +65,30 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
             <div className="modal-content">
                 {/* 제목 위 하트 아이콘 */}
                 <p className="modal-header-heart"><img src="/img/symbol_heart.png" alt="heart"/> </p>
-                <h2 className="head-title">Create an Event</h2>
+                <h2 className="head-title">새 일정 추가하기</h2>
                 <div className="inner-box">
                         <label className="label">
-                            Title
+                            일정 제목
                             <input className="input-text"
                                 value={title} onChange={e => setTitle(e.target.value)} />
                         </label>
                         <label className="label">
-                            Content
+                            일정 내용
                             <input className="input-text"
                                 value={content} onChange={e => setContent(e.target.value)} />
                         </label>
                         <label className="label">
-                            Start Date
+                            시작일
                             <input className="input-text" type="date"
                                    value={startDate} onChange={e => setStartDate(e.target.value)} />
                         </label>
                         <label className="label">
-                            End Date
+                            종료일
                             <input className="input-text" type="date"
                                    value={endDate} onChange={e => setEndDate(e.target.value)} />
                         </label>
                         <label className="label-dropdown">
-                            Event Type
+                            일정 타입
                         </label>
                         <div style={{ position: 'relative', display: 'block' }}>
                             {/* 기본 버튼 */}
@@ -119,7 +119,7 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
                             <input
                                 type="radio"
                                 name="progress"
-                                value="in_progress"
+                                value="진행 중"
                                 checked={isDone === "in_progress"}
                                 onChange={handleRadio}
                             /> In Progress
@@ -128,7 +128,7 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
                             <input
                                 type="radio"
                                 name="progress"
-                                value="Done"
+                                value="완료"
                                 checked={isDone === "Done"}
                                 onChange={handleRadio}
                             /> Done
@@ -137,7 +137,7 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
                             <input
                                 type="radio"
                                 name="progress"
-                                value="Canceled"
+                                value="취소"
                                 checked={isDone === "Canceled"}
                                 onChange={handleRadio}
                             /> Canceled

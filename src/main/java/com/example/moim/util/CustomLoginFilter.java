@@ -1,16 +1,22 @@
 package com.example.moim.util;
 
+import com.example.moim.entity.RefreshToken;
+import com.example.moim.entity.Users;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.command.CustomUserInfoVO;
 //import com.example.moim.jwt.TokenType;
 //import com.example.moim.service.user.CustomUserDetailsService;
 //import com.example.moim.service.user.UserDetails;
+import com.example.moim.repository.RefreshTokenRepository;
 import com.example.moim.service.user.CustomUserDetails;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,15 +27,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Map;
 
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //private final AuthenticationManager authenticationManager;
 //    private final CustomUserDetailsService customUserDetailsService;
     private final JWTService jwtService;
-    public CustomLoginFilter(JWTService jwtService) {
+    private final RefreshTokenRepository refreshTokenRepository;
+    public CustomLoginFilter(JWTService jwtService, RefreshTokenRepository refreshTokenRepository) {
 //        this.customUserDetailsService = customUserDetailsService;
         this.jwtService = jwtService;
+        this.refreshTokenRepository = refreshTokenRepository;
         setFilterProcessesUrl("/api/user/login"); // 로그인 경로 지정
         System.out.println(">>> [CustomLoginFilter] 생성자 호출됨");
     }
@@ -48,10 +59,10 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         // 폼 기반 로그인: application/x-www-form-urlencoded 방식
-        System.out.println(">>> [CustomLoginFilter] attemptAuthentication, 현재 AuthenticationManager: " + this.getAuthenticationManager());
+        //System.out.println(">>> [CustomLoginFilter] attemptAuthentication, 현재 AuthenticationManager: " + this.getAuthenticationManager());
         String username = obtainUsername(request); // == request.getParameter("username")
         String password = obtainPassword(request); // == request.getParameter("password")
-        System.out.println("username: " + username + ", password: " + password);
+        //System.out.println("username: " + username + ", password: " + password);
 
         UsernamePasswordAuthenticationToken authRequest =
                 new UsernamePasswordAuthenticationToken(username, password);
@@ -69,7 +80,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 //                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
         // 반드시 이 메서드로 호출
         Authentication authentication = this.getAuthenticationManager().authenticate(authRequest);
-        System.out.println("우웨엑 "+authentication.toString());
+        //System.out.println("우웨엑 "+authentication.toString());
         return authentication;
     }
 
@@ -112,6 +123,28 @@ protected void successfulAuthentication(HttpServletRequest request, HttpServletR
 
     response.addCookie(accessCookie);
     response.addCookie(refreshCookie);
+
+    long userNo = cDetails.getUserNo();
+    try {
+        RefreshToken e = refreshTokenRepository.findByUserUserNo(userNo)
+                .orElseThrow(() -> new EntityNotFoundException("토큰이 없습니다."));
+        e.setTokenCont(refreshToken);
+        e.setTokenCreated(new Timestamp(System.currentTimeMillis()));
+        e.setTokenExpires(new Timestamp(System.currentTimeMillis() + 604800000));
+        refreshTokenRepository.save(e); //db 에서 해당 유저 row 에 새 리프레시토큰값 넣음
+        System.out.println("기존유저 리프레시토큰 새로고침");
+    } catch (EntityNotFoundException e) {
+      RefreshToken e2 = new RefreshToken();
+      Users user = new Users();
+      user.setUserNo(userNo);
+      e2.setUser(user);
+      e2.setTokenCont(refreshToken);
+      e2.setTokenCreated(new Timestamp(System.currentTimeMillis()));
+      e2.setTokenExpires(new Timestamp(System.currentTimeMillis() + 604800000));
+        System.out.println("신규유저 리프레시토큰 등록");
+    } catch (Exception e) {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
 
     // ✅ 응답 본문을 비우고 성공 상태 코드(200 OK)만 보냅니다.
     response.setStatus(HttpServletResponse.SC_OK);

@@ -115,7 +115,7 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
                 {/*일정 삭제버튼 */}
                 <button type="button" className="modal-btn-delete"
                         onClick={handleDeleteEvent}
-                >Delete event</button>
+                >일정 삭제</button>
                 {/*일정 제목*/}
                 <div className='head-title'>
                     {event?.title}
@@ -127,23 +127,23 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
                 </div>
                 {/*마감일*/}
                 <label className="label">
-                    End Date :
+                    종료일 :
                     <input className="input-text" type="date"
                            value={endDate} onChange={e => setEndDate(e.target.value)} />
                 </label>
                 {/*일정 종류*/}
                 <div className='label'>
-                    Event Type : {event?.resource.calType}
+                    일정 타입 : {event?.resource.calType}
                 </div>
                 {/*일정 담당자*/}
                 <div className='label'>
-                     Event Owner : {userNick}
+                     담당자 : {userNick}
                     <button className='todoAddBtn' type='button'
                             onClick={handleAddTodo}>TodoList로 가져오기</button>
                 </div>
                 {/*일정 완료 여부*/}
                 <div className='label'>
-                    Event Progress :
+                    진행 상황 :
                     <label className="label-radio">
                         <input
                             type="radio"
@@ -151,7 +151,7 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
                             value="in_progress"
                             checked={isDone === "in_progress"}
                             onChange={handleRadio}
-                        /> In Progress
+                        /> 진행 중
                     </label>
                     <label className="label-radio">
                         <input
@@ -160,7 +160,7 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
                             value="Done"
                             checked={isDone === "Done"}
                             onChange={handleRadio}
-                        /> Done
+                        /> 완료
                     </label>
                     <label className="label-radio">
                         <input
@@ -169,13 +169,13 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
                             value="Canceled"
                             checked={isDone === "Canceled"}
                             onChange={handleRadio}
-                        /> Canceled
+                        /> 취소
                     </label><br/>
                 </div>
                 {/*저장버튼 */}
-                <button type="button" className="modal-btn-modify" onClick={handleModify}>Modify</button>
+                <button type="button" className="modal-btn-modify" onClick={handleModify}>수정</button>
                 {/*닫기버튼 */}
-                <button type="button" className="modal-btn-close" onClick={onClose}>Close</button>
+                <button type="button" className="modal-btn-close" onClick={onClose}>닫기</button>
             </div>
         </div>
     )
