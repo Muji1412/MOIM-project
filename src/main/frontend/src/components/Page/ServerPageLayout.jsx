@@ -5,6 +5,7 @@ import { useServerChat } from '../../context/ServerChatContext';
 import ServerMenuAside from './ServerMenuAside';
 import ChattingView from '../../chatting/ChattingView';
 import styles from './PageLayout.module.css';
+import {useDm} from "../../context/DmContext";
 
 export default function ServerPageLayout() {
 
@@ -15,6 +16,7 @@ export default function ServerPageLayout() {
 
     const { servers, setSelectedServerId, setSelectedChannel, selectedServerId } = useServer();
     const { connectToServer, isConnected, currentServer } = useServerChat();
+    const { } = useDm();
 
 
     // 서버 변경 또는 새로고침 후 자동 복원
