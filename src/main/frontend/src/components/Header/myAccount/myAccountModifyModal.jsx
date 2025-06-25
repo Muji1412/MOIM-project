@@ -170,8 +170,8 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay">
-            <div className="modal">
+        <div className="modify_modal-overlay">
+            <div className="modify_modal">
                 {/* 제목 위 하트 아이콘 */}
                 <p className="modal-header-heart"><img src="/img/symbol_heart.png" alt="heart"/> </p>
                 {/* 창 제목 */}

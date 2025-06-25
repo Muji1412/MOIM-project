@@ -77,9 +77,12 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay">
-            <div className="modal">
-                <h2>비밀번호 변경하기</h2>
+        <div className="chpw_modal-overlay">
+            <div className="pw_change_modal">
+                <div className="modal_title">
+                    <img src="/bundle/img/home_ic.png" alt="logo"/>
+                    <h2>비밀번호 변경하기</h2>
+                </div>
                 {/*현재 비밀번호*/}
                 <div className="modal-inner-label">
                     현재 비밀번호 <p className="modal-inner-star">*</p>
