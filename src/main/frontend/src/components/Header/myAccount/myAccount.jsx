@@ -6,6 +6,7 @@ import AccountDeleteModal from "./AccountDelete/accountDeleteModal";
 import LogoutModal from "./Logout/logoutModal";
 import AccountDeleteSuccessModal from "./AccountDelete/accountDeleteSuccessModal";
 
+
 export default function MyAccount ({isOpen, onClose, onDelete }) {
     if (!isOpen) return null;
     const [userInfo, setUserInfo] = useState({
@@ -26,7 +27,7 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
         fetch("/user/myAccount", {
             method: "GET",
             headers: {
-               "Content-Type" : "application/json"
+                "Content-Type": "application/json"
 
             }
         })
@@ -124,10 +125,13 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
             <div className="box">
                 {/* 좌측 회색 메뉴 */}
                 <div className="menu">
-                    <div className="menu-title"> 세팅</div>
-                    <div className="menu-content"> 사용자 정보 </div>
+                    <div className="menu-title">사용자 설정</div>
+                    <div className="menu-content">
+                        <span>내 계정</span>
+                    </div>
                     <div className="menu-logout"
-                        onClick={handleLogout}>로그아웃
+                         onClick={handleLogout}>
+                        <span>로그아웃</span>
                         <img src="/bundle/img/logout_ic_1.png" alt="logout_icon"/>
                     </div>
                 </div>
@@ -135,18 +139,24 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
                 <div className="myAccount-background">
                     {/* 맨 위 헤드라인 부분 */}
                     <div className="myAccount-headline">
-                        <h2> 내 정보 </h2>
-                        <a><img src='/bundle/img/btn_close.png' alt="close button" onClick={handleClose}/></a>
+                        <div className="headline_left">
+                            <h2>내 계정</h2>
+                        </div>
+                        <div className="headline_close_btn">
+                            <a><img src='/bundle/img/btn_close.png' alt="close button" onClick={handleClose}/></a>
+                        </div>
                     </div>
                     {/*회원정보 박스 컨테이너*/}
                     <div className="myAccount-container">
                         {/* 회원정보 박스 상단 프로필사진, modify 버튼*/}
                         <div className="myAccount-container-head">
-                            <div className="profile-image">
-                                <img src={userInfo.img || "/bundle/img/default_profile.png"} alt="user_img" className="profile-image-img"/>
-                            </div>
-                            <div>
-                                <button className="modify-btn" onClick={handleModify}>회원정보 수정</button>
+                            <div className="setting_card_header"></div>
+                            <div className="myAccount-container-head-wrap">
+                                <div className="profile-image">
+                                    <img src={userInfo.img || "/bundle/img/default_profile.png"} alt="user_img"
+                                         className="profile-image-img"/>
+                                </div>
+                                <button className="modify-btn" onClick={handleModify}>프로필 편집</button>
                             </div>
                         </div>
                         {/* 회원정보 표시되는 흰 박스*/}
@@ -155,38 +165,45 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
                             <div className="inner-title">닉네임</div>
                             <div className="inner-content">{userInfo.nickname}</div>
                             {/* 아이디 */}
-                            <div className="inner-title">ID</div>
+                            <div className="inner-title">사용자명</div>
                             <div className="inner-content">{userInfo.username}</div>
                             {/* 이메일 */}
-                            <div className="inner-title">Email</div>
+                            <div className="inner-title">이메일</div>
                             <div className="inner-content">{userInfo.email}</div>
                             {/* 전화번호 */}
-                            <div className="inner-title">전화번호</div>
+                            <div className="inner-title">연락처</div>
                             <div className="inner-content">{userInfo.phone}</div>
                             {/* 상태메시지 */}
-                            <div className="inner-title">상태메시지</div>
+                            <div className="inner-title">상태 메시지</div>
                             <div className="inner-content">{userInfo.message}</div>
                         </div>
                     </div>
-                    {/* 비밀번호 바꾸기 */}
-                    <div className="inner-title">비밀번호 및 인증<br/>
-                    <button className="pw-change-btn" onClick={handleChangePw}> 비밀번호 변경 </button></div>
-                    {/* 회원 탈퇴 */}
-                    <div className="inner-title">회원 탈퇴하기 <br/>
-                    <button className="account-delete-btn"
-                            onClick={handleDeleteAccount}> 탈퇴 </button></div>
+                    <div className="footer_box_area">
+                        {/* 비밀번호 바꾸기 */}
+                        <div className="footer_title">
+                            <span>비밀번호와 인증</span>
+                            <button className="pw-change-btn" onClick={handleChangePw}>비밀번호 변경하기</button>
+                        </div>
+                        {/* 회원 탈퇴 */}
+                        <div className="footer_title">
+                            <span>계정 삭제하기</span>
+                            <button className="account-delete-btn" onClick={handleDeleteAccount}>삭제하기</button>
+                        </div>
+                    </div>
 
                     {/*로그아웃 모달창*/}
                     <LogoutModal isOpen={showLogoutModal} onClose={handleCloseLogout}/>
                     {/*회원정보 수정 모달창*/}
                     {userInfo && showModifyModal && (<MyAccountModifyModal isOpen={showModifyModal}
-                                          userInfo={userInfo}
-                                          onClose={() => {
-                                              handleCloseModifyModal();
-                                              fetchUserInfo();
-                                          }} />)}
+                                                                           userInfo={userInfo}
+                                                                           onClose={() => {
+                                                                               handleCloseModifyModal();
+                                                                               fetchUserInfo();
+                                                                           }}/>)}
                     {/* 비밀번호 수정 모달창 */}
                     {userInfo && showPwModal && (< ChangePasswordModal isOpen={showPwModal}
+                   
+
                                          userInfo={userInfo}
                                          onClose={handleChangePwCloseModal}/>)}
                     {/*/!* 회원 탈퇴 모달창 *!/*/}
