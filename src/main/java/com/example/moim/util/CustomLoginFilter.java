@@ -141,6 +141,7 @@ protected void successfulAuthentication(HttpServletRequest request, HttpServletR
       e2.setTokenCont(refreshToken);
       e2.setTokenCreated(new Timestamp(System.currentTimeMillis()));
       e2.setTokenExpires(new Timestamp(System.currentTimeMillis() + 604800000));
+      refreshTokenRepository.save(e2);
         System.out.println("신규유저 리프레시토큰 등록");
     } catch (Exception e) {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
