@@ -33,14 +33,14 @@ public class TodoListController {
                                         ) {
         String today = LocalDate.now().toString();
         long userNo = user.getUserNo();
-        List<TodolistEntity> list = todolistRepository.getByUserNoAndEndAfter(userNo, today);
+        List<TodolistEntity> list = todolistRepository.getByUserNoAndEndAfterAsc(userNo, today);
         return list.stream().map(TodolistDTO::new).collect(Collectors.toList());
     }
 
     //할일 완료
     @PostMapping("/complete")
     public ResponseEntity<?> completeTodo(@RequestBody TodolistDTO dto, @AuthenticationPrincipal CustomUserDetails user) {
-        TodolistEntity entity = todolistRepository.getByTodoNo(dto.getTodoNo());
+        TodolistEntity entity = todolistRepository.findByTodoNo(dto.getTodoNo());
         entity.setTodoIsDone(dto.getTodoIsDone());
         try {
             todolistRepository.save(entity);
@@ -53,10 +53,11 @@ public class TodoListController {
 
     //할일 내용 수정
     @PostMapping("/modify")
-    public ResponseEntity<?> modifyTodoList(TodolistDTO dto, @AuthenticationPrincipal CustomUserDetails user) {
-        TodolistEntity entity = todolistRepository.getByTodoNo(dto.getTodoNo());
-        entity.setTodoContent(dto.getTodoContent());
-        entity.setTodoIsDone(dto.getTodoIsDone());
+    public ResponseEntity<?> modifyTodoList(@RequestBody TodolistDTO dto,
+                                            @AuthenticationPrincipal CustomUserDetails user) {
+        System.out.println(dto.getTodoNo());
+        TodolistEntity entity = todolistRepository.findByTodoNo(dto.getTodoNo());
+        System.out.println("근데 왜 이것도 출력이 안됨?"+entity.toString());
         entity.setTodoEnd(dto.getTodoEnd());
         entity.setTodoTitle(dto.getTodoTitle());
         try {
@@ -73,7 +74,7 @@ public class TodoListController {
     @PostMapping("/delete")
     public ResponseEntity<?> deleteTodoList(@AuthenticationPrincipal CustomUserDetails user,
                                             @RequestBody TodolistDTO dto) {
-        TodolistEntity entity = todolistRepository.getByTodoNo(dto.getTodoNo());
+        TodolistEntity entity = todolistRepository.findByTodoNo(dto.getTodoNo());
         try {
             todolistRepository.delete(entity);
             return  ResponseEntity.ok().build();

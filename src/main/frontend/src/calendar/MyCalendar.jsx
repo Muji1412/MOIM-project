@@ -14,7 +14,7 @@ export default function MyCalendar() {
     const [events, setEvents] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [groupNo, setGroupNo] = useState('00');
+    const [groupNo, setGroupNo] = useState('');
     const [detailEvent, setDetailEvent] = useState('');
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
@@ -31,8 +31,7 @@ export default function MyCalendar() {
 
     const fetchEvents = () => {
         const groupNo = JSON.parse(sessionStorage.getItem("calendarData")).groupNo;
-        console.log('잘들어옴? ',groupNo);
-        if (groupNo) setGroupNo(groupNo);
+         setGroupNo(groupNo);
         fetch('api/calendar', {
             method: 'POST',
             headers: {
