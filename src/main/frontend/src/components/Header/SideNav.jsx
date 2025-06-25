@@ -109,19 +109,25 @@ export default function SideNav() {
     }, [setServers, serverId,navigate,setSelectedServerId]);
 
     // dm컨텍스트에서 보내줄 이벤트 리스너
+    // 커스텀 이벤트 리스너
     useEffect(() => {
         const handleServerSelectEvent = (event) => {
             const { serverId } = event.detail;
-            void handleServerClick(serverId); // Promise 경고 방지
+
+            // Context의 handleServerSelect도 함께 호출
+            handleServerSelect(serverId);
+
+            // 실제 서버 연결 및 페이지 이동
+            void handleServerClick(serverId);
         };
 
         window.addEventListener('serverSelect', handleServerSelectEvent);
 
-        // 컴포넌트 언마운트 시 이벤트 리스너 제거
         return () => {
             window.removeEventListener('serverSelect', handleServerSelectEvent);
         };
-    }, []);
+    }, [handleServerSelect]);
+
 
 
     // 컨텍스트 메뉴 닫기
