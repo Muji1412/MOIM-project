@@ -43,12 +43,7 @@ export default function ServerMenuAside() {
         const fetchChannels = async () => {
             if (serverId && serverId !== "default") {
                 try {
-                    const response = await fetch(`/api/groups/${serverId}/channels`,
-                        {
-                            headers: {
-
-                                // Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`
-                            }});
+                    const response = await fetch(`/api/groups/${serverId}/channels`);
                     if (response.ok) {
                         const channels = await response.json();
                         const mappedChannels = channels.map(channel => ({
@@ -57,12 +52,18 @@ export default function ServerMenuAside() {
                             type: "chat",
                             isDeletable: channel.chanName !== "일반채팅"
                         }));
+
                         setChatChannels(mappedChannels);
-                        if (mappedChannels.length > 0 && !selectedChannel) {
+
+                        // URL 파라미터 확인 - 이 부분이 핵심!
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const channelFromUrl = urlParams.get('channelName');
+
+                        if (channelFromUrl) {
+                            setSelectedChannel(channelFromUrl);
+                        } else if (mappedChannels.length > 0) {
                             setSelectedChannel(mappedChannels[0].name);
                         }
-                    } else {
-                        console.error('채널 목록 로드 실패');
                     }
                 } catch (error) {
                     console.error('채널 목록 로드 중 오류:', error);
@@ -71,7 +72,7 @@ export default function ServerMenuAside() {
         };
 
         fetchChannels();
-    }, [serverId, setChatChannels, selectedChannel, setSelectedChannel]);
+    }, [serverId]); //
 
     // 컨텍스트 메뉴 닫기 처리
     useEffect(() => {
