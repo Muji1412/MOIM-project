@@ -4,7 +4,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
-import { toast } from 'react-toastify'; // 추가
+import { toast } from 'react-toastify';
 
 const DmContext = createContext({
     // 기존 DM 관련
@@ -20,6 +20,10 @@ const DmContext = createContext({
     showAddFriend: false,
     openAddFriend: () => {},
     closeAddFriend: () => {},
+    returnToFriendsList: () => {},
+
+    // ⭐️ 새로 추가: 알림에서 DM 열기
+    openDmFromNotification: () => {},
 });
 
 export const useDm = () => useContext(DmContext);
@@ -31,20 +35,17 @@ export const DmProvider = ({ children }) => {
     const [dmMessages, setDmMessages] = useState([]);
     const [stompClient, setStompClient] = useState(null);
     const [subscription, setSubscription] = useState(null);
-    const [notificationSubscription, setNotificationSubscription] = useState(null); // 추가
-    const [notifications, setNotifications] = useState([]); // 추가
+    const [notificationSubscription, setNotificationSubscription] = useState(null);
+    const [notifications, setNotifications] = useState([]);
     const [showAddFriend, setShowAddFriend] = useState(false);
     const [friendRequestSubscription, setFriendRequestSubscription] = useState(null);
     const [mentionNotificationSubscription, setMentionNotificationSubscription] = useState(null);
 
+    const activeDmRoomRef = useRef(activeDmRoom);
 
-    // ⭐️ [추가된 로직 1] activeDmRoom의 최신 값을 담을 ref 생성
-    const activeDmRoomRef = useRef(activeDmRoom); // [!code ++]
-
-    // ⭐️ [추가된 로직 2] activeDmRoom 상태가 변경될 때마다 ref 값을 업데이트
-    useEffect(() => { // [!code ++]
-        activeDmRoomRef.current = activeDmRoom; // [!code ++]
-    }, [activeDmRoom]); // [!code ++]
+    useEffect(() => {
+        activeDmRoomRef.current = activeDmRoom;
+    }, [activeDmRoom]);
 
     useEffect(() => {
         const client = new Client({
@@ -52,10 +53,8 @@ export const DmProvider = ({ children }) => {
             onConnect: (frame) => {
                 console.log('Connected to WebSocket for DM');
                 console.log('Connection frame:', frame);
-                // ⭐️ 연결 완료 후 알림 구독 ⭐️
                 if (currentUser) {
                     subscribeToNotifications(client);
-                    //에러 구독
                     subscribeToErrors(client);
                 }
             },
@@ -79,7 +78,40 @@ export const DmProvider = ({ children }) => {
         };
     }, []);
 
-    // 친구 관련 함수 추가
+    // ⭐️ 새로 추가: 알림에서 DM 열기 함수
+    const openDmFromNotification = (friend) => {
+        console.log('알림에서 DM 열기:', friend);
+
+        // 1. 친구 페이지로 이동
+        window.location.href = '/friends';
+
+        // 2. 페이지 로드 후 DM 선택 (localStorage에 저장해서 페이지 로드 후 처리)
+        localStorage.setItem('openDmAfterLoad', JSON.stringify(friend));
+    };
+
+    // ⭐️ 페이지 로드 시 localStorage 확인해서 DM 열기
+    useEffect(() => {
+        const openDmData = localStorage.getItem('openDmAfterLoad');
+        if (openDmData && currentUser) {
+            try {
+                const friend = JSON.parse(openDmData);
+                console.log('페이지 로드 후 DM 열기:', friend);
+
+                // localStorage 클리어
+                localStorage.removeItem('openDmAfterLoad');
+
+                // 약간의 지연 후 DM 선택 (컴포넌트 렌더링 대기)
+                setTimeout(() => {
+                    selectDmRoom(friend);
+                }, 500);
+            } catch (error) {
+                console.error('openDmAfterLoad 파싱 에러:', error);
+                localStorage.removeItem('openDmAfterLoad');
+            }
+        }
+    }, [currentUser]);
+
+    // 친구 관련 함수들
     const openAddFriend = () => {
         console.log('친구 추가 페이지 열기');
         setShowAddFriend(true);
@@ -91,8 +123,8 @@ export const DmProvider = ({ children }) => {
     };
 
     const returnToFriendsList = () => {
-        setActiveDmRoom(null);      // 활성화된 DM 채팅방을 닫습니다.
-        setShowAddFriend(false);    // 친구 추가 페이지를 닫습니다.
+        setActiveDmRoom(null);
+        setShowAddFriend(false);
     };
 
     // toast 구독 알림 함수
@@ -118,12 +150,11 @@ export const DmProvider = ({ children }) => {
             friendRequestSubscription.unsubscribe();
         }
 
-        if (notificationSubscription){
-            notificationSubscription.unsubscribe();
+        if (mentionNotificationSubscription) {
+            mentionNotificationSubscription.unsubscribe();
         }
 
         try {
-
             const subscription = client.subscribe(
                 `/user/queue/notification`,
                 (message) => {
@@ -142,7 +173,7 @@ export const DmProvider = ({ children }) => {
                 }
             );
 
-            const mentionNotificationSubscription = client.subscribe(
+            const mentionSubscription = client.subscribe(
                 `/user/queue/mention-notification`,
                 (message) => {
                     console.log('=== 멘션 수신 ===', message.body);
@@ -151,10 +182,9 @@ export const DmProvider = ({ children }) => {
                 }
             );
 
-
             setNotificationSubscription(subscription);
             setFriendRequestSubscription(friendSubscription);
-            setMentionNotificationSubscription(mentionNotificationSubscription)
+            setMentionNotificationSubscription(mentionSubscription);
             console.log('✅ 알림 구독 성공!');
 
         } catch (error) {
@@ -162,55 +192,7 @@ export const DmProvider = ({ children }) => {
         }
     };
 
-    // DM 알림 처리 메서드
-    const handleMentionNotification = (mentionNotificationData) => {
-
-        const NotificationToast = ({ mentionNotificationData, onToastClick }) => (
-            <div
-                onClick={onToastClick}
-                style={{
-                    cursor: 'pointer',
-                    whiteSpace: 'pre-wrap'
-                }}
-            >
-        <span style={{ fontWeight: 'bold', color: '#333' }}>
-            {mentionNotificationData.groupName}
-        </span>
-                <span style={{ fontWeight: 'normal' }}>
-
-        </span>
-                <div style={{
-                    fontSize: '14px',
-                    color: '#666',
-                    marginTop: '4px'
-                }}>
-                    {mentionNotificationData.message}
-                </div>
-            </div>
-        );
-
-        // 토스트 알림 표시
-        toast.info(
-            <NotificationToast
-                mentionNotificationData={mentionNotificationData}
-                onToastClick={() => {
-                    console.log('토스트 알람클릭');
-                    console.log(mentionNotificationData);
-
-                    // 커스텀 이벤트 발생
-                    window.dispatchEvent(new CustomEvent('serverSelect', {
-                        detail: { serverId: mentionNotificationData.groupId }
-                    }));
-                }}
-            />,
-            {
-                autoClose: 5000,
-                closeOnClick: false // 이걸 false로 설정해야 커스텀 onClick이 작동해요
-            }
-        );
-    };
-
-    // DM 알림 처리 메서드
+    // DM 알림 처리 메서드 (⭐️ 수정된 부분)
     const handleNewNotification = (notificationData) => {
         const currentActiveRoom = activeDmRoomRef.current;
         if (currentActiveRoom && currentActiveRoom.id === notificationData.roomId) {
@@ -226,12 +208,12 @@ export const DmProvider = ({ children }) => {
                     whiteSpace: 'pre-wrap'
                 }}
             >
-        <span style={{ fontWeight: 'bold', color: '#333' }}>
-            {notificationData.senderNick}
-        </span>
+                <span style={{ fontWeight: 'bold', color: '#333' }}>
+                    {notificationData.senderNick}
+                </span>
                 <span style={{ fontWeight: 'normal' }}>
-            님의 메세지
-        </span>
+                    님의 메세지
+                </span>
                 <div style={{
                     fontSize: '14px',
                     color: '#666',
@@ -242,24 +224,28 @@ export const DmProvider = ({ children }) => {
             </div>
         );
 
-        // 토스트 알림 표시
+        // ⭐️ 수정된 토스트 알림
         toast.info(
             <NotificationToast
                 notificationData={notificationData}
                 onToastClick={() => {
                     console.log('토스트 알람클릭');
-                    console.log(notificationData)
-                    const friend ={
-                        userNick : notificationData.senderNick
-                    }
-                    console.log(friend)
-                    selectDmRoom(friend)
+                    console.log(notificationData);
+
+                    const friend = {
+                        userNick: notificationData.senderNick
+                    };
+
+                    console.log(friend);
+
+                    // ⭐️ openDmFromNotification 함수 사용
+                    openDmFromNotification(friend);
                     markNotificationAsRead(notificationData.id);
                 }}
             />,
             {
                 autoClose: 5000,
-                closeOnClick: false // 이걸 false로 설정해야 커스텀 onClick이 작동해요
+                closeOnClick: false
             }
         );
 
@@ -274,9 +260,54 @@ export const DmProvider = ({ children }) => {
             isRead: false
         }, ...prev]);
 
-        // DM 방 목록 새로고침 (새 메시지 표시용)
+        // DM 방 목록 새로고침
         fetchDmRooms();
     };
+
+    // 멘션 알림 처리 메서드
+    const handleMentionNotification = (mentionNotificationData) => {
+        const NotificationToast = ({ mentionNotificationData, onToastClick }) => (
+            <div
+                onClick={onToastClick}
+                style={{
+                    cursor: 'pointer',
+                    whiteSpace: 'pre-wrap'
+                }}
+            >
+                <span style={{ fontWeight: 'bold', color: '#333' }}>
+                    {mentionNotificationData.groupName}
+                </span>
+                <span style={{ fontWeight: 'normal' }}></span>
+                <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginTop: '4px'
+                }}>
+                    {mentionNotificationData.message}
+                </div>
+            </div>
+        );
+
+        toast.info(
+            <NotificationToast
+                mentionNotificationData={mentionNotificationData}
+                onToastClick={() => {
+                    console.log('토스트 알람클릭');
+                    console.log(mentionNotificationData);
+
+                    window.dispatchEvent(new CustomEvent('serverSelect', {
+                        detail: { serverId: mentionNotificationData.groupId }
+                    }));
+                }}
+            />,
+            {
+                autoClose: 5000,
+                closeOnClick: false
+            }
+        );
+    };
+
+    // 친구 요청 알림 처리
     const FriendRequestToast = ({ friendData, onToastClick }) => (
         <div
             onClick={onToastClick}
@@ -285,13 +316,13 @@ export const DmProvider = ({ children }) => {
                 whiteSpace: 'pre-wrap'
             }}
         >
-        <span style={{ fontWeight: 'bold', color: '#333' }}>
-            {friendData.requesterUsername} 님이
-        </span>
+            <span style={{ fontWeight: 'bold', color: '#333' }}>
+                {friendData.requesterUsername} 님이
+            </span>
             <br />
             <span style={{ fontWeight: 'normal' }}>
-            친구 요청을 보냈습니다
-        </span>
+                친구 요청을 보냈습니다
+            </span>
         </div>
     );
 
@@ -312,21 +343,19 @@ export const DmProvider = ({ children }) => {
             }
         );
 
-        // 알림 목록에 추가
         setNotifications(prev => [{
             senderNick: friendData.requesterUsername,
             message: '친구 요청'
         }, ...prev]);
     };
 
-    // ⭐️ currentUser 변경 시 알림도 다시 구독 ⭐️
+    // currentUser 변경 시 알림 구독
     useEffect(() => {
         if (currentUser) {
             console.log('=== currentUser 변경됨, DM 방 목록 조회 ===');
             console.log('currentUser:', currentUser);
             fetchDmRooms();
 
-            // ⭐️ 웹소켓이 연결되어 있고 CONNECTED 상태일 때만 알림 구독 ⭐️
             if (stompClient?.active && stompClient.state === 'CONNECTED') {
                 subscribeToNotifications(stompClient);
             }
@@ -336,7 +365,6 @@ export const DmProvider = ({ children }) => {
             setActiveDmRoom(null);
             setNotifications([]);
 
-            // 알림 구독 해제
             if (notificationSubscription) {
                 notificationSubscription.unsubscribe();
                 setNotificationSubscription(null);
@@ -349,7 +377,7 @@ export const DmProvider = ({ children }) => {
         }
     }, [currentUser, stompClient?.state]);
 
-    // ⭐️ 알림 읽음 처리 ⭐️
+    // 알림 읽음 처리
     const markNotificationAsRead = (notificationId) => {
         setNotifications(prev =>
             prev.map(notif =>
@@ -360,7 +388,7 @@ export const DmProvider = ({ children }) => {
         );
     };
 
-    // 기존 useEffect들은 그대로...
+    // activeDmRoom 변경 시 웹소켓 구독
     useEffect(() => {
         if (activeDmRoom && stompClient?.active) {
             console.log('=== activeDmRoom 변경됨, 웹소켓 구독 ===');
@@ -374,7 +402,6 @@ export const DmProvider = ({ children }) => {
                 console.log('=== 웹소켓 메시지 수신 ===');
                 console.log('receivedMessage:', receivedMessage);
 
-                //  수정된 부분: 발신자 이미지 찾기 함수 추가
                 const getSenderImage = (username) => {
                     const currentActiveRoom = activeDmRoomRef.current;
                     if (!currentActiveRoom) return null;
@@ -387,12 +414,11 @@ export const DmProvider = ({ children }) => {
                     return null;
                 };
 
-
                 setDmMessages((prevMessages) => [...prevMessages, {
                     user: receivedMessage.user,
                     text: receivedMessage.text,
                     timestamp: receivedMessage.date || new Date().toISOString(),
-                    senderImg: receivedMessage.senderImg || getSenderImage(receivedMessage.user) //프로필 이미지 관련
+                    senderImg: receivedMessage.senderImg || getSenderImage(receivedMessage.user)
                 }]);
             });
             setSubscription(newSubscription);
@@ -403,15 +429,13 @@ export const DmProvider = ({ children }) => {
         }
     }, [activeDmRoom, stompClient]);
 
-    // 기존 함수들은 그대로...
+    // DM 방 목록 조회
     const fetchDmRooms = async () => {
         console.log('=== fetchDmRooms 호출 ===');
 
         try {
             console.log('DM 방 목록 API 요청 시작');
-            const response = await axios.get('/api/dm/rooms', {
-                // headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await axios.get('/api/dm/rooms');
             console.log('DM 방 목록 API 응답:', response.data);
             setDmRooms(response.data);
         } catch (error) {
@@ -420,17 +444,14 @@ export const DmProvider = ({ children }) => {
         }
     };
 
-    // 나머지 함수들도 그대로...
+    // 메시지 목록 조회
     const fetchMessages = async (roomId) => {
         console.log('=== fetchMessages 호출 ===');
         console.log('roomId:', roomId);
 
-
         try {
             console.log('메시지 목록 API 요청 시작');
-            const response = await axios.get(`/api/dm/rooms/${roomId}/messages`, {
-                // headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await axios.get(`/api/dm/rooms/${roomId}/messages`);
             console.log('메시지 목록 API 응답:', response.data);
 
             const formattedMessages = response.data.map(msg => ({
@@ -448,6 +469,7 @@ export const DmProvider = ({ children }) => {
         }
     };
 
+    // DM 방 선택
     const selectDmRoom = async (friend) => {
         console.log('=== selectDmRoom 호출 ===');
 
@@ -461,15 +483,12 @@ export const DmProvider = ({ children }) => {
             console.log('요청 데이터:', { recipientNick: friend.userNick });
 
             const response = await axios.post('/api/dm/rooms',
-                { recipientNick: friend.userNick },
-                {
-                    // headers: { 'Authorization': `Bearer ${token}` }
-                }
+                { recipientNick: friend.userNick }
             );
 
             console.log('DM 방 생성/조회 API 응답:', response.data);
             setActiveDmRoom(response.data);
-            console.log(response.data)
+            console.log(response.data);
 
             if (!dmRooms.find(room => room.id === response.data.id)) {
                 console.log('새로운 DM 방이므로 목록 새로고침');
@@ -480,6 +499,7 @@ export const DmProvider = ({ children }) => {
         }
     };
 
+    // 메시지 전송
     const sendMessage = (content) => {
         console.log('=== sendMessage 호출 ===');
         console.log('content:', content);
@@ -504,6 +524,7 @@ export const DmProvider = ({ children }) => {
         }
     };
 
+    // 에러 구독
     const subscribeToErrors = (client) => {
         if (!currentUser || !client || !client.connected) return;
 
@@ -511,11 +532,9 @@ export const DmProvider = ({ children }) => {
             const errorData = JSON.parse(error.body);
             console.log('WebSocket 에러 수신:', errorData);
 
-            // 토스트 알림으로 사용자에게 알리기
             toast.error(errorData.message, {
                 autoClose: 3000
             });
-
         });
     };
 
@@ -529,14 +548,14 @@ export const DmProvider = ({ children }) => {
         sendMessage,
         markNotificationAsRead,
 
-        // 친구 관련 추가
+        // 친구 관련
         showAddFriend,
         openAddFriend,
         closeAddFriend,
-
-        // 친구창 띄워주는
         returnToFriendsList,
 
+        // ⭐️ 새로 추가: 알림에서 DM 열기
+        openDmFromNotification,
     };
 
     return <DmContext.Provider value={value}>{children}</DmContext.Provider>;
