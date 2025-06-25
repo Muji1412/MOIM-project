@@ -42,7 +42,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         this.jwtService = jwtService;
         this.refreshTokenRepository = refreshTokenRepository;
         setFilterProcessesUrl("/api/user/login"); // 로그인 경로 지정
-        System.out.println(">>> [CustomLoginFilter] 생성자 호출됨");
+        //System.out.println(">>> [CustomLoginFilter] 생성자 호출됨");
     }
 
     //jwt 토큰을 검증한다.
@@ -51,7 +51,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 //        //httpRequest에서 헤더부분을 가져옴
 //        String header = request.getHeader("Authorization");
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        System.out.println(">>> [CustomLoginFilter] setAuthenticationManager 호출됨, 값: " + authenticationManager);
+        //System.out.println(">>> [CustomLoginFilter] setAuthenticationManager 호출됨, 값: " + authenticationManager);
         super.setAuthenticationManager(authenticationManager);
     }
 
@@ -132,7 +132,6 @@ protected void successfulAuthentication(HttpServletRequest request, HttpServletR
         e.setTokenCreated(new Timestamp(System.currentTimeMillis()));
         e.setTokenExpires(new Timestamp(System.currentTimeMillis() + 604800000));
         refreshTokenRepository.save(e); //db 에서 해당 유저 row 에 새 리프레시토큰값 넣음
-        System.out.println("기존유저 리프레시토큰 새로고침");
     } catch (EntityNotFoundException e) {
       RefreshToken e2 = new RefreshToken();
       Users user = new Users();
@@ -142,7 +141,6 @@ protected void successfulAuthentication(HttpServletRequest request, HttpServletR
       e2.setTokenCreated(new Timestamp(System.currentTimeMillis()));
       e2.setTokenExpires(new Timestamp(System.currentTimeMillis() + 604800000));
       refreshTokenRepository.save(e2);
-        System.out.println("신규유저 리프레시토큰 등록");
     } catch (Exception e) {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

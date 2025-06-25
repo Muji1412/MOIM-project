@@ -124,10 +124,10 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
             <div className="box">
                 {/* 좌측 회색 메뉴 */}
                 <div className="menu">
-                    <div className="menu-title"> User Settings</div>
-                    <div className="menu-content"> My Account </div>
+                    <div className="menu-title"> 세팅</div>
+                    <div className="menu-content"> 사용자 정보 </div>
                     <div className="menu-logout"
-                        onClick={handleLogout}>Log out
+                        onClick={handleLogout}>로그아웃
                         <img src="/bundle/img/logout_ic_1.png" alt="logout_icon"/>
                     </div>
                 </div>
@@ -135,7 +135,7 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
                 <div className="myAccount-background">
                     {/* 맨 위 헤드라인 부분 */}
                     <div className="myAccount-headline">
-                        <h2> My Account </h2>
+                        <h2> 내 정보 </h2>
                         <a><img src='/bundle/img/btn_close.png' alt="close button" onClick={handleClose}/></a>
                     </div>
                     {/*회원정보 박스 컨테이너*/}
@@ -169,12 +169,12 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
                         </div>
                     </div>
                     {/* 비밀번호 바꾸기 */}
-                    <div className="inner-title">Passwords and Authentication<br/>
-                    <button className="pw-change-btn" onClick={handleChangePw}> 비밀번호 변경하기 </button></div>
+                    <div className="inner-title">비밀번호 및 인증<br/>
+                    <button className="pw-change-btn" onClick={handleChangePw}> 비밀번호 변경 </button></div>
                     {/* 회원 탈퇴 */}
-                    <div className="inner-title">Remove Account <br/>
+                    <div className="inner-title">회원 탈퇴하기 <br/>
                     <button className="account-delete-btn"
-                            onClick={handleDeleteAccount}> 회원 탈퇴 </button></div>
+                            onClick={handleDeleteAccount}> 탈퇴 </button></div>
 
                     {/*로그아웃 모달창*/}
                     <LogoutModal isOpen={showLogoutModal} onClose={handleCloseLogout}/>

@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import './todoList.css';
 
 export default function todoList({groupNo }) {
@@ -224,9 +225,18 @@ export default function todoList({groupNo }) {
                 })
     }
 
-
+    // 할일 순서 변경 핸들러
+        const handleDragEnd = (result) => {
+            if (!result.destination) return;
+            const reordered = Array.from(todos);
+            const [removed] = reordered.splice(result.source.index, 1);
+            reordered.splice(result.destination.index, 0, removed);
+            setTodos(reordered);
+        };
 
     return(
+        <div className='asd'>
+        <div className='todo-outer'>
         <div className="todo-container">
             <h1 className="todo-title">Todo List</h1>
             <div className="todo-filter">
@@ -252,15 +262,10 @@ export default function todoList({groupNo }) {
                         ))}
                     </div>
                 )}
-                {/*<select>*/}
-                {/*    <option>전체보기</option>*/}
-                {/*    <option>완료된 할일만 보기</option>*/}
-                {/*    <option>미완료된 할일만 보기</option>*/}
-                {/*</select>*/}
             </div>
             <table className="todo-table">
                 <thead>
-                <tr>
+                <tr className='table-tr-head'>
                     <th>#</th>
                     <th>항목</th>
                     <th>완료 여부</th>
@@ -268,107 +273,211 @@ export default function todoList({groupNo }) {
                     <th>수정 / 삭제</th>
                 </tr>
                 </thead>
-                <tbody>
-                {getFilteredTodos().map((todo, idx) => (
-                    <React.Fragment key={todo.todoNo}>
-                        <tr>
-                            <td>
-                                <span className="drag-icon">☰</span>
-                            </td>
-                            <td className='todo-title-for-hover'>{todo.todoTitle}</td>
-                            <td className='middle'>
-                                <div style={{textAlign: "center"}}>
-                                    <button
-                                        onClick={() => handleToggleDone(todo.todoNo)}
-                                        style={{
-                                            width: 18, height: 18,
-                                            borderRadius: '50%',
-                                            background: '#fff',
-                                            border: '1.5px solid #222',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginLeft: '45%'
-                                        }}
-                                        aria-label="완료 체크"
-                                    >
-                                        {todo.todoIsDone === 'done' && (
-                                            <img src='/bundle/img/checked_fill.png' alt='checked'/>
-                                        )}
-                                    </button>
-                                </div>
-                            </td>
-                            <td>{formatDueLabel(todo.todoEnd)}</td>
-                            <td>
-                                <button className="edit-btn" title="수정">
-                        <span role="img" aria-label="edit">
-                            <img src="/bundle/img/pen_black.png" alt="todo_modify"
-                                 onClick={() => handleEditClick(todo)}/>
-                        </span>
-                                </button>
-                                <button className="delete-btn" title="삭제">
-                        <span role="img" aria-label="delete">
-                            <img src="/bundle/img/delete_xo_resize.png" alt="todo_delete"
-                                 onClick={() => handleTodoDelete(todo.todoNo)}/>
-                        </span>
-                                </button>
-                            </td>
-                        </tr>
-                        {/* 수정 모드일 때 인풋 렌더 */}
-                        {editTodoNo === todo.todoNo && (
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="todoTable">
+                        {(provided) => (
+                            <tbody ref={provided.innerRef} {...provided.droppableProps}>
+                            {getFilteredTodos().map((todo, idx) => (
+                                <Draggable key={todo.todoNo} draggableId={String(todo.todoNo)} index={idx}>
+                                    {(provided, snapshot) => (
+                                        <>
+                                            <tr
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={{
+                                                    background: snapshot.isDragging ? "#fafad2" : undefined,
+                                                    ...provided.draggableProps.style,
+                                                }}
+                                            >
+                                                <td>
+                                                    <span className="drag-icon">☰</span>
+                                                </td>
+                                                <td className='todo-title-for-hover'>{todo.todoTitle}</td>
+                                                <td className='middle'>
+                                                    <div style={{textAlign: "center"}}>
+                                                        <button
+                                                            onClick={() => handleToggleDone(todo.todoNo)}
+                                                            style={{
+                                                                width: 18, height: 18,
+                                                                borderRadius: '50%',
+                                                                background: '#fff',
+                                                                border: '1.5px solid #222',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                marginLeft: '45%'
+                                                            }}
+                                                            aria-label="완료 체크"
+                                                        >
+                                                            {todo.todoIsDone === 'done' && (
+                                                                <img src='/bundle/img/checked_fill.png' alt='checked'/>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>{formatDueLabel(todo.todoEnd)}</td>
+                                                <td>
+                                                    <button className="edit-btn" title="수정">
+                                            <span role="img" aria-label="edit">
+                                            <img src="/bundle/img/pen_black.png" alt="todo_modify"
+                                                 onClick={() => handleEditClick(todo)}/>
+                                            </span>
+                                                    </button>
+                                                    <button className="delete-btn" title="삭제">
+                                            <span role="img" aria-label="delete">
+                                                <img src="/bundle/img/delete_xo_resize.png" alt="todo_delete"
+                                                     onClick={() => handleTodoDelete(todo.todoNo)}/>
+                                            </span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {/* 수정 모드일 때 인풋 렌더 */}
+                                            {editTodoNo === todo.todoNo && (
+                                                <tr>
+                                                    <td className='space'></td>
+                                                    <td>
+                                                        <input
+                                                            name="title"
+                                                            value={editData.title}
+                                                            onChange={handleInputChange}
+                                                        />
+                                                    </td>
+                                                    {/*<td>*/}
+                                                    {/*    <input*/}
+                                                    {/*        name="content"*/}
+                                                    {/*        value={editData.content}*/}
+                                                    {/*        onChange={handleInputChange}*/}
+                                                    {/*    />*/}
+                                                    {/*</td>*/}
+                                                    <td>
+                                                        <input
+                                                            name="end"
+                                                            type="date"
+                                                            value={editData.end}
+                                                            onChange={handleInputChange}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <button onClick={handleSave}>수정</button>
+                                                        <button onClick={handleCancel}>취소</button>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {/* 할일 추가 행 */}
                             <tr>
-                                <td></td>
                                 <td>
-                                    <input
-                                        name="title"
-                                        value={editData.title}
-                                        onChange={handleInputChange}
-                                    />
-                                </td>
-                                {/*<td>*/}
-                                {/*    <input*/}
-                                {/*        name="content"*/}
-                                {/*        value={editData.content}*/}
-                                {/*        onChange={handleInputChange}*/}
-                                {/*    />*/}
-                                {/*</td>*/}
-                                <td>
-                                    <input
-                                        name="end"
-                                        type="date"
-                                        value={editData.end}
-                                        onChange={handleInputChange}
-                                    />
+                                    <span className="drag-icon">
+                                        {/*☰*/}
+                                    </span>
                                 </td>
                                 <td>
-                                    <button onClick={handleSave}>수정</button>
-                                    <button onClick={handleCancel}>취소</button>
+                                    <input className="add-input" placeholder="새 일정 추가하기" value={newTodo}
+                                           onChange={(e) => setNewTodo(e.target.value)}/>
+                                </td>
+                                <td />
+                                <td>
+                                    <input className="date-input" type="date" value={newTodoEnd}
+                                           onChange={(e) => setNewTodoEnd(e.target.value)}/>
+                                </td>
+                                <td>
+                                    <button className="add-btn" title="추가"
+                                            onClick={handleTodoAdd}>＋</button>
                                 </td>
                             </tr>
+                            {provided.placeholder}
+                            </tbody>
                         )}
-                    </React.Fragment>
-                ))}
-                {/* 할일 추가 행 */}
-                <tr>
-                    <td>
-                        <span className="drag-icon">☰</span>
-                    </td>
-                    <td>
-                        <input className="add-input" placeholder="추가하기"
-                               onChange={(e) => setNewTodo(e.target.value)}/>
-                    </td>
-                    <td />
-                    <td>
-                        <input className="date-input" type="date" value={newTodoEnd}
-                               onChange={(e) => setNewTodoEnd(e.target.value)}/>
-                    </td>
-                    <td>
-                        <button className="add-btn" title="추가"
-                                onClick={handleTodoAdd}>＋</button>
-                    </td>
-                </tr>
-                </tbody>
+                    </Droppable>
+                </DragDropContext>
             </table>
+            <img src="/bundle/img/symbol_heart.png" alt="하트" className='heartSym'/>
+        </div>
+        </div>
         </div>
     )
 }
+
+{/*{getFilteredTodos().map((todo, idx) => (*/}
+{/*    <React.Fragment key={todo.todoNo}>*/}
+{/*        <tr>*/}
+{/*            <td>*/}
+{/*                <span className="drag-icon">☰</span>*/}
+{/*            </td>*/}
+{/*            <td className='todo-title-for-hover'>{todo.todoTitle}</td>*/}
+{/*            <td className='middle'>*/}
+{/*                <div style={{textAlign: "center"}}>*/}
+{/*                    <button*/}
+{/*                        onClick={() => handleToggleDone(todo.todoNo)}*/}
+{/*                        style={{*/}
+{/*                            width: 18, height: 18,*/}
+{/*                            borderRadius: '50%',*/}
+{/*                            background: '#fff',*/}
+{/*                            border: '1.5px solid #222',*/}
+{/*                            display: 'flex',*/}
+{/*                            alignItems: 'center',*/}
+{/*                            justifyContent: 'center',*/}
+{/*                            marginLeft: '45%'*/}
+{/*                        }}*/}
+{/*                        aria-label="완료 체크"*/}
+{/*                    >*/}
+{/*                        {todo.todoIsDone === 'done' && (*/}
+{/*                            <img src='/bundle/img/checked_fill.png' alt='checked'/>*/}
+{/*                        )}*/}
+{/*                    </button>*/}
+{/*                </div>*/}
+{/*            </td>*/}
+{/*            <td>{formatDueLabel(todo.todoEnd)}</td>*/}
+{/*            <td>*/}
+{/*                <button className="edit-btn" title="수정">*/}
+{/*        <span role="img" aria-label="edit">*/}
+{/*            <img src="/bundle/img/pen_black.png" alt="todo_modify"*/}
+{/*                 onClick={() => handleEditClick(todo)}/>*/}
+{/*        </span>*/}
+{/*                </button>*/}
+{/*                <button className="delete-btn" title="삭제">*/}
+{/*        <span role="img" aria-label="delete">*/}
+{/*            <img src="/bundle/img/delete_xo_resize.png" alt="todo_delete"*/}
+{/*                 onClick={() => handleTodoDelete(todo.todoNo)}/>*/}
+{/*        </span>*/}
+{/*                </button>*/}
+{/*            </td>*/}
+{/*        </tr>*/}
+{/*        /!* 수정 모드일 때 인풋 렌더 *!/*/}
+{/*        {editTodoNo === todo.todoNo && (*/}
+{/*            <tr>*/}
+{/*                <td></td>*/}
+{/*                <td>*/}
+{/*                    <input*/}
+{/*                        name="title"*/}
+{/*                        value={editData.title}*/}
+{/*                        onChange={handleInputChange}*/}
+{/*                    />*/}
+{/*                </td>*/}
+{/*                /!*<td>*!/*/}
+{/*                /!*    <input*!/*/}
+{/*                /!*        name="content"*!/*/}
+{/*                /!*        value={editData.content}*!/*/}
+{/*                /!*        onChange={handleInputChange}*!/*/}
+{/*                /!*    />*!/*/}
+{/*                /!*</td>*!/*/}
+{/*                <td>*/}
+{/*                    <input*/}
+{/*                        name="end"*/}
+{/*                        type="date"*/}
+{/*                        value={editData.end}*/}
+{/*                        onChange={handleInputChange}*/}
+{/*                    />*/}
+{/*                </td>*/}
+{/*                <td>*/}
+{/*                    <button onClick={handleSave}>수정</button>*/}
+{/*                    <button onClick={handleCancel}>취소</button>*/}
+{/*                </td>*/}
+{/*            </tr>*/}
+{/*        )}*/}
+{/*    </React.Fragment>*/}
+{/*))}*/}
