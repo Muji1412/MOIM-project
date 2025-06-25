@@ -78,22 +78,7 @@ export default function SideNav() {
                         image: group.groupImage || ""
                     }));
                     setServers(mappedServers);
-
-                    // URL 파라미터로 상태 복원
-                    if (serverId && serverId !== "default") {
-                        const foundServer = mappedServers.find(s => s.id === serverId);
-                        if (foundServer) {
-                            setSelectedServerId(serverId);
-                            console.log("서버 상태 복원됨:",serverId);
-                        }else{
-                            navigate('/home');
-                            setSelectedServerId("default");
-                        }
-                    }else{
-                        //url에 serverId가 없으면 기본값
-                        setSelectedServerId("default");
-                    }
-
+                    // 에러픽스, 두번 눌러야 가지는 버그 고침
                 } else if (response.status === 401) {
                     console.error('인증 실패: 로그인이 필요합니다');
                 } else {

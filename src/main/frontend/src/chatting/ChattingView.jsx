@@ -484,9 +484,9 @@ function ChattingView() {
                 <div className={chatStyles.chat_sub_wrap}>
                     <div className={chatStyles.messages_container}>
 
-                        <div className={chatStyles.channel_desc}>This is the start of the
-                            #{channelName || 'Channel'} channel.
-                        </div>
+                        {/*<div className={chatStyles.channel_desc}>This is the start of the*/}
+                        {/*    #{channelName || 'Channel'} channel.*/}
+                        {/*</div>*/}
 
                         {Object.entries(groupByDate).map(([date, msgs]) => (
                             <div key={date}>
