@@ -1,15 +1,17 @@
 package com.example.moim.service.notification;
 
 
+import com.example.moim.chatting.ChatMessage;
 import com.example.moim.command.DirectMessageDTO;
 import com.example.moim.command.FriendRequestDTO;
+import com.example.moim.command.MentionNotificationDTO;
 import com.example.moim.command.PushSubscriptionDto;
-import com.example.moim.entity.DirectMessage;
-import com.example.moim.entity.DirectMessageRoom;
-import com.example.moim.entity.PushSubscription;
-import com.example.moim.entity.Users;
+import com.example.moim.entity.*;
+import com.example.moim.repository.GroupsRepository;
 import com.example.moim.repository.PushSubscriptionRepository;
 import com.example.moim.repository.UsersRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.Builder;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +41,7 @@ public class PushNotificationService {
     private final PushSubscriptionRepository subscriptionRepository;
     private final UsersRepository usersRepository; // 유저 단일로 보내주기 위해서
     private final SimpMessagingTemplate messagingTemplate;
+    private final GroupsRepository groupsRepository;
 
     // 구독 정보 저장 로직 (이하 동일)
     public void subscribe(PushSubscriptionDto subscriptionDto, Users user) {
@@ -161,6 +165,47 @@ public class PushNotificationService {
             System.out.println("메세지템플릿 전송," + recipientUserId);
             System.out.println("메세지템플릿 전송," + requestDTO.getRequesterUsername());
         }
+    }
+
+    // 멘션 노티 메서드
+    public void sendMentionNotification(String groupName, ChatMessage chatMessage){
+
+        // n명에게 보낼수도 있으므로, 변경
+        // 만약 에브리원이 들어왔다면 그룹의 전체인원에게 보내는 로직으로 변경
+
+        List<String> mentionedList = mentionedList(chatMessage.getText());
+        Groups group = groupsRepository.getGroupsByGroupName(groupName); // 어차피 같은 서버이므로 for문 안에서 돌 필요 없음
+
+        for (String name : mentionedList ){
+            System.out.println("메세지 보낼 사람" + name);
+            Users users = usersRepository.findByUserNick(name)
+                    .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
+            String recipientUserId = users.getUsername();
+
+            // 보내줘야할거, 메세지의 정보, 어디서
+            MentionNotificationDTO mentionNotificationDTO = new MentionNotificationDTO(
+                    group.getGroupNo().toString(),
+                    group.getGroupName(),
+                    chatMessage.getText()
+            );
+
+            messagingTemplate.convertAndSendToUser(recipientUserId, "/queue/mention-notification", mentionNotificationDTO);
+        }
+    }
+
+    // 언급 전처리 메서드
+    // TODO 유틸메서드나 딴쪽으로 옮겨서 사용
+
+    public List<String> mentionedList(String text) {
+        List<String> result = new ArrayList<>();
+        String[] parts = text.split("@");
+        for (int i = 1; i < parts.length; i++) {
+            String part = parts[i].split("\\s")[0];
+            if (!part.isEmpty()) {
+                result.add(part);
+            }
+        }
+        return result;
     }
 
 

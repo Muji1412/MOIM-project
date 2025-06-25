@@ -6,18 +6,24 @@ import com.example.moim.chatting.ChatSessionManager;
 import com.example.moim.command.UserListResponse;
 import com.example.moim.entity.Users;
 import com.example.moim.repository.UsersRepository;
+import com.example.moim.service.notification.PushNotificationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.springframework.http.ResponseEntity; // 추가 import
 import org.springframework.http.HttpStatus; // 추가 import
 
+@Slf4j
 @Controller // STOMP(WebSocket) 메시지 처리를 위한 컨트롤러임을 명시
 public class ChatController {
 
@@ -25,15 +31,17 @@ public class ChatController {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChatSessionManager sessionManager;
     private final UsersRepository usersRepository;
+    private final PushNotificationService pushNotificationService;
 
     // 생성자 주입 방식
     public ChatController(ChatService chatService,
                           RedisTemplate<String, Object> redisTemplate,
-                          ChatSessionManager sessionManager, UsersRepository usersRepository) {
+                          ChatSessionManager sessionManager, UsersRepository usersRepository, PushNotificationService pushNotificationService ) {
         this.chatService = chatService;
         this.redisTemplate = redisTemplate;
         this.sessionManager = sessionManager;
         this.usersRepository = usersRepository;
+        this.pushNotificationService = pushNotificationService;
     }
 
     // 1. 실시간 채팅 메시지 저장 (채널별)
@@ -51,11 +59,23 @@ public class ChatController {
             message.setUserImg(sender.getUserImg());  // GCP URL 설정
         }
 
+        // 태원 추가파트
+        // groupName 나오고, message 객체 안에
+        System.out.println("sendMessage 디버깅");
+        System.out.println(groupName);
+        System.out.println(message.toString());
+        // text=@test11 @imurditto2
         // Redis에 프로필 이미지가 포함된 메시지 저장
+        // 서비스 전에, 일단 메세지에 @이 포함돼있는지 확인하고 실행
+        if (message.getText().contains("@")) {
+            pushNotificationService.sendMentionNotification(groupName, message);
+        }
         chatService.saveChat(groupName, message.getChannel(), message);
 
         return message; // 실시간 브로드캐스트 (프로필 이미지 포함)
     }
+
+
 
 
     // 2. 이미지 업로드 (REST 방식)
@@ -109,7 +129,7 @@ public class ChatController {
     @MessageMapping("/chat/join/{groupName}")
     public void joinChannel(@DestinationVariable String groupName,
                             ChatMessage message,
-                            org.springframework.messaging.simp.SimpMessageHeaderAccessor headerAccessor) {
+                            SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         String username = message.getUser();
         String channel = message.getChannel();
@@ -124,7 +144,7 @@ public class ChatController {
         joinMessage.setUser("System");
         joinMessage.setText(username + "님이 채팅방에 입장했습니다.");
         joinMessage.setChannel(channel);
-        joinMessage.setDate(new java.util.Date().toString());
+        joinMessage.setDate(new Date().toString());
 
         // 채팅 기록에 저장 (선택사항)
         // chatService.saveChat(groupName, channel, joinMessage);
@@ -134,7 +154,7 @@ public class ChatController {
     @MessageMapping("/chat/leave/{groupName}")
     public void leaveChannel(@DestinationVariable String groupName,
                              ChatMessage message,
-                             org.springframework.messaging.simp.SimpMessageHeaderAccessor headerAccessor) {
+                             SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         String username = message.getUser();
         String channel = message.getChannel();

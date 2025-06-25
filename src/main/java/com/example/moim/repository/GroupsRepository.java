@@ -30,4 +30,6 @@ public interface GroupsRepository extends JpaRepository<Groups, Long> {
 
     //그룹번호로 그룹찾기 - 캘린더 일정넣을때
     Optional<Groups> findByGroupNo(long groupNo);
+
+    Groups getGroupsByGroupName(String groupName);
 }

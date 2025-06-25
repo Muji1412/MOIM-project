@@ -181,10 +181,10 @@ export default function FriendListPage() {
                     <div className={styles.section_title_wrap}>
                         <div className={styles.section_title_area}>
                             <img src="/bundle/img/friend_ic.png" alt="#" />
-                            <p>Friend</p>
+                            <p>친구</p>
                         </div>
                         <button onClick={openAddFriend} className={styles.add_friend_btn}>
-                            Add Friend
+                            친구 추가
                         </button>
                     </div>
                 </div>

@@ -53,7 +53,7 @@
                 });
 
                 if (response.ok) {
-                    alert('푸시 알림이 성공적으로 구독되었습니다!');
+                    console.log('푸시 알림이 성공적으로 구독되었습니다!');
                     setIsSubscribed(true);
                     setSubscriptionError(null);
                 } else {
@@ -62,7 +62,6 @@
             } catch (error) {
                 console.error('푸시 구독 실패:', error);
                 setSubscriptionError('알림 권한이 거부되었거나 오류가 발생했습니다.');
-                alert('푸시 알림 구독에 실패했습니다. 브라우저의 알림 권한을 확인해주세요.');
             }
         };
 

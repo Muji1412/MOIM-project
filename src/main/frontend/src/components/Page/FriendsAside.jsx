@@ -52,7 +52,7 @@ export default function FriendsAside() {
                     onClick={returnToFriendsList} // ✅ 함수를 직접 연결합니다.
                 >
                     <img src="/bundle/img/friend_ic.png" alt="friend_icon"/>
-                    <p>Friend</p>
+                    <p>친구</p>
                 </div>
             </div>
 
