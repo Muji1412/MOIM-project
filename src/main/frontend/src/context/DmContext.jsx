@@ -195,7 +195,12 @@ export const DmProvider = ({ children }) => {
                 mentionNotificationData={mentionNotificationData}
                 onToastClick={() => {
                     console.log('토스트 알람클릭');
-                    console.log(mentionNotificationData)
+                    console.log(mentionNotificationData);
+
+                    // 커스텀 이벤트 발생
+                    window.dispatchEvent(new CustomEvent('serverSelect', {
+                        detail: { serverId: mentionNotificationData.groupId }
+                    }));
                 }}
             />,
             {
