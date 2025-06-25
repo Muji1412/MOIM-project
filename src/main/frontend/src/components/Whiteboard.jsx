@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Tldraw, createTLStore, defaultShapeUtils } from 'tldraw';
+import { Tldraw, createTLStore, defaultShapeUtils, loadSnapshot } from 'tldraw';
 import 'tldraw/tldraw.css';
 
 function Whiteboard() {
@@ -18,6 +18,9 @@ function Whiteboard() {
     const store = useRef(createTLStore({ shapeUtils: defaultShapeUtils }));
     const whiteboardSubscription = useRef(null);
     const isUpdatingRef = useRef(false);
+
+    const lastPingTime = useRef(Date.now());
+    const pingInterval = useRef(null);
 
     // --- 사용자별 고유 색상 생성 ---
     const getUserColor = useCallback((userId) => {
@@ -162,6 +165,15 @@ function Whiteboard() {
         };
     }, [whiteboardData]);
 
+    const reconnectWebSocket = () => {
+        if (window.whiteboardStompClient) {
+            window.whiteboardStompClient.disconnect();
+        }
+        setTimeout(() => {
+            createServerWebSocket();
+        }, 1000);
+    };
+
     // --- 서버별 공유 WebSocket 연결 ---
     const createServerWebSocket = async () => {
         try {
@@ -175,8 +187,8 @@ function Whiteboard() {
             const { Stomp } = await import('@stomp/stompjs');
 
             const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
-                ? 'http://localhost:8089'
-                : `http://${window.location.hostname}:8089`;
+                ? 'http://localhost:8089'  // ⚠️ 포트 번호는 본인 백엔드 서버에 맞게 수정
+                : 'https://moim.o-r.kr';
 
             console.log('WebSocket 서버 URL:', APPLICATION_SERVER_URL);
 
@@ -314,7 +326,7 @@ function Whiteboard() {
 
                 // 화이트보드 상태 복원
                 const snapshot = JSON.parse(message.data);
-                editorRef.current.store.loadSnapshot(snapshot);
+                loadSnapshot(editorRef.current.store, snapshot);
 
                 console.log('>>> 화이트보드 상태 복원 완료');
                 setHasReceivedInitialState(true);
@@ -338,6 +350,9 @@ function Whiteboard() {
 
     // --- 서버 메시지 핸들러 ---
     const handleServerMessage = (message) => {
+        // 메시지 수신 시 핑 타임 업데이트
+        lastPingTime.current = Date.now();
+
         console.log('=== 서버 공유 화이트보드 메시지 수신 ===');
         console.log('메시지 타입:', message.type);
         console.log('발신 연결 ID:', message.connectionId);
@@ -371,7 +386,7 @@ function Whiteboard() {
                         }
 
                         const snapshot = JSON.parse(message.data);
-                        editorRef.current.store.loadSnapshot(snapshot);
+                        loadSnapshot(editorRef.current.store, snapshot);
                         console.log('>>> 서버 화이트보드 동기화 완료 (assets 포함)');
 
                         setTimeout(() => {
@@ -550,7 +565,7 @@ function Whiteboard() {
                     } catch (error) {
                         console.error('서버 화이트보드 스냅샷 생성 실패:', error);
                     }
-                }, 50); // 100 → 50으로 단축
+                }, 500); // 500ms로 제한
             }
         };
 
@@ -613,6 +628,25 @@ function Whiteboard() {
         console.log('상태 복원 완료:', isStateRestored);
         console.log('초기 상태 수신 완료:', hasReceivedInitialState);
     }, [connectedUsers, activeUsers, isStateRestored, hasReceivedInitialState]);
+
+    // --- 핑 체크 및 재연결 로직 ---
+    useEffect(() => {
+        if (isConnected) {
+            pingInterval.current = setInterval(() => {
+                if (Date.now() - lastPingTime.current > 5000) {
+                    console.warn('핑 지연 감지 - 재연결 시도');
+                    reconnectWebSocket();
+                }
+            }, 3000);
+
+            return () => {
+                if (pingInterval.current) {
+                    clearInterval(pingInterval.current);
+                }
+            };
+        }
+    }, [isConnected]);
+
 
     // --- Render Logic ---
     if (!isConnected && (!whiteboardData || showJoinForm)) {
@@ -694,7 +728,7 @@ function Whiteboard() {
 
                 <div className="controls-bar">
                     <div className="connected-users">
-                        <span>서버 {whiteboardData.groupId} 접속자: {activeUsers.size}명</span>
+                        <span>서버 {whiteboardData.groupId}</span>
                         {Array.from(activeUsers.entries()).map(([userId, user]) => (
                             <span
                                 key={userId}
