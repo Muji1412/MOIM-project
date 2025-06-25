@@ -1,224 +1,61 @@
 /* 사용자 정보 조회 페이지 */
 
-.modal-overlay{
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: initial;
-    z-index: 500;
-}
+.modal-overlay{overflow: hidden;position: fixed;top: 0;left: 0;right: 0;bottom: 0;display: flex;justify-content: center;align-items: initial;z-index: 500;}
 
-.box{
-    overflow: hidden;
-    border-radius: 12px;
-    width: 770px;
-    text-align: center;
-    background: #eeeeee;;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
+.box{justify-content: space-between; display: flex; flex-direction: row; overflow: hidden;border-radius: 12px;width: 870px;text-align: center;background: #23272a;;box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);height: 725px;}
 
 /* 좌측 회색 메뉴*/
-.menu {
-    background: #e1e0e1;
-    width: 20%;
-    min-width: 220px;
-    height: 800px;
-    float: left;
-}
-
+.menu {gap: 10px; width: 240px;height: 800px; display: flex; align-items: center; flex-direction: column;margin-top: 25px;}
+/*background: #23272a;*/
 /*메뉴 User Settings*/
-.menu-title {
-    width: 85%;
-    color: #6b7280;
-    font-size: 12px;
-    text-align: left;
-    margin: 10px 20px;
-    padding-top: 30px;
-}
-
+.menu-title {width: 90%;color: #6b7280;font-size: 12px;text-align: left;margin-top: 40px;}
 /*메뉴 My Account*/
-.menu-content{
-    background: #a7a7a7;
-    width: 85%;
-    font-size: 16px;
-    height: 28px;
-    text-align: left;
-    margin: 10px 20px;
-    border-radius: 5px;
-    padding: 4px;
-}
-
-.menu-logout{
-    width: 85%;
-    color: #A4232C;
-    font-size: 16px;
-    border-bottom: 1px solid #a7a7a7;
-    border-top: 1px solid #a7a7a7;
-    padding: 4px;
-    margin: 10px 20px;
-    cursor: pointer;
-    text-align: left;
-}
-
-.menu-logout > img{
-    float: right;
-    margin-right: 10px;
-}
+.menu-content{margin: 5px 0; width: 90%; background: #a7a7a7;font-size: 16px;height: 35px;text-align: left;border-radius: 5px;display: flex; align-items: center;}
+.menu-content span{width: 90%; margin: 0 auto; color: #fff;}
+.menu-logout{ display: flex; justify-content: space-between; align-items: center; width: 90%; height: 40px; color: #f23f42; font-size: 16px; border-bottom: 1px solid #a7a7a7; border-top: 1px solid #a7a7a7; cursor: pointer; text-align: left;}
+.menu-logout span{margin-left: 10px;}
+.menu-logout img{margin-right: 5px;}
 
 /* 헤더, 좌측메뉴 제외한 흰 부분*/
-.myAccount-background {
-    width: 60%;
-    min-width: 500px;
-    float: left;
-    margin-left: 50px;
-    background: #eeeeee;
-}
-
+.myAccount-background {width: 600px;}
 /* 맨 위 헤드라인 부분 */
-.myAccount-headline {
-    width: 60%;
-    min-width: 400px;
-    overflow: hidden;
-    flex-direction: row;
-    vertical-align: middle;
-    align-items: center;
-    justify-content: center;
-    border-bottom: #777777;
-    padding: 10px 30px;
-}
+.myAccount-headline {width: 98%; height: 85px; position: relative; margin: 0 auto;}
 
-/* 제목 - my account */
-.myAccount-headline > h2 {
-    display: inline-block;
-    float: left;
-    margin-bottom: 10px;
-    height: 90px;
-    line-height: 90px;
-}
+.headline_left{width: 88%;height: 85px; line-height: 85px; border-bottom: 1px solid #777777;}
+.headline_left h2 {color: #fff;text-align:start;}
 
-/* my account 우측 닫기 버튼*/
-.myAccount-headline > a {
-    border: #ee2349;
-    max-width: 40px;
-    height: 100%;
-    text-decoration: none;
-    float: right;
-    margin-top: 20px;
-    flex-direction: row;
-    vertical-align: middle;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
+.headline_close_btn{width: 20%;height: 100%;position: absolute; right: 35px; top: 15px;}
+.headline_close_btn a {text-decoration: none;float: right;margin-top: 10px;cursor: pointer;}
+.headline_close_btn a > img {width: 33px; height: auto;}
 
 /* 회원정보 박스 컨테이너 */
-.myAccount-container {
-    background: #23272a;
-    width: 60%;
-    min-width: 400px;
-    border-radius: 18px;
-    padding: 40px 30px;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
+.myAccount-container {background: #23272a;width: 88%;min-width: 400px;border-radius: 18px;margin-left: 5px;}
 /* 회원정보 박스 상단 프로필사진, modify 버튼 든 박스 */
-.myAccount-container-head {
-    height: 100px;
-    width: 100%;
-    overflow: hidden;
-}
+.myAccount-container-head {height: 140px;width: 98%;overflow: hidden;position: relative; border-top-left-radius: 10px;border-top-right-radius: 10px; margin-top: 25px;}
+.setting_card_header{width: 100%;height: 70px;background: #c3ee41cc;}
+.myAccount-container-head-wrap {height: 100px;width: 100%;overflow: hidden;display: flex; justify-content: space-around; align-items: center;position: absolute;z-index: 1;bottom:0;gap: 200px;}
 
 /* 프로필사진*/
-.profile-image {
-    display: inline-block;
-    float: left;
-    height: 100px;
-    width: 100px;
-    border-radius: 100%;
-    background: white;
-}
-
-/* 프로필사진*/
-.profile-image-img {
-    display: inline-block;
-    float: left;
-    height: 100px;
-    width: 100px;
-    border-radius: 100%;
-    background: white;
-}
+.profile-image{height: 95px;width: 95px;border-radius: 100%;background: #23272a;display: flex; align-items: center; justify-content: center;}
+.profile-image img{height: 90%;width: 90%;border-radius: 100%;background: white;}
 
 /* modify 버튼*/
-.modify-btn {
-    background: #97b82d;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    height: 20px;
-    font-size: 14px;
-    margin-top: 30px;
-    margin-right: 20px;
-    cursor: pointer;
-    float: right;
-}
-
+.modify-btn {background: #C3EE41CC;color: #fff;border: none;border-radius: 10px;font-size: 14px;cursor: pointer;height: 35px;width: 120px;margin-top: 20px;}
+.modify-btn:hover {background: #97b82d;}
 /* 회원정보 표시되는 흰 박스*/
-.myAccount-container-under {
-    width: 95%;
-    border-radius: 18px;
-    background: white;
-    margin-top: 15px;
-    padding: 5px 10px;
-}
+.myAccount-container-under {width: 95%;border-radius: 18px;padding: 5px 0;color: #fff; margin-left: 30px;}
 
-.inner-title {
-    font-size: 16px;
-    font-weight: bold;
-    text-align: left;
-
-}
-
-.inner-content {
-    font-size: 16px;
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-/* 비밀번호 바꾸기 및 회원탈퇴 박스 */
-.myAccount-container-small {
-
-}
+.inner-title {font-size: 16px;font-weight: bold;text-align: left;width: 90%;}
+.inner-content {font-size: 16px;margin-bottom: 10px;text-align: left;}
 
 /*비밀번호 바꾸기*/
-.pw-change-btn{
-    width: 30%;
-    background: #8aa82b;
-    color: white;
-    padding: 6px 0;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-}
-
+.pw-change-btn{width: 160px;background: #C3EE41CC;color: white;padding: 6px 0;border: none;border-radius: 8px;font-size: 16px;margin-top: 10px;margin-bottom: 10px;cursor: pointer;}
+.pw-change-btn:hover {background: #97b82d;}
 /*회원 탈퇴 버튼*/
-.account-delete-btn {
-    width: 15%;
-    background: #ee2349;
-    color: white;
-    padding: 6px 0;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    margin-top: 10px;
-    cursor: pointer;
-}
+.account-delete-btn {width: 100px;background: #d9d9d9;color: #ee2349;padding: 6px 0;border: none;border-radius: 8px;font-size: 16px;margin-top: 10px;cursor: pointer;}
+.account-delete-btn:hover {background: #ee2349;color: white;}
 
+
+.footer_box_area{width: 100%; margin: 20px auto;}
+.footer_title{display: flex; flex-direction: column; align-items: flex-start; width: 97%; margin: 0 auto;}
+.footer_title span{color: #fff;}
