@@ -356,7 +356,7 @@ function ChattingView() {
             const filtered = members.filter(member =>
                 member.nickname.toLowerCase().includes(query.toLowerCase())
             );
-            setFilteredMembers(filtered.slice(0, 5)); // 최대 5명만 표시
+            setFilteredMembers(filtered.slice(0, 20)); // 최대 5명만 표시
         } else {
             setShowMentionList(false);
         }

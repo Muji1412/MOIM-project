@@ -150,6 +150,10 @@ export default function SideNav() {
                 console.log("서버 정보 없이 페이지만 이동");
             }
 
+
+            //채널명 초기화
+            setSelectedChannel(null);
+
             // 페이지 이동은 항상 실행
             navigate(`/servers/${serverId}?channelName=${encodeURIComponent('일반채팅')}`);
         }
