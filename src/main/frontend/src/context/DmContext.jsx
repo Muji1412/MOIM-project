@@ -35,6 +35,7 @@ export const DmProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]); // 추가
     const [showAddFriend, setShowAddFriend] = useState(false);
     const [friendRequestSubscription, setFriendRequestSubscription] = useState(null);
+    const [mentionNotificationSubscription, setMentionNotificationSubscription] = useState(null);
 
 
     // ⭐️ [추가된 로직 1] activeDmRoom의 최신 값을 담을 ref 생성
@@ -94,7 +95,7 @@ export const DmProvider = ({ children }) => {
         setShowAddFriend(false);    // 친구 추가 페이지를 닫습니다.
     };
 
-    // ⭐️ 알림 구독 함수 ⭐️
+    // toast 구독 알림 함수
     const subscribeToNotifications = (client) => {
         if (!currentUser || !client || !client.connected) {
             console.log('구독 조건 불만족:', {
@@ -117,8 +118,11 @@ export const DmProvider = ({ children }) => {
             friendRequestSubscription.unsubscribe();
         }
 
+        if (notificationSubscription){
+            notificationSubscription.unsubscribe();
+        }
+
         try {
-            // ⭐️ 여러 구독 방식으로 테스트 ⭐️
 
             const subscription = client.subscribe(
                 `/user/queue/notification`,
@@ -138,31 +142,80 @@ export const DmProvider = ({ children }) => {
                 }
             );
 
+            const mentionNotificationSubscription = client.subscribe(
+                `/user/queue/mention-notification`,
+                (message) => {
+                    console.log('=== 멘션 수신 ===', message.body);
+                    const mentionNotificationData = JSON.parse(message.body);
+                    handleMentionNotification(mentionNotificationData);
+                }
+            );
+
 
             setNotificationSubscription(subscription);
             setFriendRequestSubscription(friendSubscription);
+            setMentionNotificationSubscription(mentionNotificationSubscription)
             console.log('✅ 알림 구독 성공!');
-
-            // ⭐️ 구독 성공 확인을 위한 테스트 메시지 요청 ⭐️
-            setTimeout(() => {
-                client.publish('/pub/test-notification', {}, JSON.stringify({
-                    username: currentUser.username,
-                    message: '구독 테스트'
-                }));
-            }, 1000);
 
         } catch (error) {
             console.error('❌ 알림 구독 실패:', error);
         }
     };
 
-    // ⭐️ 새 알림 처리 ⭐️
+    // DM 알림 처리 메서드
+    const handleMentionNotification = (mentionNotificationData) => {
+
+        const NotificationToast = ({ mentionNotificationData, onToastClick }) => (
+            <div
+                onClick={onToastClick}
+                style={{
+                    cursor: 'pointer',
+                    whiteSpace: 'pre-wrap'
+                }}
+            >
+        <span style={{ fontWeight: 'bold', color: '#333' }}>
+            {mentionNotificationData.groupName}
+        </span>
+                <span style={{ fontWeight: 'normal' }}>
+
+        </span>
+                <div style={{
+                    fontSize: '14px',
+                    color: '#666',
+                    marginTop: '4px'
+                }}>
+                    {mentionNotificationData.message}
+                </div>
+            </div>
+        );
+
+        // 토스트 알림 표시
+        toast.info(
+            <NotificationToast
+                mentionNotificationData={mentionNotificationData}
+                onToastClick={() => {
+                    console.log('토스트 알람클릭');
+                    console.log(mentionNotificationData);
+
+                    // 커스텀 이벤트 발생
+                    window.dispatchEvent(new CustomEvent('serverSelect', {
+                        detail: { serverId: mentionNotificationData.groupId }
+                    }));
+                }}
+            />,
+            {
+                autoClose: 5000,
+                closeOnClick: false // 이걸 false로 설정해야 커스텀 onClick이 작동해요
+            }
+        );
+    };
+
+    // DM 알림 처리 메서드
     const handleNewNotification = (notificationData) => {
         const currentActiveRoom = activeDmRoomRef.current;
-        // ⭐️ [수정된 로직] state 대신 ref 값을 사용하여 현재 활성화된 채팅방의 알림인지 확인
         if (currentActiveRoom && currentActiveRoom.id === notificationData.roomId) {
             console.log(`현재 활성화된 방(${currentActiveRoom.id})의 메시지이므로 알림을 표시하지 않습니다.`);
-            return; // 함수 종료
+            return;
         }
 
         const NotificationToast = ({ notificationData, onToastClick }) => (

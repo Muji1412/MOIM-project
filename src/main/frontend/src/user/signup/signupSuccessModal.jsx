@@ -7,10 +7,10 @@ const SignupSuccessModal = ({ isOpen, onClose }) => {
     return (
         <div className="modal-overlay-signup">
             <div className="modal-signup">
-                <h2>🎉 Signing up Completed!</h2>
-                <p>Welcome to MOIM</p>
+                <h2>🎉 회원 가입 완료!</h2>
+                <p>로그인하셔서 MOIM을 이용해보세요</p>
                 <button className="modal-btn-signup" onClick={onClose}>
-                    Login
+                    로그인
                 </button>
             </div>
         </div>

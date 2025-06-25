@@ -29,7 +29,7 @@ public class RefreshToken {
     @Column(name = "token_expires")
     private Timestamp tokenExpires;
 
-    @Column(name = "user_agent")
-    private String userAgent;
+//    @Column(name = "user_agent")
+//    private String userAgent;
 
 }

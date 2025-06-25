@@ -79,24 +79,24 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Reset Your Password</h2>
+                <h2>비밀번호 변경하기</h2>
                 {/*현재 비밀번호*/}
                 <div className="modal-inner-label">
-                    Current Password <p className="modal-inner-star">*</p>
+                    현재 비밀번호 <p className="modal-inner-star">*</p>
                 </div>
                 <input type="password" className="modal-inner-input"
                        ref={currentPwRef}
                         onChange={(e) => setCurrentPassword(e.target.value)}></input>
                 {/*새 비밀번호*/}
                 <div className="modal-inner-label">
-                    New Password <p className="modal-inner-star">*</p>
+                    새 비밀번호 <p className="modal-inner-star">*</p>
                 </div>
                 <input type="password" className="modal-inner-input" value={newPassword}
                        ref={newPwRef}
                        onChange={(e) => setNewPassword(e.target.value)}></input>
                 {/*새 비밀번호 체크*/}
                 <div className="modal-inner-label">
-                    New Password check <p className="modal-inner-star">*</p>
+                    비밀번호 확인 <p className="modal-inner-star">*</p>
                     {pwCheck === true && <span style={{ color: '#ee2349' }}>Passwords don't match</span>}
                     {pwCheck === false && <span style={{ color: '#97b82d' }}>Passwords match</span>}
                 </div>
@@ -106,11 +106,11 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
                         onChange={handleNewPassword2Change}></input>
                 {/*리셋 버튼*/}
                 <button className="modal-btn" onClick={handlePwChange}>
-                    Reset
+                    변경
                 </button>
                 {/*닫기 버튼*/}
                 <button className="modal-btn-close" onClick={onClose}>
-                    close
+                    닫기
                 </button>
                 {/*비밀번호 수정 성공 모달*/}
                 <PwChangeSuccessModal isOpen={showSuccessModal} onClose={handleCloseSuccessModal}/>

@@ -16,7 +16,7 @@ public interface TodolistRepository extends JpaRepository<TodolistEntity,Long> {
 //    @Query("select t from TodolistEntity t where t.users.userNo = :userNo")
 //    List<TodolistEntity> getTodolistByUserNoAndTodoEndAfter(long userNo, String todoEnd);
 
-    @Query("SELECT t FROM TodolistEntity t WHERE t.users.userNo = :userNo AND t.todoEnd > :today")
+    @Query("SELECT t FROM TodolistEntity t WHERE t.users.userNo = :userNo AND t.todoEnd >= :today")
     List<TodolistEntity> getByUserNoAndEndAfter(@Param("userNo") long userNo, @Param("today") String today);
 
     TodolistEntity getByTodoNo(long todoNo);

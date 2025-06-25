@@ -10,11 +10,11 @@ import DetailCalendarModal from "./DetailCalendarModal";
 const locales = {'ko' : koLocale };
 const localizer = dateFnsLocalizer({format, parse, startOfWeek, getDay, locales});
 
-export default function MyCalendar({group_No}) {
+export default function MyCalendar() {
     const [events, setEvents] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [groupNo, setGroupNo] = useState(group_No);
+    const [groupNo, setGroupNo] = useState('00');
     const [detailEvent, setDetailEvent] = useState('');
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
@@ -31,7 +31,8 @@ export default function MyCalendar({group_No}) {
 
     const fetchEvents = () => {
         const groupNo = JSON.parse(sessionStorage.getItem("calendarData")).groupNo;
-        setGroupNo(groupNo);
+        console.log('잘들어옴? ',groupNo);
+        if (groupNo) setGroupNo(groupNo);
         fetch('api/calendar', {
             method: 'POST',
             headers: {
@@ -91,6 +92,12 @@ export default function MyCalendar({group_No}) {
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
+                views={{
+                    month: true,
+                    week: true,
+                    day: true}}
+                step={30}
+                timeslots={2}
                 onSelectSlot={(slotInfo) => {
                     setSelectedSlot(slotInfo);
                     setModalOpen(true);

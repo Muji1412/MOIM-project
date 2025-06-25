@@ -1,6 +1,7 @@
 package com.example.moim.config;
 
 import com.example.moim.jwt.JWTService;
+import com.example.moim.repository.RefreshTokenRepository;
 import com.example.moim.service.user.CustomUserDetailsService;
 import com.example.moim.util.JWTAuthenticationFilter;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -173,8 +174,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager, JWTService jwtService) {
-        CustomLoginFilter filter = new CustomLoginFilter(jwtService);
+    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager
+            , JWTService jwtService
+            , RefreshTokenRepository refreshTokenRepository) {
+        CustomLoginFilter filter = new CustomLoginFilter(jwtService, refreshTokenRepository);
         filter.setAuthenticationManager(authenticationManager);
         return filter;
     }

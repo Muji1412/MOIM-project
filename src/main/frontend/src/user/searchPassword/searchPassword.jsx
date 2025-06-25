@@ -61,7 +61,7 @@ export default function SearchPassword() {
                 {/* 22. 상단 로고 이미지 */}
                 <img src="/bundle/img/logo_login.png" alt="logo_login" className="login-logo" />
                 {/* 23. 비밀번호 찾기 타이틀 */}
-                <h2>	Forgot your password? <br /> You can reset it here.</h2>
+                <h2>	비밀번호 찾기   </h2>
                 {/* 아이디 입력 */}
                 <div className="search-input-group">
                     {/* 25. 라벨과 필수입력 별 */}
@@ -92,7 +92,7 @@ export default function SearchPassword() {
                 {/* 44. 비밀번호 찾기 버튼 */}
                 {result && <div className="search-error">{result}</div>}
                 <button className="search-btn" onClick={handleSearchPassword}>
-                    Reset Password
+                    비밀번호 찾기
                 </button>
                 {/* 로그인 창으로 되돌아가기 */}
                 <div className="search-bottom">

@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
         //로그인VO에서 아이디와 비밀번호를 받아 DB에 해당 아이디 존재여부 및 존재시 비밀번호가 일치하는지 검사
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
-        Optional<Users> user = usersRepository.findByUsername(username);
+        Optional<Users> user = Optional.of(usersRepository.findByUsername(username).orElseThrow());
         if(user.isEmpty()) {
             throw new IllegalArgumentException("아이디가 없습니다.");
         } else if (!passwordEncoder.matches(password, user.get().getPassword())) {
@@ -100,12 +100,23 @@ public class UserServiceImpl implements UserService {
         String refreshToken = jwtService.createRefreshToken(vo);
 
         //refreshToken은 DB에 저장해 둔다
-        RefreshToken refreshTokenEntity = new  RefreshToken();
-        refreshTokenEntity.setTokenCont(refreshToken);
-        refreshTokenEntity.setUser(users);
-        refreshTokenEntity.setTokenCreated(new Timestamp(System.currentTimeMillis()));
-        refreshTokenEntity.setTokenExpires(Timestamp.valueOf(LocalDateTime.now().plusDays(7)));
-        refreshTokenRepository.save(refreshTokenEntity);
+        Optional<RefreshToken> refreshTokenEntity = refreshTokenRepository.findByUserUserNo(users.getUserNo());
+        if(refreshTokenEntity.isPresent()) {
+            RefreshToken refreshTokenEntity1 = refreshTokenEntity.get();
+            refreshTokenEntity1.setTokenCont(refreshToken);
+            refreshTokenEntity1.setUser(users);
+            refreshTokenEntity1.setTokenCreated(new Timestamp(System.currentTimeMillis()));
+            refreshTokenEntity1.setTokenExpires(Timestamp.valueOf(LocalDateTime.now().plusDays(7)));
+            refreshTokenRepository.save(refreshTokenEntity1);
+        } else {
+            RefreshToken refreshTokenEntity1 = new RefreshToken();
+            refreshTokenEntity1.setTokenCont(refreshToken);
+            refreshTokenEntity1.setUser(users);
+            refreshTokenEntity1.setTokenCreated(new Timestamp(System.currentTimeMillis()));
+            refreshTokenEntity1.setTokenExpires(Timestamp.valueOf(LocalDateTime.now().plusDays(7)));
+            refreshTokenRepository.save(refreshTokenEntity1);
+        }
+
 
         return new TokenResponseVO(token,refreshToken); //토큰들이 든 vo 반환
     }
@@ -258,11 +269,7 @@ public class UserServiceImpl implements UserService {
         Users user = usersRepository.findByUsername(username).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow( () -> new EntityNotFoundException("유저가 없습니다."));
         if (!passwordEncoder.matches(password, user.getPassword())) {
-//            System.out.println("비밀번호 일치 여부: " + passwordEncoder.matches(password, user.getPassword()));
-//            System.out.println("입력 비밀번호: " + password);
-//            System.out.println("DB 비밀번호: " + user.getPassword());
             boolean isMatch = passwordEncoder.matches(password, user.getPassword());
-//            System.out.println("일치 여부: " + isMatch);
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
         user.setUserIsDeleted(true);

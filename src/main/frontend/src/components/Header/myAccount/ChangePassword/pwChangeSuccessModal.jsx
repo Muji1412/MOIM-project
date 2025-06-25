@@ -7,10 +7,10 @@ const PwChangeSuccessModal = ({ isOpen, onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Reset Success!</h2>
-                <p>Your password has been successfully changed.</p>
+                <h2>비밀번호 변경 성공</h2>
+                <p>비밀번호가 성공적으로 변경되었습니다.</p>
                 <button className="modal-btn" onClick={onClose}>
-                    Close
+                    닫기
                 </button>
             </div>
         </div>

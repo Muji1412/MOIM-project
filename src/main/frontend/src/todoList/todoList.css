@@ -1,14 +1,30 @@
 /* Todo list 페이지 */
 
+.asd{
+    text-align: center;
+
+}
+
+/*.todo-outer{*/
+/*    width: 82%;*/
+/*    margin: 50px;*/
+/*    padding: 20px;*/
+/*    background: #afcf49;*/
+/*    text-align: center;*/
+/*    border: 2px solid #777777;*/
+/*    border-radius: 14px;*/
+/*}*/
 
 .todo-container {
-    width: 80%;
+    width: 100%;
     margin: 30px auto;
     background: #fff;
     border: 2px solid #777777;
     border-radius: 14px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.05);
     padding: 30px 30px 50px 30px;
+    position: relative;
+    min-height: 500px;
 }
 
 .todo-title {
@@ -22,7 +38,9 @@
 .todo-filter {
     text-align: right;
     margin-bottom: 18px;
-    position: fixed;
+    position: absolute;
+    top: 50px;
+    right: 130px;
     width: 80%;
 }
 
@@ -51,10 +69,37 @@
     text-align: center;
 }
 
+/*드롭다운 된 상태에서 hover시 라임색*/
+.typeBtn-drop:hover{
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #8aa82b;
+    z-Index: 1000;
+    color: #fff;
+    height: 30px;
+    width: 130px;
+    border-radius: 8px;
+    text-align: center;
+}
+
 /*드롭다운 된 아래 버튼들*/
 .typeBtn-drop-inner{
     display: block;
     background: #777777;
+    color: #fff;
+    height: 30px;
+    width: 130px;
+    border: none;
+    border-bottom: 1px solid #a7a7a7;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/*드롭다운 된 아래 버튼들 hover시 라임색*/
+.typeBtn-drop-inner:hover{
+    display: block;
+    background: #8aa82b;
     color: #fff;
     height: 30px;
     width: 130px;
@@ -156,12 +201,7 @@
     padding: 2px 7px;
     border-radius: 5px;
 }
-/*.edit-btn:hover {*/
-/*    background: #eaf2fc;*/
-/*}*/
-/*.delete-btn:hover {*/
-/*    background: #ffe1e1;*/
-/*}*/
+
 .add-btn {
     background: #f5f5f5;
     font-size: 1.25rem;
@@ -185,107 +225,30 @@
     padding: 4px 5px;
 }
 
+.heartSym{
+    width: 100px;
+    opacity: 0.5;
+}
 
-/*!*가장 바깥쪽*!*/
-/*.full-background{*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*todo list 박스*!*/
-/*.todo-outer-box{*/
-/*    width: 80%;*/
-/*    border: 2px solid #777777;*/
-/*    border-radius: 18px;*/
-/*    padding: 20px;*/
-/*}*/
-
-/*!*제목 박스 *!*/
-/*.todo-header-box{*/
-/*    width: 80%;*/
-/*    margin: 30px 10%;*/
-/*    overflow: hidden;*/
-/*}*/
-
-/*!*제목(TODO LIST)*!*/
-/*.todo-title{*/
-/*    display: inline-block;*/
-/*    float: left;*/
-/*    margin-left: 40%;*/
-/*    width: 20%;*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*검색 드롭박스*!*/
-/*.search-dropbox{*/
-/*    float: right;*/
-/*}*/
-
-/*!*할일 박스*!*/
-/*.todo-section{*/
-/*    text-align: center;*/
-/*    padding: 15px;*/
-/*}*/
-
-/*!*할일박스 위 제목*!*/
-/*.todo-section-title{*/
-/*    height: 30px;*/
-/*    width: 100%;*/
-/*    border-bottom: #777777;*/
-/*    overflow: hidden;*/
-/*}*/
-
-/*!*#*!*/
-/*.section-label-move{*/
-/*    float: left;*/
-/*    width: 5%;*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*항목*!*/
-/*.section-label-cont{*/
-/*    float: left;*/
-/*    width: 60%;*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*완료여부*!*/
-/*.section-label-progress{*/
-/*    float: left;*/
-/*    width: 10%;*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*마감일*!*/
-/*.section-label-end-date{*/
-/*    float: left;*/
-/*    width: 10%;*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*수정/삭제*!*/
-/*.section-label-modify-delete{*/
-/*    float: left;*/
-/*    width: 10%;*/
-/*    text-align: center;*/
-/*}*/
-
-/*!*할일들*!*/
-/*.todo-section-things{*/
-
-/*}*/
-
-/*.tdlist > div{*/
-/*    display: inline-block;*/
-/*}*/
-
-/*!*할일 추가 버튼*!*/
-/*.things-add-btn{*/
-/*    overflow: hidden;*/
-/*}*/
-
-/*.add-btn{*/
-/*    width: 24px;*/
-/*    height: 24px;*/
-/*    float: right;*/
-/*}*/
-
+input[type="date"] {
+    position:relative;
+    padding:14px;
+    width:150px;
+    height:30px;
+    font-size:14px;
+    color:#999;
+    border:none;
+    border-bottom:1px solid #e0e0e0;}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    width:auto;
+    height:auto;
+    color:transparent;
+    background:transparent;}
+input[type="date"].has-value::before {
+    content:attr(data-placeholder);
+    width:100%;}

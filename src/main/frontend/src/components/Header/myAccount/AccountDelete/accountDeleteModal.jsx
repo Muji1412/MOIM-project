@@ -4,7 +4,7 @@ import AccountDeleteFailModal from "./accountDeleteFailModal";
 import AccountDeleteSuccessModal from "./accountDeleteSuccessModal";
 
 
-const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {
+const AccountDeleteModal = ({ userInfo, isOpen, onClose, onDeleteSuccess  }) => {
 
     const [password, setPassword] = useState('');
     const currentPwRef = useRef(null);
@@ -18,6 +18,7 @@ const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {
         }
         fetch("/api/user/deleteAccount", {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
@@ -26,7 +27,8 @@ const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {
         })
             .then(res => {
                 if (res.status === 200) {
-                    setShowSuccessModal(true);
+                    // setShowSuccessModal(true);
+                    onDeleteSuccess();
                 } else {
                     setShowFailModal(true);
                 }
@@ -34,27 +36,27 @@ const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {
     }
 
     //탈퇴 성공 모달창 닫기
-    const handleCloseSuccessModal = () => {
-        setShowSuccessModal(false);
-        onClose();
-    }
+    // const handleCloseSuccessModal = () => {
+    //     setShowSuccessModal(false);
+    //     onClose();
+    // }
 
     //탈퇴 실패(비밀번호 틀림) 모달창 닫기
-    const handleCloseFailModal = () => {
-        setShowFailModal(false);
-        onClose();
-    }
+    // const handleCloseFailModal = () => {
+    //     setShowFailModal(false);
+    //     onClose();
+    // }
 
     if (!isOpen) return null;
 
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Delete Account</h2>
-                <div>Enter your password to delete account.</div>
+                <h2>회원 탈퇴하기</h2>
+                <div>비밀번호를 입력해 주세요</div>
                 {/*비밀번호*/}
                 <div className="modal-inner-label">
-                    Current Password <p className="modal-inner-star">*</p>
+                    현재 비밀번호 <p className="modal-inner-star">*</p>
                 </div>
                 <input type="password" className="modal-inner-input"
                        ref={currentPwRef}
@@ -62,16 +64,16 @@ const AccountDeleteModal = ({ userInfo, isOpen, onClose }) => {
 
                 {/*탈퇴 버튼*/}
                 <button className="modal-btn" onClick={handleDeleteAccount}>
-                    Delete Account
+                    탈퇴하기
                 </button>
                 {/*닫기 버튼*/}
                 <button className="modal-btn-close" onClick={onClose}>
-                    close
+                    닫기
                 </button>
                 {/*탈퇴 성공 모달*/}
-                <AccountDeleteSuccessModal isOpen={showSuccessModal} onClose={handleCloseSuccessModal}/>
+                {/*<AccountDeleteSuccessModal isOpen={showSuccessModal} onClose={handleCloseSuccessModal}/>*/}
                 {/* 탈퇴 실패 모달*/}
-                <AccountDeleteFailModal isOpen={showFailModal} onClose={handleCloseFailModal}/>
+                {/*<AccountDeleteFailModal isOpen={showFailModal} onClose={handleCloseFailModal}/>*/}
             </div>
         </div>
     );

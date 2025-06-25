@@ -98,7 +98,6 @@ public class TodoListController {
         entity.setUsers(u);
         try {
             todolistRepository.save(entity);
-            System.out.println("됨");
             return  ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();

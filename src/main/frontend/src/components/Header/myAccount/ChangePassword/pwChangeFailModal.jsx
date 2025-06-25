@@ -7,10 +7,10 @@ const PwChangeFailModal = ({ isOpen, onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Reset Failed</h2>
-                <p>Password doesn't match</p>
+                <h2>비밀번호 변경 실패</h2>
+                <p>비밀번호가 일치하지 않습니다.</p>
                 <button className="modal-btn" onClick={onClose}>
-                    Close
+                    닫기
                 </button>
             </div>
         </div>

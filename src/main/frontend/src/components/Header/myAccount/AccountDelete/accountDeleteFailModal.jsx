@@ -7,10 +7,10 @@ const AccountDeleteFailModal = ({ isOpen, onClose }) => {
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Account Deletion Failed</h2>
-                <p>Check your password again.</p>
+                <h2>탈퇴 오류</h2>
+                <p>비밀번호를 다시 확인해 주세요.</p>
                 <button className="modal-btn" onClick={onClose}>
-                    Close
+                    닫기
                 </button>
             </div>
         </div>

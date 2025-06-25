@@ -124,7 +124,7 @@ export default function FriendAddPage() {
 
     const handleCancelRequest = async (request) => {
         try {
-            const response = await sessionStoragefetch(`/api/friendship/reject`, {
+            const response = await fetch(`/api/friendship/reject`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ export default function FriendAddPage() {
                 })
             });
             if (response.ok) {
-                alert('친구 요청이 취소되었습니다.');
+                alert('친구 요청이 거절되었습니다.');
                 fetchPendingRequests();
             } else {
                 alert('요청 취소에 실패했습니다.');
@@ -153,11 +153,11 @@ export default function FriendAddPage() {
                     <div className={styles.section_title_wrap}>
                         <div className={styles.section_title_area}>
                             <img src="/bundle/img/friend_ic.png" alt="#" />
-                            <p>Add Friend</p>
+                            <p>친구 추가</p>
                         </div>
                         {/* Link 대신 closeAddFriend 함수 사용 */}
                         <button onClick={closeAddFriend} className={styles.back_to_friends_btn}>
-                            Back to Friends
+                            친구목록으로 돌아가기
                         </button>
                     </div>
                 </div>
@@ -170,7 +170,7 @@ export default function FriendAddPage() {
                                 <form onSubmit={handleRequestSubmit}>
                                     <input
                                         className={styles.afs_bar}
-                                        placeholder="Search by User ID (e.g. 2)"
+                                        placeholder="친구추가할 유저의 ID를 입력..."
                                         type="text"
                                         value={friendId}
                                         onChange={(e) => setFriendId(e.target.value)}

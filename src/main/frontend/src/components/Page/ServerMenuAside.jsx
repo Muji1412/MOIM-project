@@ -5,12 +5,15 @@ import modalStyles from '../Header/Modal.module.css';
 import {useServer} from "../../context/ServerContext";
 import {useAuth} from "../../context/AuthContext";
 import MyAccount from "../Header/myAccount/myAccount";
+import AccountDeleteModal from "../Header/myAccount//AccountDelete/accountDeleteModal";
+import AccountDeleteSuccessModal from "../Header/myAccount//AccountDelete/accountDeleteSuccessModal";
 
 export default function ServerMenuAside() {
 
 
     const navigate = useNavigate();
     const {serverId} = useParams();
+    const [whichModal, setWhichModal] = useState(null);
 
     const {
         servers,
@@ -30,7 +33,7 @@ export default function ServerMenuAside() {
     const [channelContextMenu, setChannelContextMenu] = useState({visible: false, x: 0, y: 0, channelId: null});
     const [isChannelModifyModalOpen, setIsChannelModifyModalOpen] = useState(false);
     const [modifyChannelData, setModifyChannelData] = useState({id: "", name: ""});
-    const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
+    // const [isAccountModifyModalOpen, setIsAccountModifyModalOpen] = useState(false);
 
     const selectedServer = servers.find((s) => s.id === selectedServerId);
     const selectedServerName = selectedServer ? selectedServer.name : "서버 선택";
@@ -225,13 +228,14 @@ export default function ServerMenuAside() {
 
     //myAccount 모달창 켜기
     const openAccountModifyModal = () => {
-        setIsAccountModifyModalOpen(true);
+        //setIsAccountModifyModalOpen(true);
+        setWhichModal('edit');
     }
 
     //myAccount 모달창 끄기
-    const closeAccountModifyModal = () => {
-        setIsAccountModifyModalOpen(false);
-    }
+    // const closeAccountModifyModal = () => {
+    //     setIsAccountModifyModalOpen(false);
+    // }
 
     const openVideoChatPopup = () => {
         const popupWidth = 1024;
@@ -269,13 +273,32 @@ export default function ServerMenuAside() {
         window.open('/whiteboard.do', 'whiteboardPopup', `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes`);
     };
 
+    //캘린더로 이동시 groupNo 전달
     const navigateToCalendar = () => {
+        // if (!selectedServerId || selectedServerId === "default") {
+        //     alert("먼저 서버를 선택해주세요!");
+        //     return;
+        // }
         const calData ={
-            groupNo: selectedServerId
+            groupNo: serverId
         }
         sessionStorage.setItem('calendarData', JSON.stringify(calData));
-        navigate(`/calendar`);
+        navigate('/calendar');
     }
+
+    // accountDelete 모달 오픈시
+    const openDeleteModal = () => {
+        console.log('openDeleteModal 호출됨');
+        setWhichModal('delete');
+        console.log("whichModal? ",whichModal);
+    };
+    // 3단계: delete 성공 모달 오픈 (delete에서 호출)
+    const openDeleteSuccessModal = () => setWhichModal('deleteSuccess');
+    // 4단계: delete 성공 모달 닫히면 홈에서 로그인 페이지로 이동
+    const handleDeleteSuccessClose = () => {
+        setWhichModal(null);         // 모달 모두 닫기
+        window.location.href = "/login.do";          // 로그인 페이지로 이동
+    };
 
     return (
         <>
@@ -498,10 +521,28 @@ export default function ServerMenuAside() {
                 </div>
             )}
             {/*회원정보 모달*/}
-            {isAccountModifyModalOpen && (<MyAccount isOpen={isAccountModifyModalOpen}
-                                                     onClose={() => {
-                                                         closeAccountModifyModal();
-                                                     }}/>)}
+            {/*{isAccountModifyModalOpen && (<MyAccount isOpen={whichModal === 'edit'}*/}
+            {/*                                         //isOpen={isAccountModifyModalOpen}*/}
+            {/*                                         onDelete={openDeleteModal}*/}
+            {/*                                         onClose={() => {*/}
+            {/*                                             setWhichModal(null);*/}
+            {/*                                             closeAccountModifyModal();*/}
+            {/*                                         }}/>)}*/}
+            <MyAccount
+                isOpen={whichModal === 'edit'}  // or open={whichModal === 'edit'}
+                onDelete={openDeleteModal}
+                onClose={() => setWhichModal(null)}
+            />
+            {/**탈퇴(삭제) 버튼 클릭 시 호출**/}
+            <AccountDeleteModal
+                isOpen={whichModal === 'delete'}
+                onClose={() => setWhichModal(null)}
+                onDeleteSuccess={openDeleteSuccessModal} // **비밀번호 확인 후 탈퇴 성공시 호출**
+            />
+            <AccountDeleteSuccessModal
+                isOpen={whichModal === 'deleteSuccess'}
+                onClose={handleDeleteSuccessClose}   // **닫기 누르면 홈에서 로그인 이동**
+            />
         </>
     );
 }

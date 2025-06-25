@@ -5,21 +5,28 @@ const LogoutModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     const handleLogout = () => {
-        sessionStorage.removeItem("accessToken");
-        sessionStorage.removeItem("refreshToken");
-        window.location.href = "login.do";
+        fetch("/api/user/logout", {
+            method: "POST",
+            credentials: "include",
+        }).then(res => {
+            if (res.status === 200) {
+                window.location.href = "login.do";
+            } else {
+                alert("로그아웃 실패");
+            }
+        });
     }
 
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <h2>Log out</h2>
+                <h2>로그아웃하기</h2>
                 {/*<p>Password doesn't match</p>*/}
                 <button className="modal-btn" onClick={handleLogout}>
-                    Log out
+                    로그아웃
                 </button>
                 <button className="modal-btn-close" onClick={onClose}>
-                    Close
+                    닫기
                 </button>
             </div>
         </div>
