@@ -1,9 +1,10 @@
 /* 로그인 페이지 */
-
+*{margin: 0; padding: 0;}
 /* 1. 전체 배경 -  중앙 정렬 */
 .login-background {
-  min-height: 100vh;
-  background-image: url('/img/bg_1920.png');
+  width: 100vw;
+  height: 100vh;
+  background-image: url('/bundle/img/bg_1920.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
