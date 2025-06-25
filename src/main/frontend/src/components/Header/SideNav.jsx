@@ -108,6 +108,22 @@ export default function SideNav() {
     // }, [setServers]);
     }, [setServers, serverId,navigate,setSelectedServerId]);
 
+    // dm컨텍스트에서 보내줄 이벤트 리스너
+    useEffect(() => {
+        const handleServerSelectEvent = (event) => {
+            const { serverId } = event.detail;
+            void handleServerClick(serverId); // Promise 경고 방지
+        };
+
+        window.addEventListener('serverSelect', handleServerSelectEvent);
+
+        // 컴포넌트 언마운트 시 이벤트 리스너 제거
+        return () => {
+            window.removeEventListener('serverSelect', handleServerSelectEvent);
+        };
+    }, []);
+
+
     // 컨텍스트 메뉴 닫기
     useEffect(() => {
         const handleClick = () => {
@@ -121,25 +137,30 @@ export default function SideNav() {
     // 서버 클릭 핸들러
     const handleServerClick = async (serverId) => {
         setSelectedServerId(serverId);
+        console.log("테스트 서버클릭 " + serverId);
 
         if (serverId === "default") {
             navigate("/home");
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
+
             if (selectedServer) {
+                // 서버 정보가 있으면 웹소켓 연결
                 try {
                     console.log("서버 연결 시도:", selectedServer);
                     await connectToServer(selectedServer);
                     console.log("웹소켓 연결 완료, 페이지 이동");
-                    // navigate(`/servers/${serverId}`);
-                    navigate(`/servers/${serverId}?channelName=${encodeURIComponent('일반채팅')}`);
                 } catch (error) {
                     console.error("웹소켓 연결 실패:", error);
                     alert("서버 연결에 실패했습니다. 다시 시도해주세요.");
+                    return;
                 }
             } else {
-                console.error("서버를 찾을 수 없습니다:", serverId);
+                console.log("서버 정보 없이 페이지만 이동");
             }
+
+            // 페이지 이동은 항상 실행
+            navigate(`/servers/${serverId}?channelName=${encodeURIComponent('일반채팅')}`);
         }
     };
 
