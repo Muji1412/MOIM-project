@@ -75,22 +75,6 @@ public class DirectMessageController {
         pushNotificationService.sendDMNotification(savedMessage);
     }
 
-    @MessageMapping("/test-notification")
-    public void testNotification(@Payload Map<String, String> payload) {
-        String username = payload.get("username");
-        String message = payload.get("message");
-
-        System.out.println("테스트 알림 요청 받음: " + username + " - " + message);
-
-        // 방법 1: 기본 방식
-        messagingTemplate.convertAndSend("/sub/notification/" + username,
-                "테스트 알림: " + message);
-
-        // 방법 2: 사용자별 방식
-        messagingTemplate.convertAndSendToUser(username, "/queue/notification",
-                "사용자별 테스트 알림: " + message);
-    }
-
     // 일시방편용 메서드
     private String authToNick(Authentication authentication){
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
