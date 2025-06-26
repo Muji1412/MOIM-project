@@ -51,5 +51,7 @@ export default function ServerPageLayout() {
                 <ChattingView />
             </main>
         </div>
+
+
     );
 }

@@ -134,6 +134,13 @@ export default function SideNav() {
         } else {
             const selectedServer = servers.find(s => s.id === serverId);
 
+            // 태원 추가, 세션 추가 로직변경.
+            const sessionGroupNoData = {
+                groupNo: serverId
+            }
+            sessionStorage.setItem('calendarData', JSON.stringify(sessionGroupNoData));
+            sessionStorage.setItem('todoData', JSON.stringify(sessionGroupNoData));
+
             if (selectedServer) {
                 // 서버 정보가 있으면 웹소켓 연결
                 try {
