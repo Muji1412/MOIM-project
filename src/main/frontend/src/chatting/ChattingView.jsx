@@ -308,7 +308,7 @@ function ChattingView() {
             });
             const imageUrl = await res.text();
 
-            // TODO 종범 이부분 수정필요합니다 사진 올릴때는 유저명이 아니라 박종범으로 들어갑니다
+
             const newMsg = {
                 date: new Date().toISOString().slice(0, 10),
                 user: currentUser?.userNick,
