@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Tldraw, createTLStore, defaultShapeUtils, loadSnapshot } from 'tldraw';
 import 'tldraw/tldraw.css';
+import pako from 'pako';
+
 
 function Whiteboard() {
     // --- 간소화된 State Management ---
@@ -14,6 +16,16 @@ function Whiteboard() {
     const store = useRef(createTLStore({ shapeUtils: defaultShapeUtils }));
     const whiteboardSubscription = useRef(null);
     const isUpdatingRef = useRef(false);
+
+
+    //기존 데이터 압축과정 pako이용
+    const compressData = (data) => {
+        return btoa(String.fromCharCode(...pako.gzip(data)));
+    };
+
+    const decompressData = (compressedData) => {
+        return pako.ungzip(Uint8Array.from(atob(compressedData), c => c.charCodeAt(0)), { to: 'string' });
+    };
 
     // --- 데이터 로딩 ---
     const getStoredData = useCallback(() => {
@@ -153,7 +165,7 @@ function Whiteboard() {
                     console.log('다른 사용자 그림 적용 중...');
                     try {
                         isUpdatingRef.current = true;
-                        const snapshot = JSON.parse(message.data);
+                        const snapshot = JSON.parse(decompressData(message.data));
                         loadSnapshot(editorRef.current.store, snapshot);
                         console.log('그림 적용 완료!');
 
@@ -214,7 +226,7 @@ function Whiteboard() {
                                 type: 'drawing-update',
                                 groupId: whiteboardData.groupId,
                                 userName: whiteboardData.userName,
-                                data: currentSnapshot
+                                data: compressData(currentSnapshot)
                             });
                             console.log('자동 전송 완료!');
                         }
@@ -224,14 +236,14 @@ function Whiteboard() {
                         console.error('주기적 체크 실패:', error);
                     }
                 }
-            }, 300); // 2초마다 체크
+            }, 1000); // 2초마다 체크
         };
 
         // 1초 후에 주기적 체크 시작 (초기화 완료 대기)
         setTimeout(() => {
             console.log('주기적 변경사항 체크 시작');
             startPeriodicCheck();
-        }, 1000);
+        }, 500);
 
         return () => {
             console.log('주기적 체크 정리');
@@ -253,7 +265,7 @@ function Whiteboard() {
                     type: 'drawing-update',
                     groupId: whiteboardData.groupId,
                     userName: whiteboardData.userName,
-                    data: JSON.stringify(snapshot)
+                    data: compressData(JSON.stringify(snapshot)) //데이터 압축
                 });
                 console.log('수동 전송 완료!');
             } catch (error) {
