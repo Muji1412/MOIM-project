@@ -7,7 +7,7 @@ import {useAuth} from '../context/AuthContext';
 
 function ChattingView() {
 
-    const {isConnected, sendMessage, currentServer, connectToServer} = useServerChat(); // Context 사용
+    const {isConnected, sendMessage, currentServer} = useServerChat(); // Context 사용
     const {currentUser} = useAuth(); // 현재 사용자 정보 가져오기
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
@@ -536,7 +536,7 @@ function ChattingView() {
                                                 src={msg.userImg }
                                                 alt={`${msg.user} 프로필`}
                                                 className={chatStyles.profile_image}
-                                                onError={(e) => e.target.src = '/default-profile.png'}
+                                                onError={(e) => e.target.src = '/bundle/img/default_profile.png'}
                                             />
                                         </div>
                                         <div className={chatStyles.chat_message_bubble}>

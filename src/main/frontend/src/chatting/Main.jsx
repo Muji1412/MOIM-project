@@ -6,8 +6,6 @@ import ChattingView from "./ChattingView";
 const rootElement = document.getElementById('root');
 if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
-        <React.StrictMode>
             <ChattingView />
-        </React.StrictMode>
     );
 }
