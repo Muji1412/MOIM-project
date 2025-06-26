@@ -10,7 +10,7 @@ public interface UserService {
     public TokenResponseVO login(LoginDTO loginDTO);
     public TokenResponseVO refresh(String refreshToken);
     public Users modifyInfo(MyAccountDTO myAccountDTO);
-    public Users modifyPw(PWChangeDTO pwChangeDTO);
+    public Users modifyPw(PWChangeDTO pwChangeDTO, String username);
     public String getTmpPw();
     public void updatePw(String tmpPw, String email);
     public boolean updatePwToken(String username, String email);

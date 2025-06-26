@@ -145,7 +145,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         formData.append('folderPath', userInfo.userNo.toString());
 
         //클라우드에 formData 이용해 파일업로드
-        const uploadRes = await fetch('api/files', {
+        const uploadRes = await fetch('/api/files', {
             method: 'POST',
             body: formData,
         });

@@ -127,8 +127,9 @@ public class UserRestController {
                                       HttpServletResponse response,
                                       @Valid @RequestBody PWChangeDTO pwChangeDTO) {
         long userNo = userDetails.getUserNo();
+        String username = userDetails.getUsername();
         try {
-            Users pwChangedUser = userService.modifyPw(pwChangeDTO);
+            Users pwChangedUser = userService.modifyPw(pwChangeDTO, username);
             RefreshToken e = refreshTokenRepository.findByUserUserNo(userNo)
                     .orElseThrow(() -> new EntityNotFoundException("토큰이 없습니다."));
             refreshTokenRepository.delete(e); //db에서 리프레시토큰 삭제
@@ -152,7 +153,7 @@ public class UserRestController {
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
-        System.out.println("왜이래 또");
+        //System.out.println("왜이래 또");
         return ResponseEntity.ok(Map.of(    "msg", "비밀번호가 변경되어 재 로그인이 필요합니다."));
     }
 

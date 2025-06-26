@@ -10,7 +10,7 @@ const LogoutModal = ({ isOpen, onClose }) => {
             credentials: "include",
         }).then(res => {
             if (res.status === 200) {
-                window.location.href = "login.do";
+                window.location.href = "/login.do";
             } else {
                 alert("로그아웃 실패");
             }

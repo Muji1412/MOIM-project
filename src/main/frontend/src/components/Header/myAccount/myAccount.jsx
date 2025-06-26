@@ -7,7 +7,7 @@ import LogoutModal from "./Logout/logoutModal";
 import AccountDeleteSuccessModal from "./AccountDelete/accountDeleteSuccessModal";
 
 
-export default function MyAccount ({isOpen, onClose, onDelete }) {
+export default function MyAccount ({isOpen, onClose, onDelete, onPwChange }) {
     if (!isOpen) return null;
     const [userInfo, setUserInfo] = useState({
         email: '',
@@ -47,7 +47,7 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
     }
 
     useEffect(() => {
-        console.log("MyAccount 렌더링, onDelete prop:", onDelete);
+        //console.log("MyAccount 렌더링, onDelete prop:", onDelete);
         fetchUserInfo();
         if (showLogoutModal || showModifyModal || showPwModal || showDeleteModal) {
             window.addEventListener('keydown', handleKeyDown);
@@ -87,14 +87,14 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
     };
 
     // 비밀번호 수정 모달창 켜기
-    const handleChangePw = () => {
-        setShowPwModal(true);
-    }
+    // const handleChangePw = () => {
+    //     setShowPwModal(true);
+    // }
 
     // 비밀번호 수정 모달창 끄기
-    const handleChangePwCloseModal = () => {
-        setShowPwModal(false);
-    };
+    // const handleChangePwCloseModal = () => {
+    //     setShowPwModal(false);
+    // };
 
     //회원탈퇴 모달창 켜기
     // const handleDeleteAccount = () => {
@@ -114,6 +114,11 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
         if (typeof onDelete === "function") onDelete();
         else console.error('onDelete is not a function!');
     };
+
+    const handleChangePw = () => {
+        if (typeof onPwChange === "function") onPwChange();
+        else console.error('onPwChange is not a function!');
+    }
 
     //창닫기
     const handleClose = () => {
@@ -201,11 +206,11 @@ export default function MyAccount ({isOpen, onClose, onDelete }) {
                                                                                fetchUserInfo();
                                                                            }}/>)}
                     {/* 비밀번호 수정 모달창 */}
-                    {userInfo && showPwModal && (< ChangePasswordModal isOpen={showPwModal}
-                   
+                    {/*{userInfo && showPwModal && (< ChangePasswordModal isOpen={showPwModal}*/}
 
-                                         userInfo={userInfo}
-                                         onClose={handleChangePwCloseModal}/>)}
+
+                    {/*                     userInfo={userInfo}*/}
+                    {/*                     onClose={handleChangePwCloseModal}/>)}*/}
                     {/*/!* 회원 탈퇴 모달창 *!/*/}
                     {/*{userInfo && showDeleteModal && (< AccountDeleteModal isOpen={showDeleteModal}*/}
                     {/*                                                   userInfo={userInfo}*/}

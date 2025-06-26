@@ -2,8 +2,9 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './changePasswordModal.css';
 import PwChangeSuccessModal from "./pwChangeSuccessModal";
 import PwChangeFailModal from "./pwChangeFailModal";
+import {useNavigate} from "react-router-dom";
 
-const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
+const changePasswordModal = ({ userInfo, isOpen, onClose, onChangeSuccess }) => {
 
     const [id, setId] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
@@ -15,10 +16,11 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
     const newPw2Ref = useRef(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showFailModal, setShowFailModal] = useState(false);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
-        setId(userInfo.username);
+        // setId(userInfo.username);
     }, []);
 
     //새 비밀번호 입력값 2개가 서로 동일한지 체크
@@ -49,12 +51,15 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({username : id, oldPw : currentPassword, newPw : newPassword})
+            body: JSON.stringify({
+                // username : id,
+                oldPw : currentPassword, newPw : newPassword})
         })
             .then(res => {
                 if (res.status === 200) {
-                    setShowSuccessModal(true);
+                    //setShowSuccessModal(true);
                     //onClose();
+                    onChangeSuccess();
                 } else {
                     setShowFailModal(true);
                     //onClose();
@@ -63,16 +68,17 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
     }
 
     //수정 성공 모달창 닫기
-    const handleCloseSuccessModal = () => {
-        setShowSuccessModal(false);
-        onClose();
-    }
+    // const handleCloseSuccessModal = () => {
+    //     setShowSuccessModal(false);
+    //     onClose();
+    //     window.location.href("/login.do");
+    // }
 
     //수정 실패 모달창 닫기
-    const handleCloseFailModal = () => {
-        setShowFailModal(false);
-        onClose();
-    }
+    // const handleCloseFailModal = () => {
+    //     setShowFailModal(false);
+    //     onClose();
+    // }
 
     if (!isOpen) return null;
 
@@ -116,9 +122,9 @@ const changePasswordModal = ({ userInfo, isOpen, onClose }) => {
                     닫기
                 </button>
                 {/*비밀번호 수정 성공 모달*/}
-                <PwChangeSuccessModal isOpen={showSuccessModal} onClose={handleCloseSuccessModal}/>
+                {/*<PwChangeSuccessModal isOpen={showSuccessModal} onClose={handleCloseSuccessModal}/>*/}
                 {/* 비밀번호 수정 실패 모달*/}
-                <PwChangeFailModal isOpen={showFailModal} onClose={handleCloseFailModal}/>
+                {/*<PwChangeFailModal isOpen={showFailModal} onClose={handleCloseFailModal}/>*/}
             </div>
         </div>
     );
