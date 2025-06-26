@@ -304,6 +304,18 @@ function Whiteboard() {
                     <small>연결 ID: {window.whiteboardConnectionId}</small>
                 </div>
 
+                {/* 웹소켓 연결 상태 */}
+                <div style={{
+                    padding: '8px 16px',
+                    background: isConnected ? '#d4edda' : '#f8d7da',
+                    color: isConnected ? '#155724' : '#721c24',
+                    fontSize: '14px',
+                    textAlign: 'center',
+                    borderBottom: '1px solid #333'
+                }}>
+                    {isConnected ? '🟢 연결됨' : '🔴 연결 끊김'}
+                </div>
+
                 <div className="main-content">
                     <Tldraw
                         store={store.current}

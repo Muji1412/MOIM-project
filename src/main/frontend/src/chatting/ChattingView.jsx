@@ -153,13 +153,6 @@ function ChattingView() {
     }, [serverId, serverName, APPLICATION_SERVER_URL]);
 
 
-    // 랜덤 색상 생성 함수
-    const getRandomColor = () => {
-        const colors = ['purple', 'blue', 'green', 'yellow'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    };
-
-
     // 서버 정보 가져오기 (serverId로 서버명 조회)
     useEffect(() => {
         if (serverId && serverId !== "default") {
@@ -220,26 +213,30 @@ function ChattingView() {
         }
     };
 
-    // 채팅 히스토리 로드
     useEffect(() => {
-        console.log("채팅 히스토리 로드 시작");
-        console.log("groupName:", groupName, "channelName:", channelName);
-
-        if (groupName && channelName) {
-            setMessages([]);
-            fetch(`${APPLICATION_SERVER_URL}/api/chat/${groupName}/${channelName}/all`)
-                .then(res => res.json())
-                .then(data => {
-                    console.log("채팅 히스토리 로드 성공:", data.length, "개 메시지");
-                    setMessages(data);
-                })
-                .catch(err => console.error("채팅 히스토리 로드 실패:", err));
-        }
+        // 이벤트 리스너는 한 번만 등록
+        const handleNewMessage = (event) => {
+            const payload = event.detail;
+            if (payload.channel === channelName) {
+                setMessages(prev => [...prev, payload]);
+            }
+        };
 
         window.addEventListener('newChatMessage', handleNewMessage);
         return () => {
             window.removeEventListener('newChatMessage', handleNewMessage);
         };
+    }, [channelName]);
+
+    // 채팅 히스토리는 별도 useEffect로 분리
+    useEffect(() => {
+        if (groupName && channelName) {
+            setMessages([]);
+            fetch(`${APPLICATION_SERVER_URL}/api/chat/${groupName}/${channelName}/all`)
+                .then(res => res.json())
+                .then(data => setMessages(data))
+                .catch(err => console.error("채팅 히스토리 로드 실패:", err));
+        }
     }, [groupName, channelName, APPLICATION_SERVER_URL]);
 
     // 메시지 전송 - Context 방식으로 변경
@@ -304,7 +301,7 @@ function ChattingView() {
             });
             const imageUrl = await res.text();
 
-            // TODO 종범 이부분 수정필요합니다 사진 올릴때는 유저명이 아니라 박종범으로 들어갑니다
+
             const newMsg = {
                 date: new Date().toISOString().slice(0, 10),
                 user: currentUser?.userNick,
@@ -430,7 +427,7 @@ function ChattingView() {
                             {member.profileImage ? (
                                 <img src={member.profileImage} alt={member.nickname} />
                             ) : (
-                                <div className={chatStyles.avatar_default}>
+                                <div>
                                     {member.nickname.charAt(0).toUpperCase()}
                                 </div>
                             )}
@@ -442,52 +439,53 @@ function ChattingView() {
         );
     };
 
+    // 웹소켓기능 중복으로 잠시 삭제
     //새로고침시 웹소켓 연결 트리거
-    useEffect(() => {
-        const autoConnectToServer = async () => {
-
-            console.log("isConnected:"+isConnected);
-            // 이미 연결되어 있으면 스킵
-            if (isConnected && currentServer?.id === serverId) {
-                console.log("이미 해당 서버에 연결되어 있음");
-                return;
-            }
-
-            // serverId가 있고 default가 아닐 때만 연결 시도
-            if (serverId && serverId !== "default") {
-                console.log("새로고침 후 자동 서버 연결 시도:", serverId);
-
-                try {
-                    // 서버 정보 가져오기
-                    const response = await fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        const serverData = await response.json();
-                        const serverInfo = {
-                            id: serverId,
-                            name: serverData.groupName
-                        };
-
-                        // WebSocket 연결
-                        await connectToServer(serverInfo);
-                        console.log("자동 연결 완료:", serverInfo);
-                    } else {
-                        console.error("서버 정보 조회 실패");
-                    }
-                } catch (error) {
-                    console.error("자동 연결 중 오류:", error);
-                }
-            }
-        };
-
-        // 컴포넌트 마운트 시 자동 연결 시도
-        autoConnectToServer();
-    }, [serverId, isConnected, currentServer]); // serverId 변경 시에도 재연결
+    // useEffect(() => {
+    //     const autoConnectToServer = async () => {
+    //
+    //         console.log("isConnected:"+isConnected);
+    //         // 이미 연결되어 있으면 스킵
+    //         if (isConnected && currentServer?.id === serverId) {
+    //             console.log("이미 해당 서버에 연결되어 있음");
+    //             return;
+    //         }
+    //
+    //         // serverId가 있고 default가 아닐 때만 연결 시도
+    //         if (serverId && serverId !== "default") {
+    //             console.log("새로고침 후 자동 서버 연결 시도:", serverId);
+    //
+    //             try {
+    //                 // 서버 정보 가져오기
+    //                 const response = await fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
+    //                     method: 'GET',
+    //                     headers: {
+    //                         'Content-Type': 'application/json'
+    //                     }
+    //                 });
+    //
+    //                 if (response.ok) {
+    //                     const serverData = await response.json();
+    //                     const serverInfo = {
+    //                         id: serverId,
+    //                         name: serverData.groupName
+    //                     };
+    //
+    //                     // WebSocket 연결
+    //                     await connectToServer(serverInfo);
+    //                     console.log("자동 연결 완료:", serverInfo);
+    //                 } else {
+    //                     console.error("서버 정보 조회 실패");
+    //                 }
+    //             } catch (error) {
+    //                 console.error("자동 연결 중 오류:", error);
+    //             }
+    //         }
+    //     };
+    //
+    //     // 컴포넌트 마운트 시 자동 연결 시도
+    //     autoConnectToServer();
+    // }, [serverId, isConnected, currentServer]); // serverId 변경 시에도 재연결
 
     // 날짜별 메시지 그룹화
     const groupByDate = messages.reduce((acc, msg) => {
@@ -598,24 +596,12 @@ function ChattingView() {
                                 <div key={member.id} className={chatStyles.member_item}
                                      onContextMenu={(e) => handleMemberContextMenu(e, member)}>
                                     <div className={chatStyles.member_avatar}>
-                                        {member.profileImage ? (
-                                            <img
-                                                src={member.profileImage}
-                                                alt={member.nickname}
-                                                className={chatStyles.avatar_image}
-                                                onError={(e) => {
-                                                    // 이미지 로드 실패 시 기본 색상 아바타로 대체
-                                                    e.target.style.display = 'none';
-                                                    e.target.nextSibling.style.display = 'flex';
-                                                }}
-                                            />
-                                        ) : null}
-                                        <div
-                                            className={`${chatStyles.avatar_default} ${chatStyles['avatar_' + (member.color || getRandomColor())]}`}
-                                            style={{display: member.profileImage ? 'none' : 'flex'}}
-                                        >
-                                            {member.nickname ? member.nickname.charAt(0).toUpperCase() : '?'}
-                                        </div>
+                                        <img
+                                            src={member.profileImage || '/default-profile.png'}
+                                            alt={member.nickname}
+                                            className={chatStyles.avatar_image}
+                                            onError={(e) => e.target.src = '/default-profile.png'}
+                                        />
                                     </div>
                                     <span className={chatStyles.member_nickname}>{member.nickname}</span>
                                 </div>

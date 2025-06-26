@@ -21,25 +21,43 @@ public class FileUploadService {
     private String bucketName;
 
     public String uploadFile(MultipartFile file, String folderPath) throws IOException {
+        // 파일 검증
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+
         String uuid = UUID.randomUUID().toString();
         String originalFilename = file.getOriginalFilename();
-        String ext = originalFilename != null
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : "";
+        String ext = "";
 
-        // 프로필 이미지 폴더 구조 적용
-        String fileName = "profile-images/";
-        if (folderPath != null && !folderPath.isEmpty()) {
-            fileName += folderPath + "/";  // 사용자 ID 폴더
+        if (originalFilename != null && originalFilename.contains(".")) {
+            ext = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        fileName += uuid + ext;
 
-        BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName)
-                .setContentType(file.getContentType())
-                .build();
+        // 하드코딩 제거 - folderPath 그대로 사용
+        String fileName;
+        if (folderPath != null && !folderPath.isEmpty()) {
+            fileName = folderPath + "/" + uuid + ext;
+        } else {
+            fileName = uuid + ext;
+        }
 
-        storage.create(blobInfo, file.getBytes());
+        try {
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName)
+                    .setContentType(file.getContentType())
+                    .build();
 
-        return "https://storage.googleapis.com/" + bucketName + "/" + fileName;
+            storage.create(blobInfo, file.getBytes());
+
+            String fileUrl = "https://storage.googleapis.com/" + bucketName + "/" + fileName;
+            System.out.println("파일 업로드 성공: " + fileUrl);
+
+            return fileUrl;
+
+        } catch (Exception e) {
+            System.err.println("파일 업로드 실패: " + e.getMessage());
+            throw new IOException("파일 업로드 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
     }
+
 }

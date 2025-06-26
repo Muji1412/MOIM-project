@@ -7,6 +7,8 @@ import {useAuth} from "../../context/AuthContext";
 import MyAccount from "../Header/myAccount/myAccount";
 import AccountDeleteModal from "../Header/myAccount//AccountDelete/accountDeleteModal";
 import AccountDeleteSuccessModal from "../Header/myAccount//AccountDelete/accountDeleteSuccessModal";
+import ChangePasswordModal from "../Header/myAccount/ChangePassword/changePasswordModal";
+import PwChangeSuccessModal from "../Header/myAccount/ChangePassword/pwChangeSuccessModal"
 
 export default function ServerMenuAside() {
 
@@ -308,9 +310,7 @@ export default function ServerMenuAside() {
 
     // accountDelete 모달 오픈시
     const openDeleteModal = () => {
-        console.log('openDeleteModal 호출됨');
         setWhichModal('delete');
-        console.log("whichModal? ",whichModal);
     };
     // 3단계: delete 성공 모달 오픈 (delete에서 호출)
     const openDeleteSuccessModal = () => setWhichModal('deleteSuccess');
@@ -319,6 +319,20 @@ export default function ServerMenuAside() {
         setWhichModal(null);         // 모달 모두 닫기
         window.location.href = "/login.do";          // 로그인 페이지로 이동
     };
+
+    //비밀번호 변경 성공 모달 오픈
+    const openChangeModal = () => {
+        setWhichModal('change');
+    }
+    //3단계: 비번 변경 성공 모달 오픈
+    const openChangeSuccessModal = () => setWhichModal('changeSuccess');
+    // 4단계: 비번 변경 성공 모달 닫히면 홈에서 로그인 페이지로 이동
+    const handleChangeSuccessClose = () => {
+        setWhichModal(null);
+        window.location.href = "/login.do";          // 로그인 페이지로 이동
+    };
+
+
 
     return (
         <>
@@ -540,17 +554,10 @@ export default function ServerMenuAside() {
                     </div>
                 </div>
             )}
-            {/*회원정보 모달*/}
-            {/*{isAccountModifyModalOpen && (<MyAccount isOpen={whichModal === 'edit'}*/}
-            {/*                                         //isOpen={isAccountModifyModalOpen}*/}
-            {/*                                         onDelete={openDeleteModal}*/}
-            {/*                                         onClose={() => {*/}
-            {/*                                             setWhichModal(null);*/}
-            {/*                                             closeAccountModifyModal();*/}
-            {/*                                         }}/>)}*/}
             <MyAccount
                 isOpen={whichModal === 'edit'}  // or open={whichModal === 'edit'}
                 onDelete={openDeleteModal}
+                onPwChange={openChangeModal}
                 onClose={() => setWhichModal(null)}
             />
             {/**탈퇴(삭제) 버튼 클릭 시 호출**/}
@@ -562,6 +569,15 @@ export default function ServerMenuAside() {
             <AccountDeleteSuccessModal
                 isOpen={whichModal === 'deleteSuccess'}
                 onClose={handleDeleteSuccessClose}   // **닫기 누르면 홈에서 로그인 이동**
+            />
+            <ChangePasswordModal
+                isOpen={whichModal === 'change'}
+                onClose={() => setWhichModal(null)}
+                onChangeSuccess={openChangeSuccessModal} // **비번 변경 성공시 호출**
+            />
+            <PwChangeSuccessModal
+                isOpen={whichModal === 'changeSuccess'}
+                onClose={handleChangeSuccessClose}
             />
         </>
     );
