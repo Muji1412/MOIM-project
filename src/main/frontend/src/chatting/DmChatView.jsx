@@ -46,7 +46,7 @@ const DmChatView = () => {
                                 src={msg.senderImg } //
                                 alt={``}
                                 className={styles.profile_image}
-                                onError={(e) => e.target.src = '/default-profile.png'}
+                                onError={(e) => e.target.src = '/bundle/img/default_profile.png'}
                             /> {/*프로필 이미지 관련*/}
                         </div>
                         <div className={styles.chat_message_bubble}>

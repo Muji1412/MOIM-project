@@ -538,7 +538,7 @@ function ChattingView() {
                                                 src={msg.userImg }
                                                 alt={`${msg.user} 프로필`}
                                                 className={chatStyles.profile_image}
-                                                onError={(e) => e.target.src = '/default-profile.png'}
+                                                onError={(e) => e.target.src = '/bundle/img/default_profile.png'}
                                             />
                                         </div>
                                         <div className={chatStyles.chat_message_bubble}>
