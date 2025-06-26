@@ -20,7 +20,7 @@
 }
 
 /* section_title */
-.section_title {width: 100%;height: 65px;border-bottom: 1px solid #d9d9d9;margin: 0 auto;}
+.section_title {width: 100%;height: 60px;border-bottom: 1px solid #d9d9d9;margin: 0 auto;}
 .section_title_box {width: 100%;height: 100%;}
 .section_title_wrap {width: 95%;height: 60px;display: flex;flex-direction: row;align-items: center;justify-content: flex-start;gap: 0px;margin: 0 auto;}
 .section_title_area {width: 130px;display: flex;flex-direction: row;align-items: center;gap: 15px;}
