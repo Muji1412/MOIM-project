@@ -72,8 +72,7 @@ export default function FriendsAside() {
 
             <div className={styles.dm_list}>
                 <div className={styles.dm_list_title}>
-                    <p>Direct Message</p>
-                    <img src="/bundle/img/add_plus_ic.png" alt="add_dm"/>
+                    <p>다이렉트 메시지</p>
                 </div>
                 <div className={styles.dm_user_area}>
                     {currentUser && dmRooms && dmRooms.map((room) => {

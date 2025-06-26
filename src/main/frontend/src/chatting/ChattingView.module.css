@@ -172,7 +172,7 @@
       border-radius: 5px;
       padding-left: 10px;
     }
-    .member_item:hover{background: rgb(217, 217, 217);}
+    .member_item:hover{background: rgb(217, 217, 217); cursor: pointer;}
 
     /* 멤버 아바타 스타일 추가 */
     .member_avatar {
