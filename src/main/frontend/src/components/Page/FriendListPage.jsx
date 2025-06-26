@@ -110,8 +110,21 @@ export default function FriendListPage() {
     const handleFriendContextMenu = (e, friend) => {
         e.preventDefault();
         e.stopPropagation();
-        setContextMenu({ visible: true, x: e.clientX, y: e.clientY, friend: friend });
+
+        const MENU_WIDTH = 120;
+
+        // 항상 마우스 왼쪽에 표시
+        let x = e.clientX - MENU_WIDTH + 20;
+        let y = e.clientY;
+
+        // 왼쪽 끝을 벗어나는 경우에만 오른쪽으로
+        if (x < 10) {
+            x = e.clientX;
+        }
+
+        setContextMenu({ visible: true, x: x, y: y, friend: friend });
     };
+
 
     const handleDeleteFriend = async (friend) => {
         if (!friend || !window.confirm(`'${friend.userNick}'님을 친구 목록에서 삭제하시겠습니까?`)) {
