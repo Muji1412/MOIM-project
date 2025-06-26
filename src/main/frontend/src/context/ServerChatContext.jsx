@@ -17,38 +17,22 @@ export const ServerChatProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(false);
     const [currentServer, setCurrentServer] = useState(null);
     const stompClientRef = useRef(null);
-
-    // 새로고침 후 복원 로직에 로그 추가
-    useEffect(() => {
-        console.log("=== ServerChatContext 초기화 ===");
-        console.log("localStorage 확인 중...");
-
-        const savedServerInfo = localStorage.getItem('currentServer');
-        console.log("저장된 서버 정보:", savedServerInfo);
-
-        if (savedServerInfo) {
-            try {
-                const serverInfo = JSON.parse(savedServerInfo);
-                console.log("파싱된 서버 정보:", serverInfo);
-                console.log("웹소켓 연결 시도 시작...");
-                connectToServer(serverInfo);
-            } catch (error) {
-                console.error("저장된 서버 정보 복원 실패:", error);
-                localStorage.removeItem('currentServer');
-            }
-        } else {
-            console.log("저장된 서버 정보가 없습니다.");
-        }
-    }, []);
+    const [isConnecting, setIsConnecting] = useState(false);
 
 
     const connectToServer = async (serverInfo) => {
         console.log("서버 연결 시도:", serverInfo);
 
         // 기존 연결 해제
+        console.log("서버 연결 시도:", serverInfo);
+
+        // 기존 연결 해제 시 연결 상태 확인
         if (stompClientRef.current) {
             console.log("기존 웹소켓 연결 해제");
-            stompClientRef.current.deactivate();
+            // 연결이 열려있을 때만 닫기
+            if (stompClientRef.current.connected) {
+                stompClientRef.current.deactivate();
+            }
             setIsConnected(false);
             window.globalStompClient = null;
         }
