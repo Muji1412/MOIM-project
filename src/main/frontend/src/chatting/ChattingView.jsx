@@ -153,13 +153,6 @@ function ChattingView() {
     }, [serverId, serverName, APPLICATION_SERVER_URL]);
 
 
-    // 랜덤 색상 생성 함수
-    const getRandomColor = () => {
-        const colors = ['purple', 'blue', 'green', 'yellow'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    };
-
-
     // 서버 정보 가져오기 (serverId로 서버명 조회)
     useEffect(() => {
         if (serverId && serverId !== "default") {
@@ -430,7 +423,7 @@ function ChattingView() {
                             {member.profileImage ? (
                                 <img src={member.profileImage} alt={member.nickname} />
                             ) : (
-                                <div className={chatStyles.avatar_default}>
+                                <div>
                                     {member.nickname.charAt(0).toUpperCase()}
                                 </div>
                             )}
@@ -598,24 +591,12 @@ function ChattingView() {
                                 <div key={member.id} className={chatStyles.member_item}
                                      onContextMenu={(e) => handleMemberContextMenu(e, member)}>
                                     <div className={chatStyles.member_avatar}>
-                                        {member.profileImage ? (
-                                            <img
-                                                src={member.profileImage}
-                                                alt={member.nickname}
-                                                className={chatStyles.avatar_image}
-                                                onError={(e) => {
-                                                    // 이미지 로드 실패 시 기본 색상 아바타로 대체
-                                                    e.target.style.display = 'none';
-                                                    e.target.nextSibling.style.display = 'flex';
-                                                }}
-                                            />
-                                        ) : null}
-                                        <div
-                                            className={`${chatStyles.avatar_default} ${chatStyles['avatar_' + (member.color || getRandomColor())]}`}
-                                            style={{display: member.profileImage ? 'none' : 'flex'}}
-                                        >
-                                            {member.nickname ? member.nickname.charAt(0).toUpperCase() : '?'}
-                                        </div>
+                                        <img
+                                            src={member.profileImage || '/default-profile.png'}
+                                            alt={member.nickname}
+                                            className={chatStyles.avatar_image}
+                                            onError={(e) => e.target.src = '/default-profile.png'}
+                                        />
                                     </div>
                                     <span className={chatStyles.member_nickname}>{member.nickname}</span>
                                 </div>
