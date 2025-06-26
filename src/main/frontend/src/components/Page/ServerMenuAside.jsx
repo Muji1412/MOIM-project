@@ -330,7 +330,7 @@ export default function ServerMenuAside() {
                     <div className={styles.menu_box} onClick={() => navigateToCalendar()}>
                         <div className={styles.menu_item} style={{cursor: "pointer"}}>
                             <img src="/bundle/img/cal_ic.png" alt="cal_ic"/>
-                            <p>Calendar</p>
+                            <p>캘린더</p>
                         </div>
                     </div>
                     <div className={styles.menu_box} onClick={() => navigate(`/todo`)}>
@@ -342,7 +342,7 @@ export default function ServerMenuAside() {
                     <div className={styles.menu_box} onClick={openWhiteboardPopup}>
                         <div className={styles.menu_item} style={{cursor: "pointer"}}>
                             <img src="/bundle/img/board_ic.png" alt="board_ic"/>
-                            <p>White Board</p>
+                            <p>화이트보드</p>
                         </div>
                     </div>
                 </div>

@@ -290,15 +290,20 @@ function Videocall() {
                 </div>
 
                 <div className="controls-bar">
-                    <button onClick={toggleMicrophone} className={`control-btn ${isMicEnabled ? 'on' : 'off'}`}>{isMicEnabled ? '🎤' : '🔇'}</button>
-                    <button onClick={toggleVideo} className={`control-btn ${isVideoEnabled ? 'on' : 'off'}`}>{isVideoEnabled ? '📹' : '📵'}</button>
-                    <button onClick={leaveSession} className="control-btn leave">🚪</button>
+                    <div className="controls-bar-box">
+                        <div className="controls-bar-using">
+                            <button onClick={toggleMicrophone} className={`control-btn ${isMicEnabled ? 'on' : 'off'}`}>{isMicEnabled ? <img src="/bundle/img/open_mic.png" alt="마이크 켜짐" className="control-icon" /> : <img src="/bundle/img/close_mic.png" alt="마이크 꺼짐" className="control-icon" />}</button>
+                            <button onClick={toggleVideo} className={`control-btn ${isVideoEnabled ? 'on' : 'off'}`}>{isVideoEnabled ? <img src="/bundle/img/open_cam.png" alt="캠 켜짐" className="control-icon" /> : <img src="/bundle/img/close_cam.png" alt="캠 꺼짐" className="control-icon" />}</button>
+                        </div>
+                        <button onClick={leaveSession} className="control-btn leave">
+                            <img src="/bundle/img/call_ic.png" alt="연결 끊기" className="control-icon" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
     );
 }
-
 // --- CSS Styles (unchanged) ---
 const joinFormStyles = `
     .join-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; font-family: sans-serif; }
@@ -307,9 +312,9 @@ const joinFormStyles = `
     .join-form-wrapper input { display: block; width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
     .join-form-wrapper button { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; font-weight: 500; }
     .join-form-wrapper button:hover { background-color: #0056b3; }
-    .join-form-wrapper p { margin-top: 20px; color: #666; font-size: 14px; line-height: 1.5; }
-`;
+    .join-form-wrapper p { margin-top: 20px; color: #666; font-size: 14px; line-height: 1.5; }`;
 const videoCallStyles = `
+    *{margin:0; padding:0; box-sizing: border-box;}
     .video-call-wrapper { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; background-color: #202124; color: #fff; }
     .main-content { flex-grow: 1; display: flex; padding: 16px; gap: 16px; overflow: hidden; }
     .focused-layout { display: flex; flex-direction: column; flex-grow: 1; gap: 16px; width: 100%; height: 100%; }
@@ -325,11 +330,18 @@ const videoCallStyles = `
     .video-item-container:hover { box-shadow: 0 0 15px rgba(128, 189, 255, 0.7); }
     .video-item-container video { width: 100%; height: 100%; object-fit: cover; display: block; }
     .participant-name { position: absolute; bottom: 8px; left: 8px; background: rgba(0, 0, 0, 0.6); padding: 4px 8px; border-radius: 6px; font-size: 14px; }
-    .controls-bar { flex-shrink: 0; display: flex; justify-content: center; align-items: center; padding: 16px; background-color: #2c2d30; }
-    .control-btn { background: #4a4a4a; color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; margin: 0 10px; cursor: pointer; transition: background-color 0.3s; }
-    .control-btn.on { background-color: #8ab4f8; color: #202124; }
+   
+    .controls-bar { position: absolute;bottom: 20px;left: 50%;transform: translateX(-50%);display: flex; justify-content: center; align-items: center;opacity: 0;transition: opacity 0.3s ease;pointer-events: none;z-index: 1000;}
+    .controls-bar-box {display:flex; justify-content: space-between; align-items: center; height:48px; gap:15px;}
+    .controls-bar-using {display: flex; width:160px; height:48px; background: #23272a; border-radius:10px;}
+    .control-btn {transition:0.2s; border:none; width:65px; height:48px; border-radius:10px; display: flex; justify-content: center; align-items: center; font-size: 24px; margin: 0 auto; cursor: pointer; transition : background-color 0.3s; }
+    .control-btn img{width:25px;}
+    .control-btn.on { background : none; }
     .control-btn.off { background-color: #3c4043; }
-    .control-btn.leave { background-color: #ea4335; }
+    .control-btn.leave { background-color: #d6363f; width:65px;transition:0.2s; }
+    .control-btn.leave:hover{background: #A0222B;transition:0.2s;}
+    .control-btn:hover{background: #2B2C2E;transition:0.2s;}
+    
+    .video-call-wrapper:hover .controls-bar {opacity: 1;pointer-events: auto;}
 `;
-
 export default Videocall;

@@ -57,7 +57,7 @@ export default function FriendsAside() {
     return (
         <aside className={styles.aside_menu}>
             <div className={styles.menu_top}>
-                <button className={styles.search_button}>Search or Start Talk</button>
+                <button className={styles.search_button}>대화 찾기 또는 시작하기</button>
             </div>
 
             <div className={styles.menu_list}>

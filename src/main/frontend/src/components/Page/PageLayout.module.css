@@ -32,12 +32,15 @@
 
 /* FriendsAside.jsx에서 사용하는 스타일들 */
 .menu_top {
-    padding: 16px;
     border-bottom: 1px solid #dcdcdc;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .search_button {
-    width: 100%;
+    width: 90%;
     padding: 8px 12px;
     background-color: #e3e5e8;
     border: none;

@@ -425,7 +425,7 @@ function ChattingView() {
                     >
                         <div className={chatStyles.mention_avatar}>
                             {member.profileImage ? (
-                                <img src={member.profileImage} alt={member.nickname} />
+                                <img src={member.profileImage} alt={member.nickname}/>
                             ) : (
                                 <div>
                                     {member.nickname.charAt(0).toUpperCase()}
@@ -497,13 +497,7 @@ function ChattingView() {
 
     return (
         <section className={chatStyles.chat_view_container}>
-            {/* 연결 상태 표시 (개발용) */}
-            <div style={{padding: '5px', background: isConnected ? '#d4edda' : '#f8d7da', fontSize: '12px'}}>
-                웹소켓 상태: {isConnected ? '연결됨' : '연결 안됨'} | 서버: {serverName || '없음'}
-            </div>
-
             <div className={chatStyles.channel_header}>
-
                 {/* 서버 접속 시 서버에 있는 멤버 리스트 부분 추가 */}
                 <div className={chatStyles.channel_header_title}>
                     <div className={chatStyles.channel_title}># {channelName || 'Channel'}</div>
@@ -515,6 +509,10 @@ function ChattingView() {
                 >
                     <img src="/bundle/img/mem_list_ic.png" alt="mem_list"/>
                 </div>
+            </div>
+            {/* 연결 상태 표시 (개발용) */}
+            <div style={{padding: '5px', background: isConnected ? '#d4edda' : '#f8d7da', fontSize: '12px'}}>
+                웹소켓 상태: {isConnected ? '연결됨' : '연결 안됨'} | 서버: {serverName || '없음'}
             </div>
             {/* 서버 멤버 리스트 area 추가 */}
             <div className={chatStyles.chat_wrap_area}>
@@ -533,7 +531,7 @@ function ChattingView() {
                                     <div className={chatStyles.chat_message_row} key={idx}>
                                         <div className={chatStyles.chat_avatar}>
                                             <img
-                                                src={msg.userImg }
+                                                src={msg.userImg}
                                                 alt={`${msg.user} 프로필`}
                                                 className={chatStyles.profile_image}
                                                 onError={(e) => e.target.src = '/bundle/img/default_profile.png'}
@@ -562,7 +560,7 @@ function ChattingView() {
                         <button type="button" className={chatStyles.chat_plus_icon} onClick={handlePlusClick}
                                 tabIndex={0}
                                 aria-label="이미지 업로드">
-                            <span style={{fontSize: 24, color: "#5865f2", fontWeight: 'bold'}}>+</span>
+                            <span style={{fontSize: 24, fontWeight: 'bold'}}>+</span>
                         </button>
                         <input type="file" accept="image/*" ref={fileInputRef} style={{display: "none"}}
                                onChange={onFileChange}/>
@@ -575,12 +573,13 @@ function ChattingView() {
                                 onChange={handleInputChange}
                                 onKeyDown={handleKeyDown}
                             />
-                            <MentionList />
+                            <MentionList/>
                         </div>
                     </div>
                 </div>
                 {/* 서버멤버 리스트를 보여 줄 부분 */}
-                <div className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : chatStyles.mem_list_hidden}`}>
+                <div
+                    className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : chatStyles.mem_list_hidden}`}>
                     <div className={chatStyles.mem_list_header}>
                         멤버 - {members.length}
                     </div>
