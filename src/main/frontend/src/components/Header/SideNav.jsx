@@ -90,14 +90,14 @@ export default function SideNav() {
         };
 
         fetchServers();
-    // }, [setServers]);
-    }, [setServers, serverId,navigate,setSelectedServerId]);
+        // }, [setServers]);
+    }, [setServers, serverId, navigate, setSelectedServerId]);
 
     // dm컨텍스트에서 보내줄 이벤트 리스너
     // 커스텀 이벤트 리스너
     useEffect(() => {
         const handleServerSelectEvent = (event) => {
-            const { serverId } = event.detail;
+            const {serverId} = event.detail;
 
             // Context의 handleServerSelect도 함께 호출
             handleServerSelect(serverId);
@@ -112,7 +112,6 @@ export default function SideNav() {
             window.removeEventListener('serverSelect', handleServerSelectEvent);
         };
     }, [handleServerSelect]);
-
 
 
     // 컨텍스트 메뉴 닫기
@@ -702,6 +701,34 @@ export default function SideNav() {
                         </div>
                         <form onSubmit={handleModifyServer} className={modalStyles.modal_form}>
                             <div className={modalStyles.modal_input_area}>
+                                <div className={modalStyles.modal_img_area}>
+                                    <label className={modalStyles.modal_img_box}>
+                                        {modifyImagePreview ? (
+                                            <img
+                                                src={modifyImagePreview}
+                                                alt="preview"
+                                                className={modalStyles.modal_img_preview}
+                                            />
+                                        ) : (
+                                            <img src="/bundle/img/upload_ic.png" alt="upload"/>
+                                        )}
+                                        <input
+                                            ref={modifyInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleModifyFileChange}
+                                            style={{display: "none"}}
+                                        />
+                                        <button
+                                            type="button"
+                                            className={modalStyles.modal_img_btn}
+                                            onClick={() => modifyInputRef.current?.click()}
+                                        >
+                                        </button>
+                                    </label>
+                                </div>
+                            </div>
+                            <div className={modalStyles.modal_input_area}>
                                 <label className={modalStyles.modal_title_label} htmlFor="modifyServerName">
                                     서버 이름
                                 </label>
@@ -717,40 +744,6 @@ export default function SideNav() {
                                         required
                                         autoFocus
                                     />
-                                </div>
-                            </div>
-                            <div className={modalStyles.modal_input_area}>
-                                <label className={modalStyles.modal_title_label}>
-                                    서버 이미지
-                                </label>
-                                <div className={modalStyles.modal_img_area}>
-                                    <div className={modalStyles.modal_img_box}>
-                                        {modifyImagePreview ? (
-                                            <img
-                                                src={modifyImagePreview}
-                                                alt="preview"
-                                                className={modalStyles.modal_img_preview}
-                                            />
-                                        ) : (
-                                            <div className={modalStyles.modal_img_placeholder}>
-                                                <span>이미지 선택</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <input
-                                        ref={modifyInputRef}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleModifyFileChange}
-                                        style={{display: "none"}}
-                                    />
-                                    <button
-                                        type="button"
-                                        className={modalStyles.modal_img_btn}
-                                        onClick={() => modifyInputRef.current?.click()}
-                                    >
-                                        이미지 업로드
-                                    </button>
                                 </div>
                             </div>
                             <div className={modalStyles.modal_btn_area}>
