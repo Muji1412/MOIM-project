@@ -192,9 +192,9 @@ public class UserServiceImpl implements UserService {
 
     //비밀번호 수정
     @Override
-    public Users modifyPw(PWChangeDTO pwChangeDTO) {
+    public Users modifyPw(PWChangeDTO pwChangeDTO, String username) {
         //dto의 유저아이디(username)을 받아 DB에서 해당 유저를 찾음
-        Users user = usersRepository.findByUsername(pwChangeDTO.getUsername()).filter(u -> !u.isUserIsDeleted())
+        Users user = usersRepository.findByUsername(username).filter(u -> !u.isUserIsDeleted())
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
         //기존 비밀번호 잘못 입력 시 오류 메시지 출력
         if (!passwordEncoder.matches(pwChangeDTO.getOldPw(), user.getPassword())) {
