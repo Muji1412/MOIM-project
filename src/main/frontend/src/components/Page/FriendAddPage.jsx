@@ -157,7 +157,7 @@ export default function FriendAddPage() {
                         </div>
                         {/* Link 대신 closeAddFriend 함수 사용 */}
                         <button onClick={closeAddFriend} className={styles.back_to_friends_btn}>
-                            친구목록으로 돌아가기
+                            목록으로 돌아가기
                         </button>
                     </div>
                 </div>

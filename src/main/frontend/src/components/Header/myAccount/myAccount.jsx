@@ -215,6 +215,10 @@ export default function MyAccount ({isOpen, onClose, onDelete, onPwChange }) {
                     {/*{userInfo && showDeleteModal && (< AccountDeleteModal isOpen={showDeleteModal}*/}
                     {/*                                                   userInfo={userInfo}*/}
                     {/*                                                   onClose={handleDeleteCloseAccount}/>)}*/}
+
+                    <div className="copy_right_area">
+                        <span>Copyright © 2025 MOIM. All rights reserved. Designed by JongSu</span>
+                    </div>
                 </div>
             </div>
         </div>
