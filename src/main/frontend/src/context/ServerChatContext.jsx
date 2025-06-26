@@ -21,25 +21,18 @@ export const ServerChatProvider = ({ children }) => {
     // 새로고침 후 복원 로직에 로그 추가
     useEffect(() => {
         console.log("=== ServerChatContext 초기화 ===");
-        console.log("localStorage 확인 중...");
 
         const savedServerInfo = localStorage.getItem('currentServer');
-        console.log("저장된 서버 정보:", savedServerInfo);
-
-        if (savedServerInfo) {
+        if (savedServerInfo && !isConnected) { // 연결되지 않았을 때만 실행
             try {
                 const serverInfo = JSON.parse(savedServerInfo);
-                console.log("파싱된 서버 정보:", serverInfo);
-                console.log("웹소켓 연결 시도 시작...");
                 connectToServer(serverInfo);
             } catch (error) {
                 console.error("저장된 서버 정보 복원 실패:", error);
                 localStorage.removeItem('currentServer');
             }
-        } else {
-            console.log("저장된 서버 정보가 없습니다.");
         }
-    }, []);
+    }, []); // 빈 배열 유지
 
 
     const connectToServer = async (serverInfo) => {
