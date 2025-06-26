@@ -2,6 +2,8 @@ import React, {useCallback, useEffect, useState} from 'react';
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import './todoList.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import {useServer} from "../context/ServerContext";
+// import { useLocation } from 'react-router-dom';
 
 
 export default function todoList({groupNo }) {
@@ -23,11 +25,25 @@ export default function todoList({groupNo }) {
     const [editTodoNo, setEditTodoNo] = useState(null);
     const [editData, setEditData] = useState({ title: '', content: '', end: '' });
 
+    // 새로고침용 컨텍스트 api
+    const {
+        selectedServerId,
+        setSelectedServerId
+    } = useServer();
+
+
     useEffect(() => {
         const day = new Date().toISOString().slice(0,10);
         setToday(day);
         setNewTodoStart(day);
         setNewTodoEnd(day);
+
+        const groupNo = JSON.parse(sessionStorage.getItem("todoData")).groupNo;
+        console.log('투두리스트 로그 셀렉티드서버아이디' + selectedServerId)
+        if(selectedServerId === 'default'){
+            setSelectedServerId(groupNo)
+            console.log('투두리스트 로그 setSelectedServerId 실행, 서버값 = ' + selectedServerId)
+        }
 
         fetch("/api/todoList", {
             method: 'POST',

@@ -3,6 +3,7 @@ import {useCallback, useEffect, useState} from "react";
 import koLocale from 'date-fns/locale/ko';
 import {format,parse,startOfWeek,getDay} from "date-fns";
 //import 'react-big-calendar/lib/css/react-big-calendar.css';
+import {useServer} from "../context/ServerContext";
 import AddCalendarModal from './AddCalendarModal';
 import './MyCalendar.css';
 import DetailCalendarModal from "./DetailCalendarModal";
@@ -18,6 +19,13 @@ export default function MyCalendar() {
     const [detailEvent, setDetailEvent] = useState('');
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
+
+    // 태원 추가 - 새로고침시 sideNav, aside 의 props 를 위해
+    const {
+        selectedServerId,
+        setSelectedServerId
+    } = useServer();
+
     //db의 데이터를 json 형태로 가져와서 events 객체에 넣는다.
     //이 events 객체가 달력에 표시되는 각각의 일정이다.
     useEffect(() => {
@@ -32,6 +40,11 @@ export default function MyCalendar() {
     const fetchEvents = () => {
         const groupNo = JSON.parse(sessionStorage.getItem("calendarData")).groupNo;
          setGroupNo(groupNo);
+         console.log('캘린더 로그 셀렉티드서버아이디' + selectedServerId)
+        if(selectedServerId === 'default'){
+            setSelectedServerId(groupNo)
+            console.log('캘린더 로그 setSelectedServerId 실행, 서버값 = ' + selectedServerId)
+        }
         fetch('api/calendar', {
             method: 'POST',
             headers: {

@@ -12,7 +12,7 @@ export default function ServerMenuAside() {
 
 
     const navigate = useNavigate();
-    const {serverId} = useParams();
+    const {serverId} = useParams(); // 컨텍스트에서 serverId를 가져올것이므로, url에서 받아오는애는 다른이름으로 사용
     const [whichModal, setWhichModal] = useState(null);
 
     const {
@@ -275,19 +275,36 @@ export default function ServerMenuAside() {
     };
 
     //캘린더로 이동시 groupNo 전달
+    // 이제부터는 sideNav에서 세션에 전달하는 역할을 함으로 더이상 문제가 체크가 필요하지 않음
     const navigateToCalendar = () => {
-        // if (!selectedServerId || selectedServerId === "default") {
-        //     alert("먼저 서버를 선택해주세요!");
-        //     return;
+        // if (serverId && serverId !== '') {  // Context에서 가져온 값 사용
+            // console.log('navigateTo 캘린더함수 실행 성공')
+            // const calData = {
+            //     groupNo: serverId
+            // }
+            // sessionStorage.setItem('calendarData', JSON.stringify(calData));
+        // } else {
+        //     const groupNo = JSON.parse(sessionStorage.getItem("calendarData")).groupNo
+        //     console.log('navigateTo 캘린더함수 실행 실패, 엘스문 groupNo' + groupNo)
         // }
-        if (serverId && serverId !== '') {
-            const calData ={
-                groupNo: serverId
-            }
-            sessionStorage.setItem('calendarData', JSON.stringify(calData));
-        }
         navigate('/calendar');
     }
+
+    // 태원 추가, 새로고침용 세션스토리지 set 추가
+    const navigateToTodo = () => {
+        // if (serverId && serverId !== '') {
+            // console.log('navigateToTodo 함수 실행 성공' )
+            // const todoData = {
+            //     groupNo: serverId
+            // }
+            // sessionStorage.setItem('todoData', JSON.stringify(todoData));
+        // }else {
+        //     const groupNo = JSON.parse(sessionStorage.getItem("todoData")).groupNo
+        //     console.log('navigateTo 캘린더함수 실행 실패, 엘스문 groupNo' + groupNo)
+        // }
+        navigate('/todo');
+    }
+
 
     // accountDelete 모달 오픈시
     const openDeleteModal = () => {
@@ -319,7 +336,7 @@ export default function ServerMenuAside() {
                             <p>Calendar</p>
                         </div>
                     </div>
-                    <div className={styles.menu_box} onClick={() => navigate(`/todo`)}>
+                    <div className={styles.menu_box} onClick={() => navigateToTodo()}>
                         <div className={styles.menu_item} style={{cursor: "pointer"}}>
                             <img src="/bundle/img/todo_ic.png" alt="todo_ic"/>
                             <p>Todo List</p>
