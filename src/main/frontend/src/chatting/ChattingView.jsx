@@ -511,9 +511,9 @@ function ChattingView() {
                 </div>
             </div>
             {/* 연결 상태 표시 (개발용) */}
-            <div style={{padding: '5px', background: isConnected ? '#d4edda' : '#f8d7da', fontSize: '12px'}}>
-                웹소켓 상태: {isConnected ? '연결됨' : '연결 안됨'} | 서버: {serverName || '없음'}
-            </div>
+            {/*<div style={{padding: '5px', background: isConnected ? '#d4edda' : '#f8d7da', fontSize: '12px'}}>*/}
+            {/*    웹소켓 상태: {isConnected ? '연결됨' : '연결 안됨'} | 서버: {serverName || '없음'}*/}
+            {/*</div>*/}
             {/* 서버 멤버 리스트 area 추가 */}
             <div className={chatStyles.chat_wrap_area}>
                 <div className={chatStyles.chat_sub_wrap}>
