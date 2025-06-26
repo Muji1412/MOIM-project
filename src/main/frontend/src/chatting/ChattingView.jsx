@@ -214,29 +214,24 @@ function ChattingView() {
     };
 
     useEffect(() => {
-        // 이벤트 리스너는 한 번만 등록
-        const handleNewMessage = (event) => {
-            const payload = event.detail;
-            if (payload.channel === channelName) {
-                setMessages(prev => [...prev, payload]);
-            }
-        };
+        console.log("채팅 히스토리 로드 시작");
+        console.log("groupName:", groupName, "channelName:", channelName);
+
+        if (groupName && channelName) {
+            setMessages([]);
+            fetch(`${APPLICATION_SERVER_URL}/api/chat/${groupName}/${channelName}/all`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log("채팅 히스토리 로드 성공:", data.length, "개 메시지");
+                    setMessages(data);
+                })
+                .catch(err => console.error("채팅 히스토리 로드 실패:", err));
+        }
 
         window.addEventListener('newChatMessage', handleNewMessage);
         return () => {
             window.removeEventListener('newChatMessage', handleNewMessage);
         };
-    }, [channelName]);
-
-    // 채팅 히스토리는 별도 useEffect로 분리
-    useEffect(() => {
-        if (groupName && channelName) {
-            setMessages([]);
-            fetch(`${APPLICATION_SERVER_URL}/api/chat/${groupName}/${channelName}/all`)
-                .then(res => res.json())
-                .then(data => setMessages(data))
-                .catch(err => console.error("채팅 히스토리 로드 실패:", err));
-        }
     }, [groupName, channelName, APPLICATION_SERVER_URL]);
 
     // 메시지 전송 - Context 방식으로 변경
