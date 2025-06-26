@@ -15,78 +15,6 @@ function Whiteboard() {
     const whiteboardSubscription = useRef(null);
     const isUpdatingRef = useRef(false);
 
-    // --- 누락된 함수들 추가 ---
-    const mergeWithCurrentState = (newSnapshot) => {
-        if (!editorRef.current) return;
-
-        try {
-            // 현재는 단순히 loadSnapshot 사용 (향후 병합 로직으로 개선 가능)
-            loadSnapshot(editorRef.current.store, newSnapshot);
-            console.log('상태 병합 완료!');
-        } catch (error) {
-            console.error('상태 병합 실패:', error);
-        }
-    };
-
-    const detectChanges = (oldSnapshot, newSnapshot) => {
-        try {
-            const oldData = JSON.parse(oldSnapshot);
-            const newData = JSON.parse(newSnapshot);
-
-            const changes = {
-                added: [],
-                modified: [],
-                deleted: []
-            };
-
-            const oldShapes = new Map();
-            const newShapes = new Map();
-
-            // 기존 도형들을 Map으로 변환
-            if (oldData.store) {
-                oldData.store.forEach(record => {
-                    if (record.typeName === 'shape') {
-                        oldShapes.set(record.id, record);
-                    }
-                });
-            }
-
-            // 새로운 도형들을 Map으로 변환
-            if (newData.store) {
-                newData.store.forEach(record => {
-                    if (record.typeName === 'shape') {
-                        newShapes.set(record.id, record);
-                    }
-                });
-            }
-
-            // 추가된 도형 찾기
-            newShapes.forEach((shape, id) => {
-                if (!oldShapes.has(id)) {
-                    changes.added.push(shape);
-                } else {
-                    // 수정된 도형 찾기
-                    const oldShape = oldShapes.get(id);
-                    if (JSON.stringify(oldShape) !== JSON.stringify(shape)) {
-                        changes.modified.push(shape);
-                    }
-                }
-            });
-
-            // 삭제된 도형 찾기
-            oldShapes.forEach((shape, id) => {
-                if (!newShapes.has(id)) {
-                    changes.deleted.push(id);
-                }
-            });
-
-            return changes;
-        } catch (error) {
-            console.error('변경사항 감지 실패:', error);
-            return { added: [], modified: [], deleted: [] };
-        }
-    };
-
     // --- 데이터 로딩 ---
     const getStoredData = useCallback(() => {
         try {
@@ -182,17 +110,13 @@ function Whiteboard() {
                         groupId: whiteboardData.groupId,
                         userName: whiteboardData.userName
                     });
-                    // 기존 화이트보드 상태 요청 추가
-                    sendServerMessage({
-                        type: 'request-current-state',
-                        groupId: whiteboardData.groupId,
-                        userName: whiteboardData.userName
-                    });
                 }, 1000);
+
             }, (error) => {
                 console.error('WebSocket 연결 실패:', error);
                 setTimeout(() => createServerWebSocket(), 5000);
             });
+
         } catch (error) {
             console.error('WebSocket 생성 실패:', error);
         }
@@ -206,6 +130,7 @@ function Whiteboard() {
                     ...message,
                     connectionId: window.whiteboardConnectionId
                 };
+
                 window.whiteboardStompClient.send(
                     `/pub/whiteboard/${whiteboardData.groupId}`,
                     {},
@@ -217,7 +142,7 @@ function Whiteboard() {
         }
     };
 
-    // --- 개선된 메시지 핸들러 ---
+    // --- 간소화된 메시지 핸들러 ---
     const handleServerMessage = (message) => {
         console.log('=== 메시지 수신 ===', message.type, 'from', message.userName);
 
@@ -242,47 +167,8 @@ function Whiteboard() {
                 }
                 break;
 
-            case 'current-state-response':
-                // 서버에서 보낸 응답은 항상 처리
-                if (editorRef.current && (message.connectionId === "server" || message.connectionId !== window.whiteboardConnectionId)) {
-                    console.log('초기 상태 응답 처리 중...');
-                    try {
-                        isUpdatingRef.current = true;
-                        const snapshot = JSON.parse(message.data);
-                        loadSnapshot(editorRef.current.store, snapshot);
-                        console.log('초기 상태 로딩 완료!');
-
-                        setTimeout(() => {
-                            isUpdatingRef.current = false;
-                        }, 100);
-                    } catch (error) {
-                        console.error('초기 상태 로딩 실패:', error);
-                        isUpdatingRef.current = false;
-                    }
-                }
-                break;
-
             case 'user-join':
                 console.log('사용자 입장:', message.userName);
-                // 새 사용자에게 현재 상태 전송 (자신이 아닌 경우에만)
-                if (editorRef.current && message.connectionId !== window.whiteboardConnectionId) {
-                    setTimeout(() => {
-                        const currentSnapshot = editorRef.current.store.getSnapshot();
-                        const snapshotString = JSON.stringify(currentSnapshot);
-
-                        // 빈 상태가 아닌 경우에만 전송
-                        if (snapshotString.length > 100) { // 기본 빈 스냅샷보다 큰 경우
-                            console.log('새 사용자에게 현재 상태 전송:', snapshotString.length);
-                            sendServerMessage({
-                                type: 'current-state-broadcast',
-                                groupId: whiteboardData.groupId,
-                                userName: whiteboardData.userName,
-                                data: snapshotString,
-                                targetUser: message.userName
-                            });
-                        }
-                    }, 1000); // 1초 후 전송
-                }
                 break;
 
             case 'user-leave':
@@ -300,25 +186,6 @@ function Whiteboard() {
                 }
                 setConnectedUsers(users);
                 break;
-
-            case 'incremental-update':
-                // 증분 업데이트 처리
-                if (editorRef.current && message.connectionId !== window.whiteboardConnectionId) {
-                    console.log('증분 업데이트 적용 중...');
-                    try {
-                        isUpdatingRef.current = true;
-                        // 현재는 단순 처리, 향후 실제 증분 업데이트 로직 구현
-                        console.log('증분 업데이트 완료!');
-
-                        setTimeout(() => {
-                            isUpdatingRef.current = false;
-                        }, 100);
-                    } catch (error) {
-                        console.error('증분 업데이트 실패:', error);
-                        isUpdatingRef.current = false;
-                    }
-                }
-                break;
         }
     };
 
@@ -329,31 +196,20 @@ function Whiteboard() {
 
         let lastSnapshot = null;
         let checkInterval;
-        let isInitialized = false;
-
-        // 초기 상태 요청
-        const requestInitialState = () => {
-            if (window.whiteboardStompClient?.connected && whiteboardData) {
-                sendServerMessage({
-                    type: 'request-initial-state',
-                    groupId: whiteboardData.groupId,
-                    userName: whiteboardData.userName
-                });
-            }
-        };
 
         // 주기적으로 변경사항 체크하는 방식으로 변경
         const startPeriodicCheck = () => {
             checkInterval = setInterval(() => {
-                if (window.whiteboardStompClient?.connected && whiteboardData && !isUpdatingRef.current && isInitialized) {
+                if (window.whiteboardStompClient?.connected && whiteboardData && !isUpdatingRef.current) {
                     try {
                         const currentSnapshot = JSON.stringify(editor.store.getSnapshot());
 
                         // 이전 스냅샷과 다르면 전송
                         if (lastSnapshot && lastSnapshot !== currentSnapshot) {
                             console.log('=== 변경사항 감지 - 자동 전송 ===');
+                            console.log('이전 크기:', lastSnapshot.length);
+                            console.log('현재 크기:', currentSnapshot.length);
 
-                            // 전체 스냅샷 전송 (현재 방식 유지)
                             sendServerMessage({
                                 type: 'drawing-update',
                                 groupId: whiteboardData.groupId,
@@ -362,6 +218,7 @@ function Whiteboard() {
                             });
                             console.log('자동 전송 완료!');
                         }
+
                         lastSnapshot = currentSnapshot;
                     } catch (error) {
                         console.error('주기적 체크 실패:', error);
@@ -370,14 +227,10 @@ function Whiteboard() {
             }, 300); // 2초마다 체크
         };
 
-        // 초기화 시퀀스
+        // 1초 후에 주기적 체크 시작 (초기화 완료 대기)
         setTimeout(() => {
-            requestInitialState();
-            setTimeout(() => {
-                isInitialized = true;
-                console.log('주기적 변경사항 체크 시작');
-                startPeriodicCheck(); // 주기적 체크 활성화
-            }, 2000);
+            console.log('주기적 변경사항 체크 시작');
+            startPeriodicCheck();
         }, 1000);
 
         return () => {
@@ -395,6 +248,7 @@ function Whiteboard() {
             try {
                 const snapshot = editorRef.current.store.getSnapshot();
                 console.log('수동 전송 - 스냅샷 크기:', JSON.stringify(snapshot).length);
+
                 sendServerMessage({
                     type: 'drawing-update',
                     groupId: whiteboardData.groupId,
@@ -449,6 +303,7 @@ function Whiteboard() {
                     <p>그림을 그리면 2초 후 자동으로 공유됩니다</p>
                     <small>연결 ID: {window.whiteboardConnectionId}</small>
                 </div>
+
                 <div className="main-content">
                     <Tldraw
                         store={store.current}
@@ -456,10 +311,13 @@ function Whiteboard() {
                         autoFocus
                     />
                 </div>
+
                 <div className="controls-bar">
                     <div className="connected-users">
                         <span>서버 {whiteboardData.groupId} | 접속자: {connectedUsers.length}명</span>
                     </div>
+
+                    {/* 수동 전송 버튼 추가 */}
                     <button
                         onClick={handleManualSend}
                         style={{
@@ -470,9 +328,11 @@ function Whiteboard() {
                             borderRadius: '6px',
                             marginRight: '8px',
                             cursor: 'pointer'
-                        }}>
+                        }}
+                    >
                         수동 전송
                     </button>
+
                     <button onClick={leaveWhiteboard} className="control-btn leave">
                         나가기
                     </button>
