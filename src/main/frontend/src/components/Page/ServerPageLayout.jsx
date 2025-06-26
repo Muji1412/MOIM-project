@@ -37,7 +37,7 @@ export default function ServerPageLayout() {
                 }
             }
         }
-    }, [serverId, servers, channelName]);
+    }, [serverId, servers.length, channelName]);
 
     return (
         <div className={styles.page_container}> {/* 이 컨테이너는 flex-direction: row를 가집니다. */}
