@@ -81,7 +81,7 @@
 .add_friend_sub_title{font-size: 15px;}
 
 /* 검색창 스타일 수정 */
-.add_friend_search_box{width: 95%;height: 40px;border: 1px solid #d1d1d5; background: #f3f3f4;margin: 25px auto 0 auto;border-radius: 10px;}
+.add_friend_search_box{width: 95%;height: 40px;border: 1px solid #d1d1d5; background: #f3f3f4;margin: 12px auto 0 auto;border-radius: 10px;}
 .add_friend_search_box:focus-within{border: 2px solid #c3ee41;}
 
 .add_friend_search_bar{width: 95%;height: 100%;margin: 0 auto;}

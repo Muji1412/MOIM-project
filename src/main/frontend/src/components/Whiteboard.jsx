@@ -18,6 +18,79 @@ function Whiteboard() {
     const isUpdatingRef = useRef(false);
 
 
+    // // --- 누락된 함수들 추가 ---
+    // const mergeWithCurrentState = (newSnapshot) => {
+    //     if (!editorRef.current) return;
+    //
+    //     try {
+    //         // 현재는 단순히 loadSnapshot 사용 (향후 병합 로직으로 개선 가능)
+    //         loadSnapshot(editorRef.current.store, newSnapshot);
+    //         console.log('상태 병합 완료!');
+    //     } catch (error) {
+    //         console.error('상태 병합 실패:', error);
+    //     }
+    // };
+
+    // const detectChanges = (oldSnapshot, newSnapshot) => {
+    //     try {
+    //         const oldData = JSON.parse(oldSnapshot);
+    //         const newData = JSON.parse(newSnapshot);
+    //
+    //         const changes = {
+    //             added: [],
+    //             modified: [],
+    //             deleted: []
+    //         };
+    //
+    //         const oldShapes = new Map();
+    //         const newShapes = new Map();
+    //
+    //         // 기존 도형들을 Map으로 변환
+    //         if (oldData.store) {
+    //             oldData.store.forEach(record => {
+    //                 if (record.typeName === 'shape') {
+    //                     oldShapes.set(record.id, record);
+    //                 }
+    //             });
+    //         }
+    //
+    //         // 새로운 도형들을 Map으로 변환
+    //         if (newData.store) {
+    //             newData.store.forEach(record => {
+    //                 if (record.typeName === 'shape') {
+    //                     newShapes.set(record.id, record);
+    //                 }
+    //             });
+    //         }
+    //
+    //         // 추가된 도형 찾기
+    //         newShapes.forEach((shape, id) => {
+    //             if (!oldShapes.has(id)) {
+    //                 changes.added.push(shape);
+    //             } else {
+    //                 // 수정된 도형 찾기
+    //                 const oldShape = oldShapes.get(id);
+    //                 if (JSON.stringify(oldShape) !== JSON.stringify(shape)) {
+    //                     changes.modified.push(shape);
+    //                 }
+    //             }
+    //         });
+    //
+    //         // 삭제된 도형 찾기
+    //         oldShapes.forEach((shape, id) => {
+    //             if (!newShapes.has(id)) {
+    //                 changes.deleted.push(id);
+    //             }
+    //         });
+    //
+    //         return changes;
+    //     } catch (error) {
+    //         console.error('변경사항 감지 실패:', error);
+    //         return { added: [], modified: [], deleted: [] };
+    //     }
+    // };
+
+
     //기존 데이터 압축과정 pako이용
     const compressData = (data) => {
         return btoa(String.fromCharCode(...pako.gzip(data)));
@@ -26,6 +99,7 @@ function Whiteboard() {
     const decompressData = (compressedData) => {
         return pako.ungzip(Uint8Array.from(atob(compressedData), c => c.charCodeAt(0)), { to: 'string' });
     };
+
 
     // --- 데이터 로딩 ---
     const getStoredData = useCallback(() => {
