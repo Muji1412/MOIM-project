@@ -1,4 +1,4 @@
-.modal-overlay {
+.del_modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -11,17 +11,19 @@
     z-index: 900;
 }
 
-.modal {
+.del_modal {
     background: #23272a;
     border-radius: 12px;
     padding: 32px;
-    width: 300px;
+    width: 400px;
+    height: 350px;
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     color: white;
 }
 .modal-inner-label {
     text-align: left;
+    margin-top: 40px;
 }
 
 .modal-inner-star {
@@ -53,11 +55,12 @@
     background-color: #97b82d;
     color: white;
     border: none;
-    padding: 10px 18px;
     font-size: 16px;
     border-radius: 8px;
     margin-top: 20px;
     cursor: pointer;
+    width: 95px;
+    height: 40px;
 }
 
 .modal-btn:hover {
@@ -68,10 +71,19 @@
     background-color: #6b7280;
     color: white;
     border: none;
-    padding: 10px 18px;
     font-size: 16px;
     border-radius: 8px;
     margin-top: 20px;
     cursor: pointer;
-    margin-left: 20px;
+    width: 95px;
+    height: 40px;
 }
+
+.btn_area{
+    display: flex;
+    justify-content: space-between;
+    width: 65%;
+    margin: 50px auto;
+}
+
+.btn_area button{padding: 0;}
