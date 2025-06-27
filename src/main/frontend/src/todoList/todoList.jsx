@@ -39,10 +39,10 @@ export default function todoList({groupNo }) {
         setNewTodoEnd(day);
 
         const groupNo = JSON.parse(sessionStorage.getItem("todoData")).groupNo;
-        console.log('투두리스트 로그 셀렉티드서버아이디' + selectedServerId)
+        //console.log('투두리스트 로그 셀렉티드서버아이디' + selectedServerId)
         if(selectedServerId === 'default'){
             setSelectedServerId(groupNo)
-            console.log('투두리스트 로그 setSelectedServerId 실행, 서버값 = ' + selectedServerId)
+            //console.log('투두리스트 로그 setSelectedServerId 실행, 서버값 = ' + selectedServerId)
         }
 
         fetch("/api/todoList", {
@@ -70,7 +70,7 @@ export default function todoList({groupNo }) {
                     todoNo : item.todoNo
                 }));
                 setTodos(todos);
-                console.log(todos);
+                //console.log(todos);
             });
     }, [checkModified, setType])
 
@@ -184,7 +184,7 @@ export default function todoList({groupNo }) {
         try {
             const target = todos.find(t => t.todoNo === todoNo);
             const nextStatus = target.todoIsDone === 'done' ? 'in_progress' : 'done';
-            console.log('보낼 값', { todoNo, todoIsDone: nextStatus });
+            //console.log('보낼 값', { todoNo, todoIsDone: nextStatus });
             await fetch(`/api/todoList/complete`, {
                 method: 'POST',
                 headers: {
@@ -208,9 +208,9 @@ export default function todoList({groupNo }) {
             .then(res => {
                 if(res.status === 200) {
                     setCheckModified(prev => !prev);
-                    console.log('잘지워짐')
+                    //console.log('잘지워짐')
                 } else {
-                    console.log('안지워짐')
+                    //console.log('안지워짐')
                 }
             });
     }
@@ -227,11 +227,11 @@ export default function todoList({groupNo }) {
                 }),})
                 .then(res => {
                     if(res.status === 200) {
-                        console.log('잘추가됨');
+                        //console.log('잘추가됨');
                         setCheckModified(prev => !prev);
                         setNewTodo('');
                     } else {
-                        alert('추가 안됨');
+                        alert('일시적인 오류로 추가에 실패하였습니다');
                     }
                 })
     }
