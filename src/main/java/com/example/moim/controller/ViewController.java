@@ -29,7 +29,7 @@ public class ViewController {
             "/popup",
             "/chat",
             "/calendar",
-            "/todolist"
+            "/todo"
     })
 
 

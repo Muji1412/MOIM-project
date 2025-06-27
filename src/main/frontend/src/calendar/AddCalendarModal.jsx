@@ -43,7 +43,7 @@ export default function MyModal({ group_No, onClose, slotInfo }) {
                 setIsEventAdded(prev=>!prev);
                 onClose();
             } else {
-                console.log('???');
+                // console.log('???');
             }
         })
     };

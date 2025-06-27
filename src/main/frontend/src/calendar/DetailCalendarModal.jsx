@@ -82,7 +82,7 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
             if (res.status === 200) {
                 onClose();
             } else {
-                console.log('???');
+                // console.log('일정 수정에 실패하였습니다.');
             }
         })
     };
@@ -100,10 +100,9 @@ export default function DetailCalendarModal ({event, group_No, onClose}) {
             })
         }).then(res => {
             if(res.status === 200) {
-                console.log('가져오기 잘됨')
                 onClose();
             } else {
-                console.log("가져오기 실패")
+                console.log("일정 가져오기에 실패하였습니다.")
             }
         })
     }

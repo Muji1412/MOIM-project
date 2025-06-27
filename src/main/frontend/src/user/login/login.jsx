@@ -22,8 +22,8 @@ export default function Login() {
             window.location.href = "/"; // 메인 페이지로 리다이렉트
           } else {
             // 실패 시 에러 메시지 처리
-            const data = await res.json().catch(() => ({error: "An unknown error occurred"}));
-            if (res.status === 401 || res.status === 404 || res.status === 502) {
+            const data = await res.json().catch(() => ({error: "ID 혹은 비밀번호가 일치하지 않습니다"}));
+            if (res.status === 401 || res.status === 404 || res.status === 400) {
               setResult(data.error || "ID 혹은 비밀번호가 일치하지 않습니다");
             } else {
               setResult("An unknown error occurred");
@@ -31,7 +31,7 @@ export default function Login() {
           }
         })
         .catch(err => {
-          console.log(err);
+          //console.log(err);
           setResult("서버 연결에 문제가 발생했습니다.");
         });
   }

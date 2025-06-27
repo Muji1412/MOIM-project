@@ -57,9 +57,9 @@ export default function Signup() {
     const handlePwChange = (e) => {
         const value = e.target.value;
         setPassword2(value);
-        console.log("password: ", password, " password2 : ", password2)
+        //console.log("password: ", password, " password2 : ", password2)
         if(password !== password2) {
-            console.log("왜안됨")
+            //console.log("왜안됨")
             setPwCheck(true);
         } else {
             setPwCheck(false);
