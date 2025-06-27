@@ -28,7 +28,25 @@ function ChattingView() {
         y: 0,
         selectedMember: null
     });
-// 컨텍스트 메뉴 닫기 처리
+
+    // easterEgg Area
+    const [easterEggState, setEasterEggState] = useState({
+        toggleCount: 0,
+        isActive: false,
+        userColors: new Map()
+    });
+
+    // 랜덤 색상 생성 함수 추가
+    const getRandomColor = () => {
+        const colors = [
+            '#FF0066', '#00FF66', '#6600FF', '#FF6600',
+            '#00FFFF', '#FF00FF', '#FFFF00', '#FF3333',
+            '#33FF33', '#3333FF', '#FF9900', '#9900FF'
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+    };
+
+    // 컨텍스트 메뉴 닫기 처리
     useEffect(() => {
         const handleClick = () => {
             if (memberContextMenu.visible) {
@@ -38,7 +56,8 @@ function ChattingView() {
         window.addEventListener("click", handleClick);
         return () => window.removeEventListener("click", handleClick);
     }, [memberContextMenu.visible]);
-// 멤버 우클릭 메뉴 처리
+
+    // 멤버 우클릭 메뉴 처리
     const handleMemberContextMenu = (e, member) => {
         e.preventDefault();
 
@@ -49,7 +68,8 @@ function ChattingView() {
             selectedMember: member,
         });
     };
-// 친구추가 처리
+
+    // 친구추가 처리
     const handleAddFriend = async (member) => {
         try {
             // 컨텍스트 먼저 닫음
@@ -57,10 +77,6 @@ function ChattingView() {
 
             // 여기에 친구추가 API 호출 로직 구현
             console.log('친구추가:', member);
-            // 멤버에 찍히는거
-            // id: 22
-            // nickname: nick
-            // username 추가했음,
 
             const requesterUsername = currentUser.username;
             const receiverUsername = member.username;
@@ -87,7 +103,6 @@ function ChattingView() {
         }
     };
 
-
     // URL 파라미터 받기
     const location = useLocation();
     const params = useParams();
@@ -103,9 +118,51 @@ function ChattingView() {
     // 멤버 리스트 토글 상태 추가
     const [isMemberListVisible, setIsMemberListVisible] = useState(true);
 
-    // 멤버 리스트 토글 함수
+    // 멤버 리스트 토글 함수 (이스터에그 기능 포함)
     const toggleMemberList = () => {
         setIsMemberListVisible(!isMemberListVisible);
+
+        // 이스터에그 카운트 증가
+        setEasterEggState(prev => {
+            const newCount = prev.toggleCount + 1;
+
+            // 정확히 10의 배수일 때만 이스터에그 활성화
+            if (newCount % 10 === 0) {
+                console.log(`🎉 이스터에그 발동! (${newCount}번째 토글)`);
+
+                // 현재 멤버들에게 랜덤 색상 할당
+                const newUserColors = new Map();
+                members.forEach(member => {
+                    newUserColors.set(member.id, getRandomColor());
+                });
+
+                // 이스터에그 활성화 메시지 전송
+                if (isConnected && groupName) {
+                    const easterEggMessage = {
+                        date: new Date().toISOString(),
+                        user: '시스템',
+                        userImg: '/bundle/img/sys_ic.png',
+                        color: 'rainbow',
+                        text: '🎨 레인보우 모드가 활성화되었습니다!',
+                        channel: channelName,
+                        isEasterEgg: true
+                    };
+                    sendMessage(`/app/chat/${groupName}`, easterEggMessage);
+                }
+
+                return {
+                    toggleCount: newCount,
+                    isActive: !prev.isActive, // 토글
+                    userColors: newUserColors
+                };
+            }
+
+            // 10의 배수가 아니면 카운트만 증가
+            return {
+                ...prev,
+                toggleCount: newCount
+            };
+        });
     };
 
     // 서버 멤버 정보 가져오기 (group_no 기반)
@@ -152,7 +209,6 @@ function ChattingView() {
         };
     }, [serverId, serverName, APPLICATION_SERVER_URL]);
 
-
     // 서버 정보 가져오기 (serverId로 서버명 조회)
     useEffect(() => {
         if (serverId && serverId !== "default") {
@@ -161,7 +217,6 @@ function ChattingView() {
             fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
                 method: 'GET',
                 headers: {
-                    // 'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             })
@@ -173,7 +228,7 @@ function ChattingView() {
                 })
                 .then(data => {
                     console.log("서버 정보 응답:", data);
-                    setServerName(data.groupName);  // data.groupName으로 접근
+                    setServerName(data.groupName);
                 })
                 .catch(err => {
                     console.error("서버 정보 로드 실패:", err);
@@ -296,7 +351,6 @@ function ChattingView() {
             });
             const imageUrl = await res.text();
 
-
             const newMsg = {
                 date: new Date().toISOString().slice(0, 10),
                 user: currentUser?.userNick,
@@ -329,11 +383,28 @@ function ChattingView() {
     // 플러스 버튼 클릭
     const handlePlusClick = () => fileInputRef.current?.click();
 
+    // 입력 변경 처리 (이스터에그 타이핑 색상 변경 포함)
     const handleInputChange = (e) => {
         const value = e.target.value;
         const cursorPos = e.target.selectionStart;
 
         setInputValue(value);
+
+        // 이스터에그가 활성화되어 있고 실제로 타이핑 중일 때
+        if (easterEggState.isActive && value.length > 0) {
+            setEasterEggState(prev => {
+                const newUserColors = new Map();
+
+                // 모든 멤버들에게 새로운 랜덤 색상 할당
+                members.forEach(member => {
+                    newUserColors.set(member.id, getRandomColor());
+                });
+                return {
+                    ...prev,
+                    userColors: newUserColors
+                };
+            });
+        }
 
         // @ 기호 감지
         const beforeCursor = value.substring(0, cursorPos);
@@ -348,7 +419,7 @@ function ChattingView() {
             const filtered = members.filter(member =>
                 member.nickname.toLowerCase().includes(query.toLowerCase())
             );
-            setFilteredMembers(filtered.slice(0, 20)); // 최대 5명만 표시
+            setFilteredMembers(filtered.slice(0, 20)); // 최대 20명만 표시
         } else {
             setShowMentionList(false);
         }
@@ -364,10 +435,8 @@ function ChattingView() {
         setShowMentionList(false);
     };
 
-
     // 키보드처리
     const handleKeyDown = (e) => {
-
         //멘션관련
         if (showMentionList && filteredMembers.length > 0) {
             if (e.key === 'ArrowDown') {
@@ -404,7 +473,7 @@ function ChattingView() {
         }
     };
 
-    // 멘션창..
+    // 멘션창
     const MentionList = () => {
         if (!showMentionList || filteredMembers.length === 0) return null;
 
@@ -434,54 +503,6 @@ function ChattingView() {
         );
     };
 
-    // 웹소켓기능 중복으로 잠시 삭제
-    //새로고침시 웹소켓 연결 트리거
-    // useEffect(() => {
-    //     const autoConnectToServer = async () => {
-    //
-    //         console.log("isConnected:"+isConnected);
-    //         // 이미 연결되어 있으면 스킵
-    //         if (isConnected && currentServer?.id === serverId) {
-    //             console.log("이미 해당 서버에 연결되어 있음");
-    //             return;
-    //         }
-    //
-    //         // serverId가 있고 default가 아닐 때만 연결 시도
-    //         if (serverId && serverId !== "default") {
-    //             console.log("새로고침 후 자동 서버 연결 시도:", serverId);
-    //
-    //             try {
-    //                 // 서버 정보 가져오기
-    //                 const response = await fetch(`${APPLICATION_SERVER_URL}/api/groups/getServer/${serverId}`, {
-    //                     method: 'GET',
-    //                     headers: {
-    //                         'Content-Type': 'application/json'
-    //                     }
-    //                 });
-    //
-    //                 if (response.ok) {
-    //                     const serverData = await response.json();
-    //                     const serverInfo = {
-    //                         id: serverId,
-    //                         name: serverData.groupName
-    //                     };
-    //
-    //                     // WebSocket 연결
-    //                     await connectToServer(serverInfo);
-    //                     console.log("자동 연결 완료:", serverInfo);
-    //                 } else {
-    //                     console.error("서버 정보 조회 실패");
-    //                 }
-    //             } catch (error) {
-    //                 console.error("자동 연결 중 오류:", error);
-    //             }
-    //         }
-    //     };
-    //
-    //     // 컴포넌트 마운트 시 자동 연결 시도
-    //     autoConnectToServer();
-    // }, [serverId, isConnected, currentServer]); // serverId 변경 시에도 재연결
-
     // 날짜별 메시지 그룹화
     const groupByDate = messages.reduce((acc, msg) => {
         const date = msg.date ? msg.date.slice(0, 10) : '';
@@ -493,43 +514,38 @@ function ChattingView() {
     return (
         <section className={chatStyles.chat_view_container}>
             <div className={chatStyles.channel_header}>
-                {/* 서버 접속 시 서버에 있는 멤버 리스트 부분 추가 */}
                 <div className={chatStyles.channel_header_title}>
                     <div className={chatStyles.channel_title}># {channelName || 'Channel'}</div>
-
                 </div>
                 <div
                     className={chatStyles.channel_mem_box}
                     onClick={toggleMemberList}
+                    style={{position: 'relative'}}
                 >
                     <img src="/bundle/img/mem_list_ic.png" alt="mem_list"/>
+                    {/* 토글 카운트 힌트 (개발 모드에서만 표시) */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <div className={chatStyles.toggle_count_hint}>
+                            {easterEggState.toggleCount}/10
+                        </div>
+                    )}
                 </div>
             </div>
-            {/* 연결 상태 표시 (개발용) */}
-            {/*<div style={{padding: '5px', background: isConnected ? '#d4edda' : '#f8d7da', fontSize: '12px'}}>*/}
-            {/*    웹소켓 상태: {isConnected ? '연결됨' : '연결 안됨'} | 서버: {serverName || '없음'}*/}
-            {/*</div>*/}
-            {/* 서버 멤버 리스트 area 추가 */}
+
             <div className={chatStyles.chat_wrap_area}>
                 <div className={chatStyles.chat_sub_wrap}>
                     <div className={chatStyles.messages_container}>
-
-                        {/*<div className={chatStyles.channel_desc}>This is the start of the*/}
-                        {/*    #{channelName || 'Channel'} channel.*/}
-                        {/*</div>*/}
-
                         {Object.entries(groupByDate).map(([date, msgs]) => (
                             <div key={date}>
                                 <div className={chatStyles.chat_date_divider}>{formatDateLabel(date)}</div>
                                 {msgs.map((msg, idx) => (
-
                                     <div className={chatStyles.chat_message_row} key={idx}>
                                         <div className={chatStyles.chat_avatar}>
                                             <img
-                                                src={msg.userImg}
+                                                src={msg.userImg || '/bundle/img/sys_ic.png'}
                                                 alt={`${msg.user} 프로필`}
                                                 className={chatStyles.profile_image}
-                                                onError={(e) => e.target.src = '/bundle/img/default_profile.png'}
+                                                onError={(e) => e.target.src = '/bundle/img/sys_ic.png'}
                                             />
                                         </div>
                                         <div className={chatStyles.chat_message_bubble}>
@@ -559,7 +575,6 @@ function ChattingView() {
                         </button>
                         <input type="file" accept="image/*" ref={fileInputRef} style={{display: "none"}}
                                onChange={onFileChange}/>
-
                         <div style={{position: 'relative', flex: 1}}>
                             <input
                                 className={chatStyles.chat_input}
@@ -572,6 +587,7 @@ function ChattingView() {
                         </div>
                     </div>
                 </div>
+
                 {/* 서버멤버 리스트를 보여 줄 부분 */}
                 <div
                     className={`${chatStyles.mem_list_area} ${isMemberListVisible ? chatStyles.mem_list_visible : chatStyles.mem_list_hidden}`}>
@@ -586,20 +602,51 @@ function ChattingView() {
                         ) : members.length === 0 ? (
                             <div className={chatStyles.empty_message}>멤버가 없습니다</div>
                         ) : (
-                            members.map(member => (
-                                <div key={member.id} className={chatStyles.member_item}
-                                     onContextMenu={(e) => handleMemberContextMenu(e, member)}>
-                                    <div className={chatStyles.member_avatar}>
-                                        <img
-                                            src={member.profileImage || '/default-profile.png'}
-                                            alt={member.nickname}
-                                            className={chatStyles.avatar_image}
-                                            onError={(e) => e.target.src = '/default-profile.png'}
-                                        />
+                            members.map(member => {
+                                // 이스터에그 활성화 시 이미지 위에 색상 오버레이
+                                const imageStyle = easterEggState.isActive && easterEggState.userColors.has(member.id)
+                                    ? {
+                                        backgroundColor: easterEggState.userColors.get(member.id),
+                                        transition: 'all 0.3s ease',
+                                        borderRadius: '50%',
+                                        // 이미지를 완전히 덮어씌우기
+                                        position: 'relative',
+                                    }
+                                    : {};
+
+                                const imageClassName = easterEggState.isActive && easterEggState.userColors.has(member.id)
+                                    ? `${chatStyles.avatar_image} ${chatStyles.member_item_easter_egg}`
+                                    : chatStyles.avatar_image;
+
+                                return (
+                                    <div
+                                        key={member.id}
+                                        className={chatStyles.member_item}
+                                        onContextMenu={(e) => handleMemberContextMenu(e, member)}
+                                    >
+                                        <div className={chatStyles.member_avatar}>
+                                            <img
+                                                src={member.profileImage || '/default-profile.png'}
+                                                alt={member.nickname}
+                                                className={imageClassName}
+                                                style={imageStyle}
+                                                onError={(e) => e.target.src = '/default-profile.png'}
+                                            />
+                                            {/* 이스터에그 활성화 시 색상 오버레이 */}
+                                            {easterEggState.isActive && easterEggState.userColors.has(member.id) && (
+                                                <div
+                                                    className={chatStyles.color_overlay}
+                                                    style={{
+                                                        backgroundColor: easterEggState.userColors.get(member.id),
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                        <span className={chatStyles.member_nickname}>{member.nickname}</span>
                                     </div>
-                                    <span className={chatStyles.member_nickname}>{member.nickname}</span>
-                                </div>
-                            ))
+                                );
+                            })
+
                         )}
                     </div>
 
@@ -620,9 +667,22 @@ function ChattingView() {
                             </li>
                         </ul>
                     )}
-
                 </div>
             </div>
+
+            {/* 이스터에그 상태 표시 */}
+            {easterEggState.isActive && (
+                <div className={chatStyles.easter_egg_indicator}>
+                    🎨 레인보우 모드 활성화!
+                    <br />
+                    <small>타이핑하면 색상이 바뀝니다!</small>
+                    <button
+                        onClick={() => setEasterEggState(prev => ({...prev, isActive: false}))}
+                    >
+                        끄기
+                    </button>
+                </div>
+            )}
         </section>
     );
 }
