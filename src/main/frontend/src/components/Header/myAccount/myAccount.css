@@ -15,7 +15,7 @@
 .menu-content{margin: 5px 0; width: 90%; background: #c3ee41cc;font-size: 16px;height: 35px;text-align: left;border-radius: 5px;display: flex; align-items: center;}
 .menu-content span{width: 90%; margin: 0 auto; color: #fff;}
 .menu-logout{ display: flex; justify-content: space-between; align-items: center; width: 90%; height: 40px; color: #f23f42; font-size: 16px; border-bottom: 1px solid #a7a7a7; border-top: 1px solid #a7a7a7; cursor: pointer; text-align: left;}
-.menu-logout span{margin-left: 10px;}
+.menu-logout span{margin-left: 10px; font-weight: 500;}
 .menu-logout img{margin-right: 5px;}
 
 /* 헤더, 좌측메뉴 제외한 흰 부분*/
