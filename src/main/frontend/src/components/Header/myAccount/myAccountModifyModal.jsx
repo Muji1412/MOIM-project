@@ -177,8 +177,18 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                 {/* 창 제목 */}
                 <h2 className="modal-title">사용자 정보 수정</h2>
                 <div className="modal-inner-box">
+                    {/*프로필 이미지*/}
+                    <div className="profile-image-box">
+                        <input  id="fileUpload" type="file" accept="image/*"
+                                style={{display:"none"}} onChange={handleFileChange}></input>
+                        <label htmlFor="fileUpload" className="custom-file-label">
+                            {previewUrl !== null ? <img src={previewUrl} alt="previewImg"/>
+                                : <img src={userImg} alt="addImg"/>}
+                        </label>
+                    </div>
+
                     {/*이메일*/}
-                    <div className="modal-inner-label">
+                    <div className="modal_email_label">
                         Email <p className="modal-inner-star">*</p>
                     </div>
                     <input className="modal-inner-input" value={newEmail}
@@ -214,18 +224,6 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
                     </div>
                     <input className="modal-inner-input" value={userMsg}
                            onChange={e => setUserMsg(e.target.value)}></input>
-                    {/*프로필 이미지*/}
-                    <div className="profile-image-box">
-                        <div className="modal-inner-label">
-                            프로필 이미지 <p className="modal-inner-star"></p>
-                        </div>
-                        <input  id="fileUpload" type="file" accept="image/*"
-                                style={{display:"none"}} onChange={handleFileChange}></input>
-                        <label htmlFor="fileUpload" className="custom-file-label">
-                            {previewUrl !== null ? <img src={previewUrl} alt="previewImg"/>
-                                : <img src={userImg} alt="addImg"/>}
-                        </label>
-                    </div>
                 </div>
                 {/*수정 버튼*/}
                 <button className="modal-btn" onClick={handleSave}>
