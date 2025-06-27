@@ -261,7 +261,7 @@ export default function Signup() {
             onChange={e => setUserPhone(e.target.value)}
             onBlur={(e) => handlePhone(e.target.value)}
           />
-            {phoneCheck === true && <span style={{ color: '#ee2349' }}>11자리 숫자를 입력해 주세요</span>}
+            {phoneCheck === true && <span style={{ color: '#ee2349' }}>010-xxxx-xxxx 형식으로 입력해주세요</span>}
             {phoneCheck === false && <span style={{ color: '#97b82d' }}></span>}
         </div>
 
