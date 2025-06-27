@@ -44,12 +44,12 @@ public class MailController {
                 //System.out.println("record가 문제? "+mailDTO.toString());
                 mailService.sendMail(mailDTO);
             } else { // false인 경우 아이디와 이메일은 맞으나 임시비밀번호 재발급 1시간 지나지 않음
-                return ResponseEntity.badRequest().body(Map.of("error", "Temporary passwords can only be issued once every hour."));
+                return ResponseEntity.badRequest().body(Map.of("error", "비밀번호 찾기는 1시간에 한 번만 가능합니다"));
             }
-            return ResponseEntity.ok(Map.of("msg", "Temporary password has been issued and sent to your email"));
+            return ResponseEntity.ok(Map.of("msg", "입력하신 이메일 주소로 임시 비밀번호가 발송되었습니다"));
         } catch (EntityNotFoundException e) {
             //아이디와 이메일을 맞지 않게 반환한 경우 exception 발생
-            return ResponseEntity.badRequest().body(Map.of("error", "Please check ID and Email again"));
+            return ResponseEntity.badRequest().body(Map.of("error", "ID와 비밀번호를 다시 확인해 주세요"));
         }
     }
 }

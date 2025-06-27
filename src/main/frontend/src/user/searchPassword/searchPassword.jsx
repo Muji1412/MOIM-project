@@ -96,7 +96,7 @@ export default function SearchPassword() {
                 </button>
                 {/* 로그인 창으로 되돌아가기 */}
                 <div className="search-bottom">
-                    <a href="login.do" className="loginBtn">Log in</a>
+                    <a href="login.do" className="loginBtn">로그인</a>
                 </div>
                 <SearchPasswordSuccessModal isOpen={showModal} onClose={handleCloseModal} />
             </div>
