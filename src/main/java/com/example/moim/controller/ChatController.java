@@ -107,7 +107,7 @@ public class ChatController {
         System.out.println("조회 키: " + key);
 
         List<Object> result = redisTemplate.opsForList().range(key, 0, -1);
-        System.out.println("조회 결과: " + result);
+//        System.out.println("조회 결과: " + result);
 
         return chatService.getChatsByChannel(groupName, channelName);
     }
