@@ -3,14 +3,11 @@ package com.example.moim.config;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.repository.RefreshTokenRepository;
 import com.example.moim.service.user.CustomUserDetailsService;
-import com.example.moim.util.CustomLogoutSuccessHandler;
-import com.example.moim.util.JWTAuthenticationFilter;
+import com.example.moim.util.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import com.example.moim.util.CustomAuthenticationEntryPoint;
-import com.example.moim.util.CustomLoginFilter;
 //import com.example.moim.util.JWTAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +20,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -39,15 +37,17 @@ public class SecurityConfig {
     private final JWTService jwtService;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+    private final CustomAuthenticationFailureHandler  authenticationFailureHandler;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService
                             , JWTService jwtService
                             , CustomAuthenticationEntryPoint authenticationEntryPoint
-            , CustomLogoutSuccessHandler customLogoutSuccessHandler) {
+            , CustomLogoutSuccessHandler customLogoutSuccessHandler, CustomAuthenticationFailureHandler authenticationFailureHandler) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtService = jwtService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.customLogoutSuccessHandler = customLogoutSuccessHandler;
+        this.authenticationFailureHandler = authenticationFailureHandler;
     }
 
     @Bean
@@ -187,9 +187,11 @@ public class SecurityConfig {
     @Bean
     public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager
             , JWTService jwtService
-            , RefreshTokenRepository refreshTokenRepository) {
+            , RefreshTokenRepository refreshTokenRepository
+            , AuthenticationFailureHandler authenticationFailureHandler) {
         CustomLoginFilter filter = new CustomLoginFilter(jwtService, refreshTokenRepository);
         filter.setAuthenticationManager(authenticationManager);
+        filter.setAuthenticationFailureHandler(authenticationFailureHandler);
         return filter;
     }
 
