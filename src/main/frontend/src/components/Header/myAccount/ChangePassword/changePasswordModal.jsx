@@ -86,7 +86,7 @@ const changePasswordModal = ({ userInfo, isOpen, onClose, onChangeSuccess }) => 
         <div className="chpw_modal-overlay">
             <div className="pw_change_modal">
                 <div className="modal_title">
-                    <img src="/bundle/img/home_ic.png" alt="logo"/>
+                    <img src="/bundle/img/symbol_heart.png" alt="logo"/>
                     <h2>비밀번호 변경하기</h2>
                 </div>
                 {/*현재 비밀번호*/}
