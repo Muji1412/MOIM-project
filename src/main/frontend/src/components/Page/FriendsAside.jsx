@@ -31,7 +31,7 @@ export default function FriendsAside() {
 
     // accountDelete 모달 오픈시
     const openDeleteModal = () => {
-        console.log('openDeleteModal 호출됨');
+        //console.log('openDeleteModal 호출됨');
         setWhichModal('delete');
     };
     // 3단계: delete 성공 모달 오픈 (delete에서 호출)

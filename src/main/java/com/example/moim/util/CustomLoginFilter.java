@@ -175,8 +175,7 @@ protected void successfulAuthentication(HttpServletRequest request, HttpServletR
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed)
             throws IOException, ServletException {
-        response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
-        response.getWriter().write("{\"error\": \"로그인 실패\"}");
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 }
 

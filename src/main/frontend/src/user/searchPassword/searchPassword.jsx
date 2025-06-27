@@ -43,7 +43,7 @@ export default function SearchPassword() {
             })
             .catch(err => {
                 // 실패: 에러 메시지 추출
-                console.log(err);
+                //console.log(err);
                 setResult("서버와의 연결에 문제가 있습니다");
             });
     };

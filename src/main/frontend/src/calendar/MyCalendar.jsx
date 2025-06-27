@@ -40,10 +40,10 @@ export default function MyCalendar() {
     const fetchEvents = () => {
         const groupNo = JSON.parse(sessionStorage.getItem("calendarData")).groupNo;
          setGroupNo(groupNo);
-         console.log('캘린더 로그 셀렉티드서버아이디' + selectedServerId)
+         //console.log('캘린더 로그 셀렉티드서버아이디' + selectedServerId)
         if(selectedServerId === 'default'){
             setSelectedServerId(groupNo)
-            console.log('캘린더 로그 setSelectedServerId 실행, 서버값 = ' + selectedServerId)
+            //console.log('캘린더 로그 setSelectedServerId 실행, 서버값 = ' + selectedServerId)
         }
         fetch('api/calendar', {
             method: 'POST',

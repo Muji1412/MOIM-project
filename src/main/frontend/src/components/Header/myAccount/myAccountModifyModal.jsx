@@ -30,7 +30,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         setUserPhone(userInfo.phone);
         setUserImg(userInfo.img);
         setUserMsg(userInfo.message);
-        console.log(userEmail, newEmail);
+        //console.log(userEmail, newEmail);
     }, [userInfo]);
 
     const handleSave = async () => {
@@ -63,7 +63,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
     // 이메일 중복 체크
     const checkUserEmail = useCallback(
         debounce(() => {
-            console.log("새로입력 : ", newEmail, " 기존이메일 : ",userEmail);
+            //console.log("새로입력 : ", newEmail, " 기존이메일 : ",userEmail);
             if(newEmail === userEmail) {
                 return;
             }
@@ -151,7 +151,7 @@ const MyAccountModifyModal = ({ userInfo, isOpen, onClose }) => {
         });
         //db에 이미지 url 저장
         const imgUrl = await uploadRes.text();
-        console.log(imgUrl);
+        //console.log(imgUrl);
         return imgUrl;
     };
 
