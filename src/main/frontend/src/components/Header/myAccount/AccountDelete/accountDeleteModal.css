@@ -80,10 +80,10 @@
 }
 
 .btn_area{
-    display: flex;
-    justify-content: space-between;
+    /*display: flex;*/
+    /*justify-content: space-between;*/
     width: 65%;
-    margin: 50px auto;
+    margin: 40px auto;
 }
 
 .btn_area button{padding: 0;}
