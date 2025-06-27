@@ -6,6 +6,7 @@ import com.example.moim.chatting.ChatSessionManager;
 import com.example.moim.command.UserListResponse;
 import com.example.moim.entity.Users;
 import com.example.moim.repository.UsersRepository;
+import com.example.moim.service.ai.AIService;
 import com.example.moim.service.notification.PushNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.http.ResponseEntity; // 추가 import
 import org.springframework.http.HttpStatus; // 추가 import
 
@@ -59,18 +62,25 @@ public class ChatController {
             message.setUserImg(sender.getUserImg());  // GCP URL 설정
         }
 
-        // 태원 추가파트
+        chatService.saveChat(groupName, message.getChannel(), message);
+        // 태원 추가파트 - 제미니 답변을 위해서 메세지 보낸 이후로 옮김
         // groupName 나오고, message 객체 안에
-        System.out.println("sendMessage 디버깅");
-        System.out.println(groupName);
-        System.out.println(message.toString());
+//        System.out.println("sendMessage 디버깅");
+//        System.out.println(groupName);
+//        System.out.println(message.toString());
         // text=@test11 @imurditto2
         // Redis에 프로필 이미지가 포함된 메시지 저장
         // 서비스 전에, 일단 메세지에 @이 포함돼있는지 확인하고 실행
-        if (message.getText().contains("@")) {
-            pushNotificationService.sendMentionNotification(groupName, message);
-        }
-        chatService.saveChat(groupName, message.getChannel(), message);
+
+        // api 호출 비동기 처리, 이렇게 비동기 처리를 해주지 않는다면 한참 걸려서 메세지가 바로 반환되지 않음.
+        CompletableFuture.runAsync(() -> {
+
+            if (message.getText().contains("@")) {
+                pushNotificationService.sendMentionNotification(groupName, message);
+            }else {
+//                System.out.println("어싱크 안됐음");
+            }
+        });
 
         return message; // 실시간 브로드캐스트 (프로필 이미지 포함)
     }

@@ -30,21 +30,36 @@ public class GroupsService {
         // 1. 그룹 저장
         Groups savedGroup = groupsRepository.save(groups);
 
-        // 2. 생성자를 UserGroup 테이블에 추가
+        // 2. 사용자들 조회
         Users owner = usersRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
+        Users bot = usersRepository.findByUsername("MO-GPT")
+                .orElseThrow(() -> new RuntimeException("Bot not found: MO-GPT"));
+
+        // 봇용 객체도 생성
+        UserGroupId ownerGroupId = new UserGroupId(savedGroup.getGroupNo(), owner.getUserNo());
+        UserGroupId botGroupId = new UserGroupId(savedGroup.getGroupNo(), bot.getUserNo());
+
+        // 둘 다 엔티티에 넣음
         UserGroup ownerGroup = UserGroup.builder()
-                .id(new UserGroupId(savedGroup.getGroupNo(), owner.getUserNo()))
+                .id(ownerGroupId)
                 .group(savedGroup)
                 .user(owner)
                 .build();
 
-        UserGroup savedOwnerGroup = userGroupRepository.save(ownerGroup);
-        System.out.println("서버 생성자 멤버십 추가 완료: " + savedOwnerGroup); // 디버깅용
+        UserGroup botToGroup = UserGroup.builder()
+                .id(botGroupId)
+                .group(savedGroup)
+                .user(bot)
+                .build();
+
+        userGroupRepository.save(ownerGroup);
+        userGroupRepository.save(botToGroup);
 
         return savedGroup;
     }
+
 
     // 사용자별 서버 조회 (간단한 방법)
     public List<Groups> getUserGroups(String username) {
