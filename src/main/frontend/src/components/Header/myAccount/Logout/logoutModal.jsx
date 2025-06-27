@@ -5,7 +5,7 @@ const LogoutModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     const handleLogout = () => {
-        fetch("/api/user/logout", {
+        fetch("/logout", {
             method: "POST",
             credentials: "include",
         }).then(res => {

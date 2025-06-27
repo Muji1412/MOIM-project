@@ -3,7 +3,9 @@ package com.example.moim.config;
 import com.example.moim.jwt.JWTService;
 import com.example.moim.repository.RefreshTokenRepository;
 import com.example.moim.service.user.CustomUserDetailsService;
+import com.example.moim.util.CustomLogoutSuccessHandler;
 import com.example.moim.util.JWTAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -36,13 +38,16 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final JWTService jwtService;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService
                             , JWTService jwtService
-                            , CustomAuthenticationEntryPoint authenticationEntryPoint) {
+                            , CustomAuthenticationEntryPoint authenticationEntryPoint
+            , CustomLogoutSuccessHandler customLogoutSuccessHandler) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtService = jwtService;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.customLogoutSuccessHandler = customLogoutSuccessHandler;
     }
 
     @Bean
@@ -118,6 +123,12 @@ public class SecurityConfig {
         http.addFilterBefore(new JWTAuthenticationFilter(customUserDetailsService, jwtService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
         http.exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint));
+        http.logout(logout -> logout
+                .logoutUrl("/logout") // POST 요청해야 함
+                .logoutSuccessHandler(customLogoutSuccessHandler) // 성공 시 처리 로직
+                .invalidateHttpSession(true)
+                .deleteCookies("access_token", "refresh_token") // 쿠키 제거
+        );
 
         return http.build();
     }

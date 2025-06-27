@@ -80,7 +80,7 @@ export default function Login() {
         {result && <div className="login-error">{result}</div>}
         {/* 비밀번호 찾기 */}
         <div className="search-password">
-          <a href="searchpassword.do" className="searchPwBtn">비밀번호 찾기</a>
+          <a href="searchPassword.do" className="searchPwBtn">비밀번호 찾기</a>
         </div>
         {/* 44. 로그인 버튼 */}
         <button className="login-btn" onClick={handleLogin}>

@@ -231,34 +231,34 @@ public class UserRestController {
     }
 
     //로그아웃
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
-            HttpServletResponse response) {
-        long userNo = userDetails.getUserNo();
-        try {
-            RefreshToken e = refreshTokenRepository.findByUserUserNo(userNo)
-                    .orElseThrow(() -> new EntityNotFoundException("토큰이 없습니다."));
-            refreshTokenRepository.delete(e); //로그아웃시 db에서 리프레시토큰 삭제
-        } catch (Exception e) {
-            return  ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-
-        Cookie accessTokenCookie = new Cookie("access_token", "");
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setMaxAge(0); // 즉시 만료
-        accessTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
-
-        Cookie refreshTokenCookie = new Cookie("refresh_token", "");
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
-
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
+//            HttpServletResponse response) {
+//        long userNo = userDetails.getUserNo();
+//        try {
+//            RefreshToken e = refreshTokenRepository.findByUserUserNo(userNo)
+//                    .orElseThrow(() -> new EntityNotFoundException("토큰이 없습니다."));
+//            refreshTokenRepository.delete(e); //로그아웃시 db에서 리프레시토큰 삭제
+//        } catch (Exception e) {
+//            return  ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+//        }
+//
+//        Cookie accessTokenCookie = new Cookie("access_token", "");
+//        accessTokenCookie.setPath("/");
+//        accessTokenCookie.setHttpOnly(true);
+//        accessTokenCookie.setMaxAge(0); // 즉시 만료
+//        accessTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+//
+//        Cookie refreshTokenCookie = new Cookie("refresh_token", "");
+//        refreshTokenCookie.setPath("/");
+//        refreshTokenCookie.setHttpOnly(true);
+//        refreshTokenCookie.setMaxAge(0);
+//        refreshTokenCookie.setDomain("localhost"); // 서버에 올릴 때는 서버주소로 해야 지워짐
+//
+//        response.addCookie(accessTokenCookie);
+//        response.addCookie(refreshTokenCookie);
+//        return ResponseEntity.ok().build();
+//    }
 
 
 
