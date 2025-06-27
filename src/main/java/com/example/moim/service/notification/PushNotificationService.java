@@ -2,6 +2,7 @@ package com.example.moim.service.notification;
 
 
 import com.example.moim.chatting.ChatMessage;
+import com.example.moim.chatting.ChatService;
 import com.example.moim.command.DirectMessageDTO;
 import com.example.moim.command.FriendRequestDTO;
 import com.example.moim.command.MentionNotificationDTO;
@@ -10,6 +11,7 @@ import com.example.moim.entity.*;
 import com.example.moim.repository.GroupsRepository;
 import com.example.moim.repository.PushSubscriptionRepository;
 import com.example.moim.repository.UsersRepository;
+import com.example.moim.service.ai.AIService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;
 import nl.martijndwars.webpush.PushService;
@@ -26,10 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동으로 만들어줍니다.
@@ -42,6 +41,9 @@ public class PushNotificationService {
     private final UsersRepository usersRepository; // 유저 단일로 보내주기 위해서
     private final SimpMessagingTemplate messagingTemplate;
     private final GroupsRepository groupsRepository;
+    private final AIService aiService;
+    private final ChatService chatService;
+
 
     // 구독 정보 저장 로직 (이하 동일)
     public void subscribe(PushSubscriptionDto subscriptionDto, Users user) {
@@ -177,8 +179,32 @@ public class PushNotificationService {
         Groups group = groupsRepository.getGroupsByGroupName(groupName); // 어차피 같은 서버이므로 for문 안에서 돌 필요 없음
 
         for (String name : mentionedList ){
+            // 제미니 지피티 답변부분
+//            System.out.println("제미니 지피티 체크");
+//            System.out.println(name);
+            String prompt = ("--- 프롬프트 시작 --- 너는 지금 채팅서비스에 봇 역할을 하고 있어. 기본적으로 한국에서 서비스되기때문에 한국어로 대답해야하지만 영어로 물어보거나 다른 나라 언어로 물어보는 경우에는 다른 언어로 응답해도 돼. 응답이 너무 길면 안돼. 300자 이상 넘어가는 답변은 피해가도록 해. --프롬프트 끝-- 유저의 쿼리 : ");
+            if (name.equals("MO-GPT")){
+                String answer = aiService.getAnswer(prompt + chatMessage.getText());
+//                System.out.println(answer);
+
+                // 메세지 보내는 부분
+                ChatMessage botMessage = new ChatMessage();
+                botMessage.setUser("MO-GPT");
+                botMessage.setText(answer);
+//                botMessage.setImageUrl("이거는 메세지에 이미지 넣어야함.");
+                botMessage.setUserImg("https://storage.googleapis.com/moim-bucket/74/6f9976d9-30a0-4f3c-b1c4-a0862e11434a.png");
+                botMessage.setChannel(chatMessage.getChannel());
+                botMessage.setDate(java.time.LocalDateTime.now().toString());
+
+                // 메세지 전송
+                messagingTemplate.convertAndSend("/topic/chat/" + groupName, botMessage);
+
+                // 세이브해서 저장함.
+                chatService.saveChat(groupName, botMessage.getChannel(), botMessage);
+                return;
+            }
             System.out.println("메세지 보낼 사람" + name);
-            Users users = usersRepository.findByUserNick(name)
+            Users users = usersRepository.findByUsername(name)
                     .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
             String recipientUserId = users.getUsername();
 
@@ -200,7 +226,7 @@ public class PushNotificationService {
         List<String> result = new ArrayList<>();
         String[] parts = text.split("@");
         for (int i = 1; i < parts.length; i++) {
-            String part = parts[i].split("\\s")[0];
+            String part = parts[i].split("\\s")[0].trim(); //트림을 해야지 사고가 안남
             if (!part.isEmpty()) {
                 result.add(part);
             }

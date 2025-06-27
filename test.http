@@ -55,3 +55,10 @@ Content-Type: application/json
   "body": "테스트중"
 }
 
+### 8. 실제사이트
+POST http://moim.o-r.kr/api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "오늘 날씨는 어때요?"
+}
