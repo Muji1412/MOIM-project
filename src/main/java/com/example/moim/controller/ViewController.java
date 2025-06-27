@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Slf4j
 @Controller
-public class ViewController {
+public class
+ViewController {
 
     /**
      * React 애플리케이션의 기본 진입점을 처리합니다.
