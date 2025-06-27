@@ -42,7 +42,7 @@ public class GroupsController {
         }
 
         String username = userDetails.getUsername();
-        System.out.println("서버 생성 사용자: " + username);
+//        System.out.println("서버 생성 사용자: " + username);
 
         Groups groups = new Groups();
         groups.setGroupName(groupName);
@@ -68,14 +68,14 @@ public class GroupsController {
         }
 
         String username = userDetails.getUsername();
-        System.out.println("=== 사용자 서버 조회 ===");
-        System.out.println("사용자: " + username);
+//        System.out.println("=== 사용자 서버 조회 ===");
+//        System.out.println("사용자: " + username);
 
         List<Groups> userGroups = groupsService.getUserGroups(username);
-        System.out.println("조회된 서버 수: " + userGroups.size());
+//        System.out.println("조회된 서버 수: " + userGroups.size());
 
         for (Groups group : userGroups) {
-            System.out.println("- 그룹: " + group.getGroupName() + " (ID: " + group.getGroupNo() + ")");
+//            System.out.println("- 그룹: " + group.getGroupName() + " (ID: " + group.getGroupNo() + ")");
         }
 
         return ResponseEntity.ok(userGroups);
