@@ -1,5 +1,7 @@
 package com.example.moim.service.groups;
 
+import com.example.moim.chatting.ChatMessage;
+import com.example.moim.chatting.ChatService;
 import com.example.moim.entity.Groups;
 import com.example.moim.entity.UserGroup;
 import com.example.moim.entity.Users;
@@ -7,6 +9,8 @@ import com.example.moim.repository.GroupsRepository;
 import com.example.moim.repository.UserGroupRepository;
 import com.example.moim.repository.UsersRepository;
 import com.example.moim.util.UserGroupId;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +19,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GroupsService {
 
     private final GroupsRepository groupsRepository;
     private final UserGroupRepository userGroupRepository;
     private final UsersRepository usersRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ChatService chatService;
 
     // 서버 생성 시 생성자를 UserGroup에도 추가
     @Transactional
@@ -57,7 +64,58 @@ public class GroupsService {
         userGroupRepository.save(ownerGroup);
         userGroupRepository.save(botToGroup);
 
+
         return savedGroup;
+    }
+
+    // 봇 웰컴메세지 메서드
+    public void sendWelcomeMessage(Groups group) {
+        String welcomeText = """
+# 🎊 MOIM에 오신걸 환영합니다! 🎊
+
+### 🤖✨ 저는 MO-GPT입니다. 저를 @로 언급하시고 질문하시면 돼요! 💬
+
+### 💡 **예시** - @MO-GPT 오늘 저녁밥은 어떤게 좋을까? 🍽️
+
+## 🌟 MOIM은 마크다운을 지원해요!
+
+💪 `**굵은 글씨**` → **굵은 글씨**
+
+📝 `*기울임 글씨*` → *기울임 글씨*
+
+📚 `# 제목1`, `## 제목2`, `### 제목3`
+""";
+
+
+        ChatMessage welcomeMessage = new ChatMessage();
+        welcomeMessage.setUser("MO-GPT");
+        welcomeMessage.setText(welcomeText);
+        welcomeMessage.setUserImg("https://storage.googleapis.com/moim-bucket/74/6f9976d9-30a0-4f3c-b1c4-a0862e11434a.png");
+        welcomeMessage.setChannel("일반채팅");
+        welcomeMessage.setDate(java.time.LocalDateTime.now().toString());
+
+        // 웰컴 메시지 전송
+        messagingTemplate.convertAndSend("/topic/chat/" + group.getGroupName(), welcomeMessage);
+
+        // 메시지 저장
+        chatService.saveChat(group.getGroupName(), "일반채팅", welcomeMessage);
+    }
+
+    // 봇 웰컴이미지 메서드
+    public void sendWelcomeImage(Groups group) {
+        ChatMessage imageMessage = new ChatMessage();
+        imageMessage.setUser("MO-GPT");
+        imageMessage.setText(""); // 텍스트는 빈 문자열로
+        imageMessage.setImageUrl("https://storage.googleapis.com/moim-bucket/12/f0fce8ae-a0d3-44cc-8c1a-0f16880b1dfb.png");
+        imageMessage.setUserImg("https://storage.googleapis.com/moim-bucket/74/6f9976d9-30a0-4f3c-b1c4-a0862e11434a.png");
+        imageMessage.setChannel("일반채팅");
+        imageMessage.setDate(java.time.LocalDateTime.now().toString());
+
+        // 이미지 메시지 전송
+        messagingTemplate.convertAndSend("/topic/chat/" + group.getGroupName(), imageMessage);
+
+        // 메시지 저장
+        chatService.saveChat(group.getGroupName(), "일반채팅", imageMessage);
     }
 
 

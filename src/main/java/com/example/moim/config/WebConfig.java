@@ -9,6 +9,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+        registry.addResourceHandler("/favicon.ico")
+                .addResourceLocations("classpath:/static/img/")
+                .setCachePeriod(0);
         // bundle 경로 정적 리소스 매핑
         registry.addResourceHandler("/bundle/**")
                 .addResourceLocations("classpath:/static/bundle/")
@@ -35,5 +39,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/js/")
                 .setCachePeriod(0);
     }
-
 }

@@ -234,6 +234,7 @@ public class PushNotificationService {
                 botMessage.setUserImg("https://storage.googleapis.com/moim-bucket/74/6f9976d9-30a0-4f3c-b1c4-a0862e11434a.png");
                 botMessage.setChannel(chatMessage.getChannel());
                 botMessage.setDate(java.time.LocalDateTime.now().toString());
+                log.info("셋채널 여기로 보냅니다." + chatMessage.getChannel());
 
                 // 메세지 전송
                 messagingTemplate.convertAndSend("/topic/chat/" + groupName, botMessage);

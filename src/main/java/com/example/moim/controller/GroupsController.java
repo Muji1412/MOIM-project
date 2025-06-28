@@ -18,8 +18,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RestController
@@ -57,6 +58,19 @@ public class GroupsController {
         }
 
         Groups savedGroup = groupsService.createGroup(groups, username);
+
+        // 봇 웰컴메시지 동기화 처리
+        CompletableFuture.runAsync(() -> {
+                    groupsService.sendWelcomeImage(savedGroup);
+                }, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS))
+                .thenRunAsync(() -> {
+                    groupsService.sendWelcomeMessage(savedGroup);
+                }, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS))
+                .exceptionally(throwable -> {
+                    System.err.println("웰컴 프로세스 실패: " + throwable.getMessage());
+                    return null;
+                });
+
         return ResponseEntity.status(HttpStatus.CREATED).body(savedGroup);
     }
 
