@@ -102,7 +102,7 @@ public class SecurityConfig {
 
                                 // --- 정적 리소스 (JS, CSS, 이미지 등) ---
                                 "/bundle/**", "/img/**", "/css/**", "/js/**",
-                                "/*.ico", "/*.json", "/*.png", "/sw.js",
+                                "/*.ico", "/*.json", "/*.png", "/sw.js","/favicon.ico",
 
                                 // --- 웹소켓 경로 ---
                                 "/ws/**"
