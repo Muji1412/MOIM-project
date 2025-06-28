@@ -16,7 +16,7 @@ public class    Groups {
     @Column(name = "GROUP_NO")
     private Long groupNo;
 
-    @Column(name = "GROUP_NAME", nullable = false, length = 40)
+    @Column(name = "GROUP_NAME", nullable = false, length = 40, unique = true)
     private String groupName;
 
     @Column(name = "GROUP_CREATED_AT")
