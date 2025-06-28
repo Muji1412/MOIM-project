@@ -317,7 +317,14 @@ export default function SideNav() {
                     console.error('응답 파싱 실패:', e);
                 }
                 console.error('서버 생성 실패 - 상태:', response.status);
-                alert(`${errorMessage} (${response.status})`);
+
+                // 중복 에러 체크 로직 추가
+                if (errorMessage && errorMessage.includes('duplicate') ||
+                    errorMessage && errorMessage.includes('이미 존재')) {
+                    alert('다른 서버 이름을 사용해주세요.');
+                } else {
+                    alert(`${errorMessage} (${response.status})`);
+                }
             }
         } catch (error) {
             console.error('서버 생성 중 오류:', error);

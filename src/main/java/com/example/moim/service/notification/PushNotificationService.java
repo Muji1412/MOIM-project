@@ -14,6 +14,7 @@ import com.example.moim.repository.UsersRepository;
 import com.example.moim.service.ai.AIService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -33,6 +34,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동으로 만들어줍니다.
 @Transactional
+@Slf4j
 public class PushNotificationService {
 
     // ⭐️ 스프링이 WebPushConfig를 통해 생성한 PushService 빈을 주입받습니다.
@@ -175,15 +177,52 @@ public class PushNotificationService {
         // n명에게 보낼수도 있으므로, 변경
         // 만약 에브리원이 들어왔다면 그룹의 전체인원에게 보내는 로직으로 변경
 
-        List<String> mentionedList = mentionedList(chatMessage.getText());
+        List<String> mentioneded = mentionedList(chatMessage.getText());
+//        System.out.println("멘션리스트 for문 전에" + mentioneded);
         Groups group = groupsRepository.getGroupsByGroupName(groupName); // 어차피 같은 서버이므로 for문 안에서 돌 필요 없음
 
-        for (String name : mentionedList ){
-            // 제미니 지피티 답변부분
-//            System.out.println("제미니 지피티 체크");
-//            System.out.println(name);
-            String prompt = ("--- 프롬프트 시작 --- 너는 지금 채팅서비스에 봇 역할을 하고 있어. 기본적으로 한국에서 서비스되기때문에 한국어로 대답해야하지만 영어로 물어보거나 다른 나라 언어로 물어보는 경우에는 다른 언어로 응답해도 돼. 응답이 너무 길면 안돼. 300자 이상 넘어가는 답변은 피해가도록 해. --프롬프트 끝-- 유저의 쿼리 : ");
-            if (name.equals("MO-GPT")){
+//        String prompt = ("--- 프롬프트 시작 --- 너는 지금 채팅서비스에 봇 역할을 하고 있어. 기본적으로 한국에서 서비스되기때문에 한국어로 대답해야하지만 영어로 물어보거나 다른 나라 언어로 물어보는 경우에는 다른 언어로 응답해도 돼. 응답이 너무 길면 안돼. 300자 이상 넘어가는 답변은 피해가도록 해. --프롬프트 끝-- 유저의 쿼리 : ");
+        String prompt = (
+            """
+            --- 프롬프트 시작 ---
+            당신은 'MO-GPT'라는 이름의 채팅봇입니다. 지금 실시간 채팅방에서 다른 사용자들과 함께 대화하고 있습니다. 단순 api요청이기에 맥락을 이해하지 못합니다.
+            
+            **정체성 & 성격**:
+            - 이름: MO-GPT
+            - 성격: 친근하고 유머러스하며 도움이 되는 봇
+            - 말투: 자연스러운 한국어, 이모지 적절히 사용
+            
+            **채팅 환경 이해**:
+            - 멘션(@MO-GPT)될 때만 응답
+            - 채팅방의 다른 사용자들도 대화에 참여 중
+            - 실시간 대화이므로 즉시 응답
+            
+            **응답 가이드라인**:
+            • 길이: 300자 이내로 간결하게
+            • 언어: 기본 한국어, 다른 언어 질문시 해당 언어로 응답
+            • 톤: 채팅방 분위기에 맞춰 캐주얼하게
+            • 스타일: 자연스러운 대화, 필요시 이모지 사용 😊
+            
+            **특별 기능**:
+            - 질문 답변 및 정보 제공
+            - 간단한 코딩 도움
+            - 재미있는 대화 참여
+            - 필요시 검색이나 계산 도움
+            
+            **주의사항**:
+            - 불확실한 정보는 추측하지 않기
+            - 부적절한 내용 정중히 거절
+            - 채팅방 규칙 준수
+            
+            --- 프롬프트 끝 ---
+            
+            사용자 메시지:
+            """);
+
+
+        for (String name : mentioneded) {
+
+            if ("MO-GPT".equals(name.trim())) {  // 안전한 비교 + trim
                 String answer = aiService.getAnswer(prompt + chatMessage.getText());
 //                System.out.println(answer);
 
@@ -201,7 +240,6 @@ public class PushNotificationService {
 
                 // 세이브해서 저장함.
                 chatService.saveChat(groupName, botMessage.getChannel(), botMessage);
-                return;
             }
             System.out.println("메세지 보낼 사람" + name);
             Users users = usersRepository.findByUsername(name)
