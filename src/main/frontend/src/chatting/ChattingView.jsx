@@ -190,7 +190,7 @@ function ChattingView() {
                         const memberList = data.map(member => ({
                             id: member.userNo || member.userId,
                             username: member.username,
-                            nickname: member.nickname || member.username || member.name,
+                            nickname: member.user_nick || member.userNick || member.nickname,
                             profileImage: member.userImg || member.profileImage,
                         }));
                         setMembers(memberList);
