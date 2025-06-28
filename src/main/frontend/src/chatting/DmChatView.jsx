@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useDm } from '../context/DmContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './DmChatView.module.css';
+import ReactMarkdown from 'react-markdown';
+import { autoLinkMd } from 'react-markdown-autolink';
 
 const DmChatView = () => {
     const { activeDmRoom, dmMessages, sendMessage } = useDm();
@@ -51,7 +53,9 @@ const DmChatView = () => {
                         </div>
                         <div className={styles.chat_message_bubble}>
                             <div className={styles.chat_message_user}>{msg.user}</div>
-                            <div className={styles.chat_message_text}>{msg.text}</div>
+                            <div className={styles.chat_message_text}>
+                                <ReactMarkdown>{autoLinkMd(msg.text)}</ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 ))}
