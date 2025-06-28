@@ -4,6 +4,8 @@ import chatStyles from './ChattingView.module.css';
 import {useLocation, useParams} from "react-router-dom";
 import {useServerChat} from '../context/ServerChatContext';
 import {useAuth} from '../context/AuthContext';
+import ReactMarkdown from 'react-markdown';
+import { autoLinkMd } from 'react-markdown-autolink';
 
 function ChattingView() {
 
@@ -550,7 +552,11 @@ function ChattingView() {
                                         </div>
                                         <div className={chatStyles.chat_message_bubble}>
                                             <div className={chatStyles.chat_message_user}>{msg.user}</div>
-                                            {msg.text && <div className={chatStyles.chat_message_text}>{msg.text}</div>}
+                                            {msg.text && (
+                                                <div className={chatStyles.chat_message_text}>
+                                                    <ReactMarkdown>{autoLinkMd(msg.text)}</ReactMarkdown>
+                                                </div>
+                                            )}
                                             {msg.imageUrl && (
                                                 <div className={chatStyles.chat_message_image}>
                                                     <img src={msg.imageUrl} alt="uploaded" style={{

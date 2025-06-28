@@ -36,7 +36,7 @@ public class GroupsInviteController {
 
             inviteCode = groupsInviteService.createInviteLink(request.getDays(), groups);
 
-            String Link = "moim.o-r.kr/invite/" + inviteCode;
+            String Link = "https://moim.o-r.kr/invite/" + inviteCode;
 
             return ResponseEntity.ok().body(Link);
 
