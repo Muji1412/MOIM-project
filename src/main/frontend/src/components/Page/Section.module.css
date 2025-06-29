@@ -179,6 +179,15 @@
     gap: 8px;
 }
 
+.accept_btn {
+    padding: 6px 12px;
+    background-color: #c3ee41;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
 .cancel_btn {
     padding: 6px 12px;
     background-color: #ff4757;
