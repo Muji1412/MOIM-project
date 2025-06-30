@@ -62,8 +62,9 @@ public class ChatController {
             message.setUserImg(sender.getUserImg());  // GCP URL 설정
         }
 
+//        System.out.println("메세지" + message);
+
         chatService.saveChat(groupName, message.getChannel(), message);
-        // 태원 추가파트 - 제미니 답변을 위해서 메세지 보낸 이후로 옮김
         // groupName 나오고, message 객체 안에
 //        System.out.println("sendMessage 디버깅");
 //        System.out.println(groupName);
@@ -74,11 +75,14 @@ public class ChatController {
 
         // api 호출 비동기 처리, 이렇게 비동기 처리를 해주지 않는다면 한참 걸려서 메세지가 바로 반환되지 않음.
         CompletableFuture.runAsync(() -> {
-
-            if (message.getText().contains("@")) {
-                pushNotificationService.sendMentionNotification(groupName, message);
-            }else {
-//                System.out.println("어싱크 안됐음");
+            try {
+                if (message.getText().contains("@")) {
+//                    System.out.println("골뱅이필터 걸림");
+                    pushNotificationService.sendMentionNotification(groupName, message);
+                }
+            } catch (Exception e) {
+                System.err.println("비동기 작업에서 예외 발생: " + e.getMessage());
+                e.printStackTrace();
             }
         });
 

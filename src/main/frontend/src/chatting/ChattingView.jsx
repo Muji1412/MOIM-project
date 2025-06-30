@@ -4,6 +4,8 @@ import chatStyles from './ChattingView.module.css';
 import {useLocation, useParams} from "react-router-dom";
 import {useServerChat} from '../context/ServerChatContext';
 import {useAuth} from '../context/AuthContext';
+import ReactMarkdown from 'react-markdown';
+import { autoLinkMd } from 'react-markdown-autolink';
 
 function ChattingView() {
 
@@ -188,7 +190,7 @@ function ChattingView() {
                         const memberList = data.map(member => ({
                             id: member.userNo || member.userId,
                             username: member.username,
-                            nickname: member.nickname || member.username || member.name,
+                            nickname: member.user_nick || member.userNick || member.nickname,
                             profileImage: member.userImg || member.profileImage,
                         }));
                         setMembers(memberList);
@@ -383,19 +385,15 @@ function ChattingView() {
     // 플러스 버튼 클릭
     const handlePlusClick = () => fileInputRef.current?.click();
 
-    // 입력 변경 처리 (이스터에그 타이핑 색상 변경 포함)
     const handleInputChange = (e) => {
         const value = e.target.value;
         const cursorPos = e.target.selectionStart;
 
         setInputValue(value);
 
-        // 이스터에그가 활성화되어 있고 실제로 타이핑 중일 때
         if (easterEggState.isActive && value.length > 0) {
             setEasterEggState(prev => {
                 const newUserColors = new Map();
-
-                // 모든 멤버들에게 새로운 랜덤 색상 할당
                 members.forEach(member => {
                     newUserColors.set(member.id, getRandomColor());
                 });
@@ -406,24 +404,29 @@ function ChattingView() {
             });
         }
 
-        // @ 기호 감지
         const beforeCursor = value.substring(0, cursorPos);
-        const mentionMatch = beforeCursor.match(/@(\w*)$/);
+
+        // 🔧 이 정규식을 수정해야 해요!
+        const mentionMatch = beforeCursor.match(/@([가-힣\w]*)$/);
+        // 또는 더 간단하게: /@([^\s@]*)$/
 
         if (mentionMatch) {
             const query = mentionMatch[1];
             setMentionQuery(query);
             setShowMentionList(true);
 
-            // 멤버 필터링 (닉네임으로만 간단하게)
-            const filtered = members.filter(member =>
-                member.nickname.toLowerCase().includes(query.toLowerCase())
-            );
-            setFilteredMembers(filtered.slice(0, 20)); // 최대 20명만 표시
+            const filtered = members.filter(member => {
+                const nickname = member.nickname.toLowerCase();
+                const searchQuery = query.toLowerCase();
+                return nickname.includes(searchQuery);
+            });
+
+            setFilteredMembers(filtered.slice(0, 20));
         } else {
             setShowMentionList(false);
         }
     };
+
 
     // 멘션 선택 처리
     const handleMentionSelect = (member) => {
@@ -472,13 +475,39 @@ function ChattingView() {
             handleSend();
         }
     };
+    // 멘션창 수정버전
 
-    // 멘션창
     const MentionList = () => {
+        const dropdownRef = useRef(null);
+
+        // 선택된 인덱스가 바뀔 때마다 스크롤 처리
+        useEffect(() => {
+            if (dropdownRef.current && selectedMentionIndex >= 0) {
+                const dropdown = dropdownRef.current;
+                const selectedItem = dropdown.children[selectedMentionIndex];
+
+                if (selectedItem) {
+                    const dropdownHeight = dropdown.clientHeight;
+                    const itemHeight = selectedItem.offsetHeight;
+                    const itemTop = selectedItem.offsetTop;
+                    const scrollTop = dropdown.scrollTop;
+
+                    // 위로 스크롤 필요한 경우
+                    if (itemTop < scrollTop) {
+                        dropdown.scrollTop = itemTop;
+                    }
+                    // 아래로 스크롤 필요한 경우
+                    else if (itemTop + itemHeight > scrollTop + dropdownHeight) {
+                        dropdown.scrollTop = itemTop + itemHeight - dropdownHeight;
+                    }
+                }
+            }
+        }, [selectedMentionIndex]);
+
         if (!showMentionList || filteredMembers.length === 0) return null;
 
         return (
-            <div className={chatStyles.mention_dropdown}>
+            <div ref={dropdownRef} className={chatStyles.mention_dropdown}>
                 {filteredMembers.map((member, index) => (
                     <div
                         key={member.id}
@@ -491,7 +520,7 @@ function ChattingView() {
                             {member.profileImage ? (
                                 <img src={member.profileImage} alt={member.nickname}/>
                             ) : (
-                                <div>
+                                <div className={chatStyles.avatar_default}>
                                     {member.nickname.charAt(0).toUpperCase()}
                                 </div>
                             )}
@@ -502,6 +531,35 @@ function ChattingView() {
             </div>
         );
     };
+    // 멘션창
+    // const MentionList = () => {
+    //     if (!showMentionList || filteredMembers.length === 0) return null;
+    //
+    //     return (
+    //         <div className={chatStyles.mention_dropdown}>
+    //             {filteredMembers.map((member, index) => (
+    //                 <div
+    //                     key={member.id}
+    //                     className={`${chatStyles.mention_item} ${
+    //                         index === selectedMentionIndex ? chatStyles.mention_item_selected : ''
+    //                     }`}
+    //                     onClick={() => handleMentionSelect(member)}
+    //                 >
+    //                     <div className={chatStyles.mention_avatar}>
+    //                         {member.profileImage ? (
+    //                             <img src={member.profileImage} alt={member.nickname}/>
+    //                         ) : (
+    //                             <div>
+    //                                 {member.nickname.charAt(0).toUpperCase()}
+    //                             </div>
+    //                         )}
+    //                     </div>
+    //                     <span className={chatStyles.mention_name}>{member.nickname}</span>
+    //                 </div>
+    //             ))}
+    //         </div>
+    //     );
+    // };
 
     // 날짜별 메시지 그룹화
     const groupByDate = messages.reduce((acc, msg) => {
@@ -550,7 +608,11 @@ function ChattingView() {
                                         </div>
                                         <div className={chatStyles.chat_message_bubble}>
                                             <div className={chatStyles.chat_message_user}>{msg.user}</div>
-                                            {msg.text && <div className={chatStyles.chat_message_text}>{msg.text}</div>}
+                                            {msg.text && (
+                                                <div className={chatStyles.chat_message_text}>
+                                                    <ReactMarkdown>{autoLinkMd(msg.text)}</ReactMarkdown>
+                                                </div>
+                                            )}
                                             {msg.imageUrl && (
                                                 <div className={chatStyles.chat_message_image}>
                                                     <img src={msg.imageUrl} alt="uploaded" style={{

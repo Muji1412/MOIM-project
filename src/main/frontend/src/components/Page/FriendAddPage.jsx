@@ -214,7 +214,7 @@ export default function FriendAddPage() {
                                         </div>
                                         <div className={styles.pending_actions}>
                                             <button
-                                                className={styles.cancel_btn}
+                                                className={styles.accept_btn}
                                                 onClick={() => handleAcceptRequest(request)}
                                             >
                                                 수락

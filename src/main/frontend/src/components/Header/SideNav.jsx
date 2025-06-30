@@ -308,8 +308,7 @@ export default function SideNav() {
                 console.log('서버 생성 성공:', createdServer);
             } else if (response.status === 401) {
                 alert('인증이 만료되었습니다. 다시 로그인해주세요.');
-            } else {
-                let errorMessage = '서버 생성에 실패했습니다.';
+            } else {let errorMessage = '다른 서버 이름을 사용해주세요.';
                 try {
                     const errorData = await response.json();
                     errorMessage = errorData.message || errorMessage;
@@ -317,11 +316,18 @@ export default function SideNav() {
                     console.error('응답 파싱 실패:', e);
                 }
                 console.error('서버 생성 실패 - 상태:', response.status);
-                alert(`${errorMessage} (${response.status})`);
+
+                // 중복 에러 체크 로직 추가
+                if (errorMessage && errorMessage.includes('duplicate') ||
+                    errorMessage && errorMessage.includes('이미 존재')) {
+                    alert('다른 서버 이름을 사용해주세요.');
+                } else {
+                    alert(`${errorMessage} (${response.status})`);
+                }
             }
         } catch (error) {
             console.error('서버 생성 중 오류:', error);
-            alert('서버 생성 중 오류가 발생했습니다.' + error.message);
+            alert('다른 서버 이름을 사용해주세요.' + error.message);
         }
     };
 
