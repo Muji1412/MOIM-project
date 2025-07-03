@@ -178,7 +178,7 @@ function Videocall() {
 
             const myPublisher = await OV.current.initPublisherAsync(undefined, {
                 audioSource: undefined, videoSource: undefined, publishAudio: isMicEnabled, publishVideo: isVideoEnabled,
-                resolution: '1280x720', frameRate: 30, insertMode: 'APPEND', mirror: true,
+                resolution: '1920x1080', frameRate: 60, insertMode: 'APPEND', mirror: true,
             });
             await mySession.publish(myPublisher);
 
