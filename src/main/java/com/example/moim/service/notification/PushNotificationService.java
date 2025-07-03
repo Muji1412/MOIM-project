@@ -243,7 +243,7 @@ public class PushNotificationService {
                 chatService.saveChat(groupName, botMessage.getChannel(), botMessage);
             }
             System.out.println("메세지 보낼 사람" + name);
-            Users users = usersRepository.findByUsername(name)
+            Users users = usersRepository.findByUserNick(name)
                     .orElseThrow(() -> new EntityNotFoundException("해당하는 유저가 없습니다."));
             String recipientUserId = users.getUsername();
 
