@@ -6,6 +6,8 @@ import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VapidKeyGenerator {
     public static void main(String[] args) throws Exception {
@@ -22,7 +24,6 @@ public class VapidKeyGenerator {
         String privateKey = Base64.getUrlEncoder().withoutPadding()
                 .encodeToString(keyPair.getPrivate().getEncoded());
 
-        System.out.println("VAPID Public Key: " + publicKey);
-        System.out.println("VAPID Private Key: " + privateKey);
+
     }
 }

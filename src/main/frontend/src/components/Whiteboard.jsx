@@ -163,7 +163,7 @@ function Whiteboard() {
 
             const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
                 ? 'http://localhost:8089'
-                : 'https://moim.o-r.kr';
+                : 'https://moim.p-e.kr';
 
             if (window.whiteboardStompClient) {
                 window.whiteboardStompClient.disconnect();

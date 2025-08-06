@@ -58,7 +58,7 @@ public class SecurityConfig {
                 "http://localhost:3000",  // React 개발 서버 (예시)
                 "http://localhost:8081",  // React 또는 다른 클라이언트가 8081 포트를 사용하는 경우
                 "http://172.30.1.68:8081",
-                "https://moim.o-r.kr",
+                "https://moim.p-e.kr",
                 "http://localhost:8089"// 특정 IP로 접속하는 경우
                 // 필요한 다른 출처가 있다면 추가
         ));

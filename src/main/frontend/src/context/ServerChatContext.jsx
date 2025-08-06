@@ -50,7 +50,7 @@ export const ServerChatProvider = ({ children }) => {
 
         const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
             ? 'http://localhost:8089'
-            : 'https://moim.o-r.kr';
+            : 'https://moim.p-e.kr';
 
         const client = new Client({
             webSocketFactory: () => new SockJS(`${APPLICATION_SERVER_URL}/ws`),

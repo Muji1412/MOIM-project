@@ -115,7 +115,7 @@ function ChattingView() {
     const channelName = searchParams.get("channelName") || "일반채팅";
     const groupName = serverName;
 
-    const APPLICATION_SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:8089' : 'https://moim.o-r.kr';
+    const APPLICATION_SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:8089' : 'https://moim.p-e.kr';
 
     // 멤버 리스트 토글 상태 추가
     const [isMemberListVisible, setIsMemberListVisible] = useState(true);
