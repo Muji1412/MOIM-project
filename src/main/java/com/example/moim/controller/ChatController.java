@@ -74,17 +74,21 @@ public class ChatController {
         // 서비스 전에, 일단 메세지에 @이 포함돼있는지 확인하고 실행
 
         // api 호출 비동기 처리, 이렇게 비동기 처리를 해주지 않는다면 한참 걸려서 메세지가 바로 반환되지 않음.
-        CompletableFuture.runAsync(() -> {
-            try {
-                if (message.getText().contains("@")) {
-//                    System.out.println("골뱅이필터 걸림");
-                    pushNotificationService.sendMentionNotification(groupName, message);
-                }
-            } catch (Exception e) {
-                System.err.println("비동기 작업에서 예외 발생: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
+//        CompletableFuture.runAsync(() -> {
+//            try {
+//                if (message.getText().contains("@")) {
+////                    System.out.println("골뱅이필터 걸림");
+//                    pushNotificationService.sendMentionNotification(groupName, message);
+//                }
+//            } catch (Exception e) {
+//                System.err.println("비동기 작업에서 예외 발생: " + e.getMessage());
+//                e.printStackTrace();
+//            }
+//        });
+        // CompletableFuture 대신 스프링 Async 활용 - 굳이 CompletableFuture로 처리하지 않아도 되고 간편하게 처리할 수 있음
+        if (message.getText().contains("@")) {
+            pushNotificationService.sendMentionNotification(groupName, message);
+        }
 
         return message; // 실시간 브로드캐스트 (프로필 이미지 포함)
     }

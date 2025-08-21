@@ -3,7 +3,7 @@ import { OpenVidu } from 'openvidu-browser';
 
 const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:8089'  // ⚠️ 포트 번호는 본인 백엔드 서버에 맞게 수정
-    : 'https://moim.o-r.kr';
+    : 'https://moim.p-e.kr';
 
 // --- Helper Component ---
 const UserVideo = React.memo(({ streamManager, onClick, isMuted }) => {
@@ -55,7 +55,6 @@ function Videocall() {
         sessionRef.current = session;
     }, [session]);
 
-    // ✅ 데이터를 가져오는 로직을 useCallback으로 감싸서 재사용 가능하도록 만듭니다.
     const getStoredData = useCallback(() => {
         try {
             const storedData = sessionStorage.getItem('videoChatData');
@@ -67,7 +66,6 @@ function Videocall() {
                     console.log(`roomId 변경 감지: ${chatData?.roomId} -> ${data.roomId}. 상태를 업데이트합니다.`);
                     setChatData(data);
 
-                    // 상태 초기화
                     if (sessionRef.current) {
                         sessionRef.current.disconnect();
                     }
@@ -85,25 +83,20 @@ function Videocall() {
         }
     }, [chatData]);
 
-    // ✅ 데이터를 가져오고, 팝업창 가시성 변경을 감지하는 useEffect
     useEffect(() => {
         getStoredData();
-
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 console.log('팝업 창이 다시 활성화되었습니다. 데이터를 다시 확인합니다.');
                 getStoredData();
             }
         };
-
         document.addEventListener('visibilitychange', handleVisibilityChange);
-
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, [getStoredData]);
 
-    // ✅ chatData가 변경되면 세션 정보를 설정하는 useEffect
     useEffect(() => {
         if (chatData) {
             setSessionIdInput(chatData.roomId);
@@ -113,7 +106,6 @@ function Videocall() {
         }
     }, [chatData]);
 
-    // ✅ 자동 참가를 처리하는 useEffect
     useEffect(() => {
         if (autoJoin && sessionIdInput && userName && !isConnected) {
             joinSession();
@@ -121,16 +113,13 @@ function Videocall() {
         }
     }, [autoJoin, sessionIdInput, userName, isConnected]);
 
-    // ✅ 컴포넌트 언마운트 시 세션 연결을 해제하는 useEffect
     useEffect(() => {
         const handleBeforeUnload = () => {
             if (sessionRef.current) {
                 sessionRef.current.disconnect();
             }
         };
-
         window.addEventListener('beforeunload', handleBeforeUnload);
-
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
             if (sessionRef.current) {
@@ -140,14 +129,20 @@ function Videocall() {
         };
     }, []);
 
-    // ... (joinSession, leaveSession 등 나머지 함수는 동일하게 유지)
+    // ✅ [수정됨] 세션 ID를 고유하게 만드는 로직 적용
     const joinSession = async (e) => {
         if (e) e.preventDefault();
 
         if (session?.connection) return;
 
         try {
-            const roomName = sessionIdInput || "default-room-moim";
+            // 현재 도메인과 방 이름을 조합하여 고유 ID 생성
+            const originIdentifier = window.location.hostname.replaceAll('.', '-');
+            const userRoomName = sessionIdInput || "default-room-moim";
+            const uniqueSessionId = `${originIdentifier}-${userRoomName}`;
+
+            console.log(`생성된 고유 세션 ID: ${uniqueSessionId}`);
+
             const mySession = OV.current.initSession();
 
             mySession.on('streamCreated', (event) => {
@@ -162,8 +157,9 @@ function Videocall() {
             });
             mySession.on('exception', (exception) => console.warn("OpenVidu 예외: ", exception));
 
+            // 백엔드에 고유 ID(uniqueSessionId)를 전송
             const response = await fetch(`${APPLICATION_SERVER_URL}/api/sessions`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customSessionId: roomName }),
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customSessionId: uniqueSessionId }),
             });
             if (!response.ok) throw new Error(`세션 생성 실패: ${response.status}`);
             const sessionId = await response.text();
@@ -178,7 +174,7 @@ function Videocall() {
 
             const myPublisher = await OV.current.initPublisherAsync(undefined, {
                 audioSource: undefined, videoSource: undefined, publishAudio: isMicEnabled, publishVideo: isVideoEnabled,
-                resolution: '1920x1080', frameRate: 60, insertMode: 'APPEND', mirror: true,
+                resolution: '1280x720', frameRate: 30, insertMode: 'APPEND', mirror: true,
             });
             await mySession.publish(myPublisher);
 
@@ -227,10 +223,8 @@ function Videocall() {
         }
     };
 
-
     // --- Render Logic ---
 
-    // 접속 전 UI
     if (!isConnected && (!chatData || showJoinForm)) {
         return (
             <>
@@ -250,7 +244,6 @@ function Videocall() {
         );
     }
 
-    // 접속 후 UI
     const allParticipants = [publisher, ...subscribers].filter(Boolean);
     const effectiveMainStreamManager = mainStreamManager || (allParticipants.length > 0 ? allParticipants[0] : null);
     const otherParticipants = allParticipants.filter(p => effectiveMainStreamManager && p.stream.streamId !== effectiveMainStreamManager.stream.streamId);
@@ -304,6 +297,7 @@ function Videocall() {
         </>
     );
 }
+
 // --- CSS Styles (unchanged) ---
 const joinFormStyles = `
     .join-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; font-family: sans-serif; }
@@ -344,4 +338,5 @@ const videoCallStyles = `
     
     .video-call-wrapper:hover .controls-bar {opacity: 1;pointer-events: auto;}
 `;
+
 export default Videocall;
