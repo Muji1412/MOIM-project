@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -172,6 +173,7 @@ public class PushNotificationService {
     }
 
     // 멘션 노티 메서드
+    @Async
     public void sendMentionNotification(String groupName, ChatMessage chatMessage){
 
         // n명에게 보낼수도 있으므로, 변경
@@ -222,7 +224,9 @@ public class PushNotificationService {
 
         for (String name : mentioneded) {
 
-            if ("MO-GPT".equals(name.trim())) {  // 안전한 비교 + trim
+
+
+            if ("MO-GPT".equals(name.trim())) {  //
                 String answer = aiService.getAnswer(prompt + chatMessage.getText());
 //                System.out.println(answer);
 
