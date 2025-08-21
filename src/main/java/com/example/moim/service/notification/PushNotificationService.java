@@ -245,6 +245,8 @@ public class PushNotificationService {
 
                 // 세이브해서 저장함.
                 chatService.saveChat(groupName, botMessage.getChannel(), botMessage);
+
+                continue;
             }
             System.out.println("메세지 보낼 사람" + name);
             Users users = usersRepository.findByUserNick(name)
